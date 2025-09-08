@@ -109,7 +109,7 @@ export function hashCode(str: string): string {
 export type Link = {
   key: string;
   label: string;
-  icon?: JSX.Element;
+  icon?: React.ReactElement;
   className?: string;
 }
 
@@ -136,7 +136,7 @@ export type PageProps = {
   setBreadcrumbs: (breadcrumbs: Link[]) => void;
 }
 
-export function getIconFromPage(page: string): JSX.Element {
+export function getIconFromPage(page: string): React.ReactElement {
   switch(page) {
     case 'appearance':          return <FaceSmileIcon className="h-5 w-5 flex-none text-gray-800" aria-hidden="true" />;
     case 'amica_life':          return <SunIcon className="h-5 w-5 flex-none text-gray-800" aria-hidden="true" />;

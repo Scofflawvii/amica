@@ -25,7 +25,7 @@ export const VrmStoreContext = createContext<VrmStoreContextType>({
     isLoadingVrmList: false, setIsLoadingVrmList: () => {}
 });
 
-export const VrmStoreProvider = ({ children }: PropsWithChildren<{}>): JSX.Element => {
+export const VrmStoreProvider = ({ children }: PropsWithChildren<{}>): React.ReactElement => {
     const [isLoadingVrmList, setIsLoadingVrmList] = useState(true);
     const [loadedVrmList, vrmListDispatch] = useReducer(vrmStoreReducer, vrmInitList);
     const vrmListAddFile = (file: File, viewer: Viewer) => {
