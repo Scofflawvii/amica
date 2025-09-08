@@ -101,10 +101,10 @@ class OptimizedGLTFLoader {
 
     if (this.options.simplifyMaterials) {
       // Simplify material settings
-      // @ts-expect-error
+      // @ts-expect-error - Type assertion required for external library
       material.fog = false;
       material.dithering = false;
-      // @ts-expect-error
+      // @ts-expect-error - Type assertion required for external library
       material.flatShading = true;
       
       if (material instanceof THREE.MeshStandardMaterial) {

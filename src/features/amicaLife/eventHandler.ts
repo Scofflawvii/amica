@@ -71,7 +71,6 @@ async function handleVRMAnimationEvent(viewer: Viewer, amicaLife: AmicaLife) {
       if (!animation) {
         throw new Error("Loading animation failed");
       }
-      // @ts-expect-error
       const duration = await viewer.model!.playAnimation(animation, previousAnimation);
       requestAnimationFrame(() => { viewer.resetCameraLerp(); });
 
@@ -117,7 +116,6 @@ export async function handleSleepEvent(chat: Chat, amicaLife: AmicaLife) {
   try {
     const viewer = chat.viewer;
     if (viewer) {
-      // @ts-expect-error
       await viewer.model!.playEmotion("Sleep");
     }
     amicaLife.eventProcessing = false;

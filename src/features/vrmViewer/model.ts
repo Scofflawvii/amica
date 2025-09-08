@@ -93,7 +93,7 @@ export class Model {
         materialType = MToonMaterial;
         break;
       case "mtoon_node": {
-        // @ts-expect-error
+        // @ts-expect-error - Type assertion required for external library
         const { MToonNodeMaterial } = await import("@pixiv/three-vrm/nodes");
         materialType = MToonNodeMaterial;
         break;
@@ -117,7 +117,7 @@ export class Model {
 
     if (config("use_webgpu") === "true") {
       // Use WebGPU compatible MToonNodeMaterial for WebGPU rendering
-      // @ts-expect-error
+      // @ts-expect-error - Type assertion required for external library
       const { MToonNodeMaterial } = await import("@pixiv/three-vrm/nodes");
       materialType = MToonNodeMaterial;
     }

@@ -37,7 +37,7 @@ export function loadMixamoAnimation(url: string, vrm: VRM) {
       // Convert each tracks for VRM use, and push to `tracks`
       const trackSplitted = track.name.split('.');
       const mixamoRigName: string = trackSplitted[0];
-      // @ts-expect-error
+      // @ts-expect-error - Type assertion required for external library
       const vrmBoneName = mixamoVRMRigMap[mixamoRigName];
       const vrmNodeName = vrm.humanoid?.getNormalizedBoneNode(vrmBoneName)?.name;
       const mixamoRigNode = asset.getObjectByName(mixamoRigName);

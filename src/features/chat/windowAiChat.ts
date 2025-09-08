@@ -26,7 +26,7 @@ export async function getWindowAiChatResponseStream(messages: Message[]) {
               throw new Error(error);
             }
 
-            // @ts-expect-error
+            // @ts-expect-error - Type assertion required for external library
             const piece = res.message?.content;
             if (piece) {
               controller.enqueue(piece);
