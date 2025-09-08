@@ -18,7 +18,9 @@ export default [
       'src/workers/**/*.min.js',
       'src/workers/bvh/**',
       '**/generateMeshBVH.worker.js',
-      '**/*.worker.js.map'
+      '**/*.worker.js.map',
+      'test_*.cjs',
+      'test_*.js'
     ]
   },
   js.configs.recommended,
@@ -72,7 +74,15 @@ export default [
         exports: 'readonly',
         define: 'readonly',
         Audio: 'readonly',
-        data: 'readonly'
+        data: 'readonly',
+        Image: 'readonly',
+        alert: 'readonly',
+        createImageBitmap: 'readonly',
+        XRSession: 'readonly',
+        XRSessionMode: 'readonly',
+        XRRigidTransform: 'readonly',
+        XRInputSourceEvent: 'readonly',
+        XRFrame: 'readonly'
       }
     },
     plugins: {
