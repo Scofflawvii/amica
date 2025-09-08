@@ -587,8 +587,7 @@ export default function Share() {
                 defaultValue={sqid}
                 readOnly
                 onClick={(e) => {
-                  // @ts-expect-error - Type assertion required for external library
-                  navigator.clipboard.writeText(e.target.value);
+                  navigator.clipboard.writeText((e.target as HTMLInputElement).value);
                 }}
               />
               <p className="mt-6 text-sm">
