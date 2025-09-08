@@ -1,0 +1,48 @@
+diff --git a/node_modules/eslint/lib/shared/ajv.js b/node_modules/eslint/lib/shared/ajv.js
+index 5c5c41b..eebc7b4 100644
+--- a/node_modules/eslint/lib/shared/ajv.js
++++ b/node_modules/eslint/lib/shared/ajv.js
+@@ -8,8 +8,28 @@
+ // Requirements
+ //------------------------------------------------------------------------------
+ 
+-const Ajv = require("ajv"),
++const Ajv = require("ajv");
++
++// AJV 8.x compatibility: import draft-04 schema differently
++let metaSchema;
++try {
++	// Try AJV 6.x location first
+ 	metaSchema = require("ajv/lib/refs/json-schema-draft-04.json");
++} catch (e) {
++	// Fallback for AJV 8.x
++	try {
++		metaSchema = require("ajv/dist/refs/json-schema-draft-04.json");
++	} catch (e2) {
++		// Final fallback - use the schema directly
++		metaSchema = {
++			"id": "http://json-schema.org/draft-04/schema#",
++			"$schema": "http://json-schema.org/draft-04/schema#",
++			"description": "Core schema meta-schema",
++			"definitions": {},
++			"type": "object"
++		};
++	}
++}
+ 
+ //------------------------------------------------------------------------------
+ // Public Interface
+@@ -28,7 +48,12 @@ module.exports = (additionalOptions = {}) => {
+ 
+ 	ajv.addMetaSchema(metaSchema);
+ 	// eslint-disable-next-line no-underscore-dangle -- Ajv's API
+-	ajv._opts.defaultMeta = metaSchema.id;
++	// AJV 8.x compatibility: use opts instead of _opts
++	if (ajv._opts) {
++		ajv._opts.defaultMeta = metaSchema.id;
++	} else if (ajv.opts) {
++		ajv.opts.defaultMeta = metaSchema.id;
++	}
+ 
+ 	return ajv;
+ };

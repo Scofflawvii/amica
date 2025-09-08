@@ -1,0 +1,42 @@
+diff --git a/node_modules/@eslint/eslintrc/dist/eslintrc-universal.cjs b/node_modules/@eslint/eslintrc/dist/eslintrc-universal.cjs
+index 6000445..b124665 100644
+--- a/node_modules/@eslint/eslintrc/dist/eslintrc-universal.cjs
++++ b/node_modules/@eslint/eslintrc/dist/eslintrc-universal.cjs
+@@ -382,7 +382,15 @@ var ajvOrig = (additionalOptions = {}) => {
+ 
+     ajv.addMetaSchema(metaSchema);
+     // eslint-disable-next-line no-underscore-dangle -- part of the API
+-    ajv._opts.defaultMeta = metaSchema.id;
++    // AJV 8.x compatibility: use opts instead of _opts
++    if (ajv._opts) {
++        ajv._opts.defaultMeta = metaSchema.id;
++    } else if (ajv.opts) {
++        ajv.opts.defaultMeta = metaSchema.id;
++    } else {
++        // Fallback for AJV 8.x - set defaultMeta via options
++        ajv.compile.metaSchema = metaSchema;
++    }
+ 
+     return ajv;
+ };
+diff --git a/node_modules/@eslint/eslintrc/dist/eslintrc.cjs b/node_modules/@eslint/eslintrc/dist/eslintrc.cjs
+index c50b720..ba75bd1 100644
+--- a/node_modules/@eslint/eslintrc/dist/eslintrc.cjs
++++ b/node_modules/@eslint/eslintrc/dist/eslintrc.cjs
+@@ -1615,7 +1615,15 @@ var ajvOrig = (additionalOptions = {}) => {
+ 
+     ajv.addMetaSchema(metaSchema);
+     // eslint-disable-next-line no-underscore-dangle -- part of the API
+-    ajv._opts.defaultMeta = metaSchema.id;
++    // AJV 8.x compatibility: use opts instead of _opts
++    if (ajv._opts) {
++        ajv._opts.defaultMeta = metaSchema.id;
++    } else if (ajv.opts) {
++        ajv.opts.defaultMeta = metaSchema.id;
++    } else {
++        // Fallback for AJV 8.x - set defaultMeta via options
++        ajv.compile.metaSchema = metaSchema;
++    }
+ 
+     return ajv;
+ };
