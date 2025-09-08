@@ -1,4 +1,3 @@
-import { config } from '@/utils/config';
 import { Telegraf } from 'telegraf';
 
 class TelegramClient {

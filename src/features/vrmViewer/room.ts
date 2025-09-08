@@ -2,11 +2,6 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 // @ts-expect-error - Type assertion required for external library
 import * as GaussianSplats3D from '@mkkellogg/gaussian-splats-3d';
-import { downscaleModelTextures, logTextureInfo } from '@/utils/textureDownscaler';
-import { OptimizedGLTFLoader } from '@/utils/gltfOptimizer';
-import { GLTFAnalyzer } from '@/utils/gltfAnalyzer';
-import { TransparencyOptimizer, checkAndOptimizeTransparency } from '@/utils/transparencyOptimizer';
-import { config } from "@/utils/config";
 
 export class Room {
   public room?: THREE.Group;

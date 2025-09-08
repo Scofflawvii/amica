@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
 
-import { basename, BasicPage, FormRow } from './common';
+import { BasicPage, FormRow } from './common';
 import { config, updateConfig } from "@/utils/config";
 import { RangeInput } from '@/components/rangeInput';
 import { SwitchBox } from "@/components/switchBox"
 import { NumberInput } from '../numberInput';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef } from 'react';
 import { ChatContext } from '@/features/chat/chatContext';
 import { TextInput } from '../textInput';
 import { IconButton } from '../iconButton';

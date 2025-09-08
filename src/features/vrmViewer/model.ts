@@ -13,10 +13,6 @@ import { LipSync } from "@/features/lipSync/lipSync";
 import { EmoteController } from "@/features/emoteController/emoteController";
 import { ProceduralAnimation } from "@/features/proceduralAnimation/proceduralAnimation";
 import { Screenplay } from "@/features/chat/messages";
-import { downscaleModelTextures, logTextureInfo } from '@/utils/textureDownscaler';
-import { OptimizedGLTFLoader } from '@/utils/gltfOptimizer';
-import { GLTFAnalyzer } from '@/utils/gltfAnalyzer';
-import { TransparencyOptimizer, checkAndOptimizeTransparency } from '@/utils/transparencyOptimizer';
 import { config } from "@/utils/config";
 
 /**
@@ -93,7 +89,6 @@ export class Model {
         materialType = MToonMaterial;
         break;
       case "mtoon_node": {
-        // @ts-expect-error - Type assertion required for external library
         const { MToonNodeMaterial } = await import("@pixiv/three-vrm/nodes");
         materialType = MToonNodeMaterial;
         break;
@@ -117,7 +112,6 @@ export class Model {
 
     if (config("use_webgpu") === "true") {
       // Use WebGPU compatible MToonNodeMaterial for WebGPU rendering
-      // @ts-expect-error - Type assertion required for external library
       const { MToonNodeMaterial } = await import("@pixiv/three-vrm/nodes");
       materialType = MToonNodeMaterial;
     }
