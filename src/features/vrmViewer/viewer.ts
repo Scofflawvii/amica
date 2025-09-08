@@ -220,10 +220,9 @@ export class Viewer {
 
     let WebRendererType = THREE.WebGLRenderer;
     if (config("use_webgpu") === "true") {
-      // @ts-expect-error - Type assertion required for external library
       WebRendererType = (
         await import("three/src/renderers/webgpu/WebGPURenderer.js")
-      ).default;
+      ).default as any;
     }
 
     const renderer = new WebRendererType({
@@ -330,11 +329,9 @@ export class Viewer {
       scene.add(controller1);
       scene.add(controller2);
 
-      // @ts-expect-error - Type assertion required for external library
       controller1.addEventListener("connected", (event) => {
         this.usingController1 = true;
       });
-      // @ts-expect-error - Type assertion required for external library
       controller2.addEventListener("connected", (event) => {
         this.usingController2 = true;
       });
@@ -369,20 +366,16 @@ export class Viewer {
       this.hand2.add(handModelFactory.createHandModel(this.hand2,"mesh"))
       scene.add(hand2);
 
-      // @ts-expect-error - Type assertion required for external library
       hand1.addEventListener("pinchstart", () => {
         this.isPinching1 = true;
       });
-      // @ts-expect-error - Type assertion required for external library
       hand2.addEventListener("pinchstart", () => {
         this.isPinching2 = true;
       });
 
-      // @ts-expect-error - Type assertion required for external library
       hand1.addEventListener("pinchend", () => {
         this.isPinching1 = false;
       });
-      // @ts-expect-error - Type assertion required for external library
       hand2.addEventListener("pinchend", () => {
         this.isPinching2 = false;
       });
@@ -402,9 +395,7 @@ export class Viewer {
 
       // webgpu does not support xr controller events yet
       if (config("use_webgpu") !== "true") {
-        // @ts-expect-error - Type assertion required for external library
         igroup.listenToXRControllerEvents(controller1);
-        // @ts-expect-error - Type assertion required for external library
         igroup.listenToXRControllerEvents(controller2);
       }
     } catch (e) {
@@ -844,8 +835,7 @@ export class Viewer {
       for (const item of this.roomBVHHelperGroup.children) {
         if (item instanceof MeshBVHHelper) {
           try {
-            // @ts-expect-error - Type assertion required for external library
-            const geometry = item.geometry;
+            const geometry = (item as any).geometry;
             geometry?.dispose();
             for (const key in geometry?.attributes) {
               geometry?.deleteAttribute(key);
@@ -1047,12 +1037,10 @@ export class Viewer {
 
   public updateHands() {
     const handle = (hand: THREE.Group, jointMeshes: THREE.Mesh[]) => {
-      // @ts-expect-error - Type assertion required for external library
-      if (hand.joints) {
+      if ((hand as any).joints) {
         let i = 0;
         for (const name of joints) {
-          // @ts-expect-error - Type assertion required for external library
-          const joint = hand?.joints[name];
+          const joint = (hand as any)?.joints[name];
           if (!joint) {
             break; // if one isnt found then they all wont be found
           }
@@ -1289,10 +1277,8 @@ export class Viewer {
     if (this.elapsedMsSlow > 1) {
       // updating the texture for this is very slow
       ptime = performance.now();
-      // @ts-expect-error - Type assertion required for external library
-      this.statsMesh!.material.map.update();
-      // @ts-expect-error - Type assertion required for external library
-      this.guiMesh!.material.map.update();
+      (this.statsMesh!.material as any).map.update();
+      (this.guiMesh!.material as any).map.update();
       this.statsMsPanel.update(performance.now() - ptime, 100);
 
       // TODO run this in a web worker

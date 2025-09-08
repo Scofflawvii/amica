@@ -778,7 +778,6 @@ export class Chat {
           ...this.messageList! as any[],
           {
             role: "user",
-            // @ts-expect-error normally this is a string
             content: [
               {
                 type: "text",

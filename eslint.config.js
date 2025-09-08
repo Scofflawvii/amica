@@ -99,9 +99,9 @@ export default [
       'react/prop-types': 'off', // Using TypeScript
       'react-hooks/rules-of-hooks': 'error',
       
-      // General rules
+      // General rules  
       'no-unused-vars': 'warn',
-      'no-console': 'warn',
+      'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off', // Allow console in dev
       'no-undef': 'error',
       'no-useless-escape': 'error',
       'no-empty': 'error',
@@ -111,6 +111,18 @@ export default [
       react: {
         version: 'detect'
       }
+    }
+  },
+  {
+    // Allow console statements in specific files where they're intentional
+    files: [
+      'src/utils/debug.ts',
+      'src/components/debugPane.tsx',
+      'public/debugLogger.js',
+      'src/workers/**/*.js'
+    ],
+    rules: {
+      'no-console': 'off'
     }
   },
   {
