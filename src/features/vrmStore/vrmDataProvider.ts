@@ -8,6 +8,10 @@ export class VrmDataProvider {
 
     constructor() {
         this.db = db;
+        // Ensure database is properly initialized
+        this.db.open().catch(err => {
+            console.error('Failed to open VRM database:', err);
+        });
     }
 
     componentWillUnmount() {
@@ -19,7 +23,17 @@ export class VrmDataProvider {
     }
 
     public async getItems(): Promise<VrmDbModel[]> {
-        return this.db.vrms.toArray();
+        try {
+            // Ensure the database is open before accessing
+            if (!this.db.isOpen()) {
+                await this.db.open();
+            }
+            return await this.db.vrms.toArray();
+        } catch (error) {
+            console.error('Error getting VRM items:', error);
+            // Return empty array as fallback
+            return [];
+        }
     }
 
     public updateItemThumb(hash: string, vrmThumbData: string): void {
