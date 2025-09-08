@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 body {
   background-position: top center;
@@ -9,13 +7,11 @@ body {
   background-repeat: no-repeat;
 }
 
-@layer utilities {
-  .scroll-hidden {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+.scroll-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
-  .scroll-hidden::-webkit-scrollbar {
-    display: none;
-  }
+.scroll-hidden::-webkit-scrollbar {
+  display: none;
 }
