@@ -11,7 +11,7 @@ export const useAudioPlayback = (audioContext: AudioContext) => {
     ) => {
         const sampleRate = audioContext.sampleRate;
         const newBuffer = audioContext.createBuffer(1, newAudioData.length, sampleRate);
-        newBuffer.copyToChannel(newAudioData, 0);
+        newBuffer.copyToChannel(newAudioData as any, 0);
 
         const sourceNode = viewer.model?._lipSync?.audio.createBufferSource();
         sourceNode.buffer = newBuffer;
