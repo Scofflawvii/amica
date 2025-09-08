@@ -1,5 +1,5 @@
 diff --git a/node_modules/@pixiv/three-vrm/lib/nodes/index.module.js b/node_modules/@pixiv/three-vrm/lib/nodes/index.module.js
-index 6863e41..f5e1295 100644
+index 6863e41..975a5af 100644
 --- a/node_modules/@pixiv/three-vrm/lib/nodes/index.module.js
 +++ b/node_modules/@pixiv/three-vrm/lib/nodes/index.module.js
 @@ -103,7 +103,7 @@ var FnCompat = (jsFunc) => {
@@ -7,13 +7,13 @@ index 6863e41..f5e1295 100644
      return THREE_TSL.Fn(jsFunc);
    } else {
 -    return THREE_WEBGPU.tslFn(jsFunc);
-+    return THREE_WEBGPU.Fn(jsFunc);
++    return THREE_TSL.Fn(jsFunc);
    }
  };
  var linearstep = FnCompat(
 diff --git a/node_modules/@pixiv/three-vrm/lib/nodes/index.module.js.backup b/node_modules/@pixiv/three-vrm/lib/nodes/index.module.js.backup
 new file mode 100644
-index 0000000..6863e41
+index 0000000..f5e1295
 --- /dev/null
 +++ b/node_modules/@pixiv/three-vrm/lib/nodes/index.module.js.backup
 @@ -0,0 +1,515 @@
@@ -122,7 +122,7 @@ index 0000000..6863e41
 +  if (threeRevision2 >= 168) {
 +    return THREE_TSL.Fn(jsFunc);
 +  } else {
-+    return THREE_WEBGPU.tslFn(jsFunc);
++    return THREE_WEBGPU.Fn(jsFunc);
 +  }
 +};
 +var linearstep = FnCompat(

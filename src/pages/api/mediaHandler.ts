@@ -9,8 +9,7 @@ import { ApiResponse, generateSessionId, sendError } from '@/features/externalAP
 import { transcribeVoice } from '@/features/externalAPI/processors/voiceProcessor';
 import { processImage } from '@/features/externalAPI/processors/imageProcessor';
 
-import formidable from 'formidable';
-import fs from "fs";
+import { parseMultipart, getMultipartBoundary, FormidablePart } from 'formidable';
 
 // Configure body parsing: disable only for multipart/form-data
 export const config = {
@@ -32,21 +31,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   const timestamp = new Date().toISOString();
   
   if (req.headers['content-type']?.includes('multipart/form-data')) {
-    // Handle form-data
-    const form = formidable({});
-    form.parse(req, async (err, fields, files) => {
-      if (err) {
-        console.error("Form parsing error:", err);
-        return sendError(res, currentSessionId, "Failed to parse form data.");
+    try {
+      // Handle form-data using new formidable v4 API
+      const contentType = req.headers['content-type'] || '';
+      const boundary = getMultipartBoundary(contentType);
+      
+      if (!boundary) {
+        return sendError(res, currentSessionId, "Invalid Content-Type: missing boundary");
       }
 
-      try {
-        await handleRequest(currentSessionId, timestamp, fields, files, res);
-      } catch (error) {
-        console.error("Error in form processing:", error);
-        sendError(res, currentSessionId, String(error), 500);
-      }
-    });
+      const fields: Record<string, string[]> = {};
+      const files: Record<string, FormidablePart[]> = {};
+
+      await parseMultipart(req, { boundary }, async (part: FormidablePart) => {
+        if (part.isFile()) {
+          if (!files[part.name]) files[part.name] = [];
+          files[part.name].push(part);
+        } else {
+          if (!fields[part.name]) fields[part.name] = [];
+          const value = await part.text();
+          fields[part.name].push(value);
+        }
+      });
+      
+      await handleRequest(currentSessionId, timestamp, fields, files, res);
+    } catch (error) {
+      console.error("Form parsing error:", error);
+      return sendError(res, currentSessionId, "Failed to parse form data.");
+    }
   } else {
     return sendError(res, currentSessionId, "Incorrect type");
   }
@@ -55,8 +67,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 async function handleRequest(
   sessionId: string,
   timestamp: string,
-  fields: any,
-  files: any,
+  fields: Record<string, string[]>,
+  files: Record<string, FormidablePart[]>,
   res: NextApiResponse<ApiResponse>
 ) {
   let response: string | undefined | TimestampedPrompt[];
@@ -77,9 +89,11 @@ async function handleRequest(
     switch (inputType) {
       case "Voice":
         if (payload) {
-          const filePath = payload.filepath;
-          const fileBuffer = fs.readFileSync(filePath);
-          const audioFile = new File([fileBuffer], "input.wav", { type: "audio/wav" });
+          // Get the file data as ArrayBuffer from FormidablePart
+          const fileBuffer = await payload.arrayBuffer();
+          const audioFile = new File([fileBuffer], payload.filename || "input.wav", { 
+            type: payload.type || "audio/wav" 
+          });
           response = await transcribeVoice(audioFile);
           outputType = "Text";
         } else {
@@ -89,8 +103,10 @@ async function handleRequest(
 
       case "Image":
         if (payload) {
-          const imageBuffer = fs.readFileSync(payload.filepath);
-          response = await processImage(imageBuffer);
+          // Get the file data as ArrayBuffer from FormidablePart
+          const imageBuffer = await payload.arrayBuffer();
+          const buffer = Buffer.from(imageBuffer);
+          response = await processImage(buffer);
           outputType = "Text";
         } else {
           throw new Error("Image input file missing.");
