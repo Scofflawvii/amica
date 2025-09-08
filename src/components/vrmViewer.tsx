@@ -5,7 +5,7 @@ import { buildUrl } from "@/utils/buildUrl";
 import { config } from "@/utils/config";
 import { useVrmStoreContext } from "@/features/vrmStore/vrmStoreContext";
 import isTauri from "@/utils/isTauri";
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import { ChatContext } from "@/features/chat/chatContext";
 import clsx from "clsx";
 
