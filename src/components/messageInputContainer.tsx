@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 // necessary because of VAD in MessageInput
 const DynamicMessageInput = dynamic(() =>

@@ -1,7 +1,6 @@
-import { XMarkIcon } from '@heroicons/react/20/solid';
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { updateConfig } from "@/utils/config";
-import { useTranslation, Trans } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 export const Introduction = ({ open }: {
   open: boolean;

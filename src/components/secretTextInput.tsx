@@ -1,4 +1,3 @@
-import { KnownIconType } from "@charcoal-ui/icons";
 import { useState, ButtonHTMLAttributes } from "react";
 import { Switch } from '@headlessui/react';
 import { clsx } from "clsx";
@@ -10,7 +9,6 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 export const SecretTextInput = ({
   value,
   onChange,
-  ...rest
 }: Props) => {
   const [inputType, setInputType] = useState("password");
   const [enabled, setEnabled] = useState(false)

@@ -1,34 +1,27 @@
 import {
-  Fragment,
   useContext,
   useEffect,
   useRef,
   useState,
 } from "react";
-import Link from "next/link";
-import { Menu, Transition } from '@headlessui/react'
 import { clsx } from "clsx";
 import { M_PLUS_2, Montserrat } from "next/font/google";
-import { useTranslation, Trans } from 'react-i18next';
 import {
   ChatBubbleLeftIcon,
   ChatBubbleLeftRightIcon,
   CloudArrowDownIcon,
   CodeBracketSquareIcon,
-  CubeIcon,
-  CubeTransparentIcon,
-  LanguageIcon,
   ShareIcon,
   SpeakerWaveIcon,
   SpeakerXMarkIcon,
-  Squares2X2Icon,
-  SquaresPlusIcon,
   VideoCameraIcon,
   VideoCameraSlashIcon,
   WrenchScrewdriverIcon,
   SignalIcon,
-  AcademicCapIcon,
 } from "@heroicons/react/24/outline";
+
+// Type for XR Session Mode
+type XRSessionMode = 'immersive-vr' | 'immersive-ar' | 'inline';
 import { IconBrain } from '@tabler/icons-react';
 
 import { MenuButton } from "@/components/menuButton";
@@ -55,7 +48,6 @@ import { AlertContext } from "@/features/alert/alertContext";
 
 import { config, updateConfig } from '@/utils/config';
 import { isTauri } from '@/utils/isTauri';
-import { langs } from '@/i18n/langs';
 import { VrmStoreProvider } from "@/features/vrmStore/vrmStoreContext";
 import { AmicaLifeContext } from "@/features/amicaLife/amicaLifeContext";
 import { ChatModeText } from "@/components/chatModeText";
@@ -77,45 +69,8 @@ const montserrat = Montserrat({
   subsets: ["latin"],
 });
 
-function detectVRHeadset() {
-  const userAgent = navigator.userAgent.toLowerCase();
-
-  // Meta Quest detection
-  // Quest 2 and 3 both use "oculus" in their user agent
-  const isQuest = userAgent.includes('oculus') ||
-                  userAgent.includes('quest 2') ||
-                  userAgent.includes('quest 3');
-
-  // Vision Pro detection
-  // visionOS is the specific identifier for Apple Vision Pro
-  const isVisionPro = userAgent.includes('visionos') ||
-                      userAgent.includes('xros');
-
-  // Detailed device information
-  let deviceInfo = {
-    isVRDevice: isQuest || isVisionPro,
-    deviceType: '',
-    browserInfo: userAgent
-  };
-
-  if (isQuest) {
-    deviceInfo.deviceType = 'quest-3';
-    if (userAgent.includes('quest 3')) {
-      deviceInfo.deviceType = 'quest-3';
-    } else if (userAgent.includes('quest 2')) {
-      deviceInfo.deviceType = 'quest-2';
-    }
-  } else if (isVisionPro) {
-    deviceInfo.deviceType = 'vision-pro';
-  }
-
-  return deviceInfo;
-}
-
 
 export default function Home() {
-  const { t, i18n } = useTranslation();
-  const currLang = i18n.resolvedLanguage;
   const { viewer } = useContext(ViewerContext);
   const { alert } = useContext(AlertContext);
   const { chat: bot } = useContext(ChatContext);
@@ -140,20 +95,15 @@ export default function Home() {
   const [showDebug, setShowDebug] = useState(false);
   const [showChatMode, setShowChatMode] = useState(false);
   const [showSubconciousText, setShowSubconciousText] = useState(false);
-  const [showMoshi, setShowMoshi] = useState(false);
 
   // null indicates havent loaded config yet
   const [muted, setMuted] = useState<boolean|null>(null);
   const [webcamEnabled, setWebcamEnabled] = useState(false);
-  const [showLanguageSelector, setShowLanguageSelector] = useState(false);
 
   const [showStreamWindow, setShowStreamWindow] = useState(false);
   const videoRef = useRef(null);
 
-  const [isARSupported, setIsARSupported] = useState(false);
-  const [isVRSupported, setIsVRSupported] = useState(false);
-
-  const [isVRHeadset, setIsVRHeadset] = useState(false);
+  const [isVRHeadset] = useState(false);
 
 
   useEffect(() => {
@@ -268,18 +218,18 @@ export default function Home() {
         console.warn(err);
       }
 
-      // @ts-ignore
+      // @ts-expect-error - WebXR types may not be fully available
       if (window.navigator.xr.offerSession !== undefined) {
-        // @ts-ignore
+        // @ts-expect-error - WebXR navigator types may not be fully available
         const session = await navigator.xr?.offerSession(immersiveType, sessionInit);
         viewer.onSessionStarted(session, immersiveType);
       }
       return;
     }
 
-    // @ts-ignore
+    // @ts-expect-error - WebXR types may not be fully available
     if (window.navigator.xr.offerSession !== undefined ) {
-      // @ts-ignore
+      // @ts-expect-error - WebXR navigator types may not be fully available
       const session = await navigator.xr?.offerSession(immersiveType, sessionInit);
       viewer.onSessionStarted(session, immersiveType);
       return;

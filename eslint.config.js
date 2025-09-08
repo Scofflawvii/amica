@@ -2,12 +2,25 @@ import js from '@eslint/js';
 import nextPlugin from '@next/eslint-plugin-next';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
-import jsxA11yPlugin from 'eslint-plugin-jsx-a11y';
-import importPlugin from 'eslint-plugin-import';
 import typescriptParser from '@typescript-eslint/parser';
 import typescriptPlugin from '@typescript-eslint/eslint-plugin';
 
 export default [
+  {
+    ignores: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/.next/**',
+      '**/coverage/**',
+      '**/public/**',
+      'src/workers/decoderWorker.min.js',
+      'src/workers/**/*.min.js',
+      'src/workers/bvh/**',
+      '**/generateMeshBVH.worker.js',
+      '**/*.worker.js.map'
+    ]
+  },
   js.configs.recommended,
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
@@ -27,7 +40,6 @@ export default [
         navigator: 'readonly',
         console: 'readonly',
         process: 'readonly',
-        // Browser APIs
         fetch: 'readonly',
         setTimeout: 'readonly',
         setInterval: 'readonly',
@@ -37,84 +49,57 @@ export default [
         performance: 'readonly',
         localStorage: 'readonly',
         sessionStorage: 'readonly',
-        alert: 'readonly',
-        confirm: 'readonly',
-        prompt: 'readonly',
         Buffer: 'readonly',
         URL: 'readonly',
         URLSearchParams: 'readonly',
-        createImageBitmap: 'readonly',
-        // WebXR globals
-        XRSession: 'readonly',
-        XRSessionMode: 'readonly',
-        XRFrame: 'readonly',
-        XRRigidTransform: 'readonly',
-        XRInputSourceEvent: 'readonly',
-        // Worker globals
         Worker: 'readonly',
         self: 'readonly',
         onmessage: 'readonly',
         postMessage: 'readonly',
-        // Web Audio API
         AudioContext: 'readonly',
         webkitAudioContext: 'readonly',
-        // WebGL
         WebGLRenderingContext: 'readonly',
         WebGL2RenderingContext: 'readonly',
-        // WebAssembly
         WebAssembly: 'readonly',
-        // Text Decoder/Encoder
         TextDecoder: 'readonly',
         TextEncoder: 'readonly',
-        // XMLHttpRequest
         XMLHttpRequest: 'readonly',
-        // Node.js globals (for server-side)
         global: 'readonly',
         __dirname: 'readonly',
         __filename: 'readonly',
         require: 'readonly',
         module: 'readonly',
         exports: 'readonly',
-        // AMD
         define: 'readonly',
-        // Additional Web APIs
         Audio: 'readonly',
         data: 'readonly'
       }
     },
     plugins: {
-      '@next/next': nextPlugin,
+      'next': nextPlugin,
       'react': reactPlugin,
-      'react-hooks': reactHooksPlugin,
-      'jsx-a11y': jsxA11yPlugin,
-      'import': importPlugin
+      'react-hooks': reactHooksPlugin
     },
     rules: {
       // Next.js specific rules
-      '@next/next/no-html-link-for-pages': 'error',
-      '@next/next/no-img-element': 'warn',
-      '@next/next/no-unwanted-polyfillio': 'error',
-      '@next/next/no-page-custom-font': 'error',
+      'next/no-img-element': 'warn',
       
       // React rules
       'react/react-in-jsx-scope': 'off', // Not needed in Next.js
       'react/prop-types': 'off', // Using TypeScript
       'react-hooks/rules-of-hooks': 'error',
-      // 'react-hooks/exhaustive-deps': 'warn', // Temporarily disabled due to AJV 8.x schema validation issue
       
       // General rules
       'no-unused-vars': 'warn',
       'no-console': 'warn',
-      'no-undef': 'error'
+      'no-undef': 'error',
+      'no-useless-escape': 'error',
+      'no-empty': 'error',
+      'no-prototype-builtins': 'error'
     },
     settings: {
       react: {
         version: 'detect'
-      },
-      'import/resolver': {
-        node: {
-          extensions: ['.js', '.jsx', '.ts', '.tsx']
-        }
       }
     }
   },
