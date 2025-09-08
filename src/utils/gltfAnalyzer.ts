@@ -147,7 +147,9 @@ class GLTFAnalyzer {
   private getTextureFormat(texture: THREE.Texture): string {
     if (texture.format === THREE.RGBAFormat) return 'RGBA';
     if (texture.format === THREE.RGBFormat) return 'RGB';
-    if (texture.format === THREE.LuminanceFormat) return 'Luminance';
+    // LuminanceFormat has been removed in newer versions of Three.js
+    // Replaced with RedFormat or other alternatives
+    if (texture.format === THREE.RedFormat) return 'Red';
     return 'Unknown';
   }
 

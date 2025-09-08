@@ -15,6 +15,10 @@ export function loadMixamoAnimation(url: string, vrm: VRM) {
   return loader.loadAsync(url).then((asset) => {
     const clip = THREE.AnimationClip.findByName(asset.animations, 'mixamo.com'); // extract the AnimationClip
 
+    if (!clip) {
+      throw new Error('Animation clip not found');
+    }
+
     const tracks: THREE.VectorKeyframeTrack[] = []; // KeyframeTracks compatible with VRM will be added here
 
     const restRotationInverse = new THREE.Quaternion();
