@@ -21,7 +21,7 @@ import { VRMHumanBoneName } from "@pixiv/three-vrm";
 import GUI from "lil-gui";
 import Stats from "stats.js";
 
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { InteractiveGroup } from "three/examples/jsm/interactive/InteractiveGroup.js";
 import { HTMLMesh } from "three/examples/jsm/interactive/HTMLMesh.js";
 
