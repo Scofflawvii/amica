@@ -9,9 +9,10 @@ export async function expandPrompt(prompt: string, values: any) {
   
 export async function handleFunctionCalling(event: string) {
   switch (event) {
-    case "news":
+    case "news": {
       const newsSummary = await handleNews();
       return newsSummary;
+    }
 
     default:
       console.log(`Unknown event: ${event}`);

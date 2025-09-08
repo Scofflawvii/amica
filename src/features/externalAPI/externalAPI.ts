@@ -75,7 +75,7 @@ export async function handleConfig(
 
   switch (type) {
     // Call this function at the beginning of your application to load the server config and sync to localStorage if needed.
-    case "init":
+    case "init": {
       let localStorageData: Record<string, string> = {};
 
       for (const key in defaults) {
@@ -94,16 +94,19 @@ export async function handleConfig(
       await fetcher("POST", configUrl, localStorageData);
 
       break;
-    case "fetch":
+    }
+    case "fetch": {
       // Sync update to server config cache
       await fetcher("GET", configUrl);
 
       break;
+    }
 
-    case "update":
+    case "update": {
       await fetcher("POST", configUrl, data);
 
       break;
+    }
 
     default:
       break;

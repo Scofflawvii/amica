@@ -40,7 +40,7 @@ const updateConfig = (body: any) => {
   const config = readFile(configFilePath);
   if (body.key && body.value !== undefined) {
     const { key, value } = body;
-    if (!config.hasOwnProperty(key)) {
+    if (!Object.prototype.hasOwnProperty.call(config, key)) {
       throw new Error(`Config key "${key}" not found.`);
     }
     config[key] = value;

@@ -59,7 +59,7 @@ export function processResponse({
 
   // Cut out and process the response sentence by sentence
   const sentenceMatch = receivedMessage.match(
-    /^(.+[\.\。\!\！\?\？\，\n]|.{10,}[,])/,
+    /^(.+[.。!！?？，\n]|.{10,}[,])/,
   );
   if (sentenceMatch && sentenceMatch[0]) {
     const sentence = sentenceMatch[0];
@@ -71,7 +71,7 @@ export function processResponse({
     // Skip if the string is unnecessary/impossible to utter.
     if (
       !sentence.replace(
-        /^[\s\[\(\{「［（【『〈《〔｛«‹〘〚〛〙›»〕》〉』】）］」\}\)\]]+$/g,
+        /^[\s[({「［（【『〈《〔｛«‹〘〚〛〙›»〕》〉』】）］」})]+$/g,
         "",
       )
     ) {

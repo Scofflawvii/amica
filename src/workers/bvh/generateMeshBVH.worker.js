@@ -4,7 +4,7 @@ import {
 } from 'three';
 import { MeshBVH } from 'three-mesh-bvh';
 
-onmessage = ( { data } ) => {
+self.onmessage = ( { data } ) => {
 
 	let prevTime = performance.now();
 	function onProgressCallback( progress ) {

@@ -11,7 +11,7 @@ let isRunning = false;
 let prevTime = 0;
 const workerPool = new WorkerPool( () => new Worker( new URL( './parallelMeshBVH.worker.js', import.meta.url ), { type: 'module' } ) );
 
-onmessage = async ( { data } ) => {
+self.onmessage = async ( { data } ) => {
 
 	if ( isRunning ) {
 

@@ -433,7 +433,7 @@ export class Chat {
 
         // Handle the message based on its type
         switch (type) {
-          case 'normal':
+          case 'normal': {
             console.log('Normal message received:', data);
             const messages: Message[] = [
               { role: "system", content: config("system_prompt") },
@@ -444,8 +444,9 @@ export class Chat {
             this.streams.push(stream);
             this.handleChatResponseStream();
             break;
+          }
           
-          case 'animation':
+          case 'animation': {
             console.log('Animation data received:', data);
             const animation = await loadVRMAnimation(`/animations/${data}`);
             if (!animation) {
@@ -454,9 +455,11 @@ export class Chat {
             this.viewer?.model?.playAnimation(animation,data);
             requestAnimationFrame(() => { this.viewer?.resetCameraLerp(); });
             break;
+          }
 
-          case 'playback':
+          case 'playback': {
             console.log('Playback flag received:', data);
+            const playbackAnimation = await loadVRMAnimation(`/animations/${data}`);
             this.viewer?.startRecording();
             // Automatically stop recording after 10 seconds
             setTimeout(() => {
@@ -478,11 +481,13 @@ export class Chat {
               });
             }, data); // Stop recording after 10 seconds
             break;
+          }
 
-          case 'systemPrompt':
+          case 'systemPrompt': {
             console.log('System Prompt data received:', data);
             updateConfig("system_prompt",data);
             break;
+          }
 
           default:
             console.warn('Unknown message type:', type);

@@ -137,16 +137,16 @@ if (typeof window !== "undefined") {
 }
 
 export function config(key: string): string {
-  if (typeof localStorage !== "undefined" && localStorage.hasOwnProperty(prefixed(key))) {
+  if (typeof localStorage !== "undefined" && Object.prototype.hasOwnProperty.call(localStorage, prefixed(key))) {
     return (<any>localStorage).getItem(prefixed(key))!;
   }
 
   // Fallback to serverConfig if localStorage is unavailable or missing
-  if (serverConfig && serverConfig.hasOwnProperty(key)) {
+  if (serverConfig && Object.prototype.hasOwnProperty.call(serverConfig, key)) {
     return serverConfig[key];
   }
 
-  if (defaults.hasOwnProperty(key)) {
+  if (Object.prototype.hasOwnProperty.call(defaults, key)) {
     return (<any>defaults)[key];
   }
 
@@ -171,7 +171,7 @@ export async function updateConfig(key: string, value: string) {
 }
 
 export function defaultConfig(key: string): string {
-  if (defaults.hasOwnProperty(key)) {
+  if (Object.prototype.hasOwnProperty.call(defaults, key)) {
     return (<any>defaults)[key];
   }
 

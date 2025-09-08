@@ -65,7 +65,7 @@ export async function getOpenRouterChatResponseStream(messages: Message[]): Prom
               const json = JSON.parse(combined);
               const messagePiece = json.choices[0].delta.content;
               combined = "";
-              if (!!messagePiece) {
+              if (messagePiece) {
                 controller.enqueue(messagePiece);
               }
             } catch (error) {

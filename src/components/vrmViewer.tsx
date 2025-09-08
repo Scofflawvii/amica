@@ -27,40 +27,37 @@ export default function VrmViewer({ chatMode }: { chatMode: boolean }) {
   const canvasRef = useCallback(
     (canvas: HTMLCanvasElement) => {
       if (canvas && (!isVrmLocal || !isLoadingVrmList)) {
-        new Promise(async (resolve, reject) => {
+        (async () => {
           await viewer.setup(canvas);
 
           try {
             const currentVrm = getCurrentVrm();
             if (!currentVrm) {
               setIsLoading(true);
-              resolve(false);
+              return false;
             } else {
               // Temp Disable : WebXR
               // await viewer.loadScenario(config('scenario_url'));
               await viewer.loadVrm(buildUrl(currentVrm.url),
               (progress) => { console.log(`loading model ${progress}`);}
               );
-              resolve(true);
+              return true;
             }
           } catch (e) {
-            reject(e);
-          }
-        })
-          .then((loaded) => {
-            if (loaded) {
-              console.log("vrm loaded");
-              setLoadingError(false);
-              setIsLoading(false);
-              if (isTauri()) invoke("close_splashscreen");
-            }
-          })
-          .catch((e) => {
             console.error("vrm loading error", e);
             setLoadingError(true);
             setIsLoading(false);
             if (isTauri()) invoke("close_splashscreen");
-          });
+            return false;
+          }
+        })().then((loaded) => {
+          if (loaded) {
+            console.log("vrm loaded");
+            setLoadingError(false);
+            setIsLoading(false);
+            if (isTauri()) invoke("close_splashscreen");
+          }
+        });
 
         // Replace VRM with Drag and Drop
         canvas.addEventListener("dragover", function (event) {

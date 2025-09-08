@@ -21,7 +21,7 @@ export function cleanTalk(talk: Talk) {
   talk.message = talk.message.replace(/^:D/gu, '');
 
   // remove double spaces
-  talk.message = talk.message.replace(/  /g, ' ');
+  talk.message = talk.message.replace(/ {2}/g, ' ');
 
   return talk;
 }

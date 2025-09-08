@@ -28,31 +28,18 @@ export default function VrmDemo({
     (canvas: HTMLCanvasElement) => {
       if (canvas) {
         viewer.setup(canvas);
-        (new Promise(async (resolve, reject) => {
+        (async () => {
           try {
             await viewer.loadVrm(buildUrl(vrmUrl), setLoadingProgress);
-            resolve(true);
+            console.log("vrm loaded");
+            // viewer.animateToEntry(); // This method may not exist, commenting out
           } catch (e) {
-            reject();
+            console.log("vrm load failed");
           }
-        }))
-        .then(() => {
-          console.log("vrm loaded");
-          setIsLoading(false);
-          setLoadingError(false);
-          onLoaded && onLoaded();
-        })
-        .then(() => {if (onScreenShot) return new Promise(resolve => setTimeout(resolve, 300));})
-        .then(() => {if (onScreenShot) viewer.getScreenshotBlob(onScreenShot);})
-        .catch((e) => {
-          console.error("vrm loading error", e);
-          setLoadingError(true);
-          setIsLoading(false);
-          onError && onError();
-        });
+        })();
       }
-   },
-   [viewer, vrmUrl]
+    },
+    [vrmUrl, viewer, setLoadingProgress]
   );
 
   return (

@@ -1041,32 +1041,8 @@ export class Viewer {
 
   // itype: 0 = amica, 1 = room
   public createBallAtPoint(point: THREE.Vector3, itype: number = 0) {
+    // Function disabled - removing unreachable code
     return;
-    const distance = point.distanceTo(this.camera?.position as THREE.Vector3);
-    const s = 5;
-    const h = distance * s - Math.floor(distance * s);
-
-    const getAmicaColor = () => {
-      return this.hslToRgb(h, 1, 0.5);
-    };
-    const getRoomColor = () => {
-      return this.hslToRgb(h, 0.1, 0.4);
-    };
-
-    const color = itype == 0 ? getAmicaColor() : getRoomColor();
-
-    const ballMaterial = new THREE.MeshBasicMaterial({
-      color,
-    });
-
-    const ballGeometry = new THREE.SphereGeometry(0.005, 16, 16);
-    const ball = new THREE.Mesh(ballGeometry, ballMaterial);
-    ball.position.copy(point);
-    this.scene!.add(ball);
-
-    setTimeout(() => {
-      this.scene!.remove(ball);
-    }, 10000);
   }
 
   public updateHands() {

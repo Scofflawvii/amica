@@ -92,11 +92,12 @@ export class Model {
       case "mtoon":
         materialType = MToonMaterial;
         break;
-      case "mtoon_node":
+      case "mtoon_node": {
         // @ts-ignore
         const { MToonNodeMaterial } = await import("@pixiv/three-vrm/nodes");
         materialType = MToonNodeMaterial;
         break;
+      }
       case "meshtoon":
         materialType = THREE.MeshToonMaterial;
         break;

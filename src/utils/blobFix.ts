@@ -401,7 +401,9 @@ class WebmContainer extends WebmBase<ContainerData[]> {
       var bytes = 1, flag = 0x80;
       x >= flag && bytes < 8;
       bytes++, flag *= 0x80
-    ) {}
+    ) {
+      // Loop body intentionally empty - just counting bytes
+    }
 
     if (!draft) {
       let value = flag + x;

@@ -28,7 +28,7 @@ export async function getWindowAiChatResponseStream(messages: Message[]) {
 
             // @ts-ignore
             const piece = res.message?.content;
-            if (!! piece) {
+            if (piece) {
               controller.enqueue(piece);
             }
 

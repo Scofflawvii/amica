@@ -57,7 +57,7 @@ export async function getLlamaCppChatResponseStream(messages: Message[]) {
               }
               const messagePiece = json.content;
               combined = "";
-              if (!!messagePiece) {
+              if (messagePiece) {
                 controller.enqueue(messagePiece);
               }
             } catch (error) {
@@ -152,7 +152,7 @@ export async function getLlavaCppChatResponse(messages: Message[], imageData: st
               }
               const messagePiece = json.content;
               combined = "";
-              if (!!messagePiece) {
+              if (messagePiece) {
                 controller.enqueue(messagePiece);
               }
             } catch (error) {

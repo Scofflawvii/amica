@@ -17,5 +17,5 @@ export function cleanFromWakeWord(text: string, wakeWord: string) {
 }
 
 export function cleanFromPunctuation(text: string) {
-  return text.toLowerCase().replace(/[^\w\s\']|_/g, "").replace(/\s+/g, " ");
+  return text.toLowerCase().replace(/[^\w\s']|_/g, "").replace(/\s+/g, " ");
 }

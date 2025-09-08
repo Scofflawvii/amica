@@ -18,7 +18,7 @@ export async function speecht5(
   }).join("");
 
   // initialize worker if not already initialized
-  if (! window.hasOwnProperty('chatvrm_worker_speecht5')) {
+  if (!Object.prototype.hasOwnProperty.call(window, 'chatvrm_worker_speecht5')) {
     (<any>window).chatvrm_worker_speecht5 = new Worker(new URL("../../workers/speecht5.js", import.meta.url), {
       type: "module",
     });
@@ -55,16 +55,18 @@ export async function speecht5(
   });
 
   // wait for job to complete
-  await new Promise(async (resolve) => {
+  await new Promise((resolve) => {
     console.log("speecht5 waiting for job to complete");
-    while (true) {
-      if((<any>window).chatvrm_worker_speecht5_audiocache !== null) {
-        resolve(null);
-        break;
+    const checkJob = async () => {
+      while (true) {
+        if((<any>window).chatvrm_worker_speecht5_audiocache !== null) {
+          resolve(null);
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
-
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
+    };
+    checkJob();
   });
 
 

@@ -38,7 +38,7 @@ export async function getOllamaChatResponseStream(messages: Message[]) {
             try {
               const json = JSON.parse(jsonResponse);
               const messagePiece = json.message.content;
-              if (!!messagePiece) {
+              if (messagePiece) {
                 controller.enqueue(messagePiece);
               }
             } catch (error) {
