@@ -1,6 +1,10 @@
-const fs = require('fs');
-const fg = require('fast-glob');
-const path = require('path');
+import fs from 'fs';
+import fg from 'fast-glob';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const ROOT = path.join(__dirname, './../public');
 

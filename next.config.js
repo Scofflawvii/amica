@@ -1,5 +1,8 @@
-const CopyPlugin = require("copy-webpack-plugin");
-const withPWA = require("@ducanh2912/next-pwa").default({
+import CopyPlugin from "copy-webpack-plugin";
+import withPWAFunction from "@ducanh2912/next-pwa";
+import { withSentryConfig } from "@sentry/nextjs";
+
+const withPWA = withPWAFunction({
   dest: "public",
 });
 
@@ -57,13 +60,11 @@ const nextConfig = {
   },
 };
 
-module.exports = withPWA(nextConfig);
+const configWithPWA = withPWA(nextConfig);
 
 // Injected content via Sentry wizard below
 
-const { withSentryConfig } = require("@sentry/nextjs");
-
-module.exports = withSentryConfig(module.exports, {
+const sentryConfig = withSentryConfig(configWithPWA, {
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options
 
@@ -102,3 +103,5 @@ module.exports = withSentryConfig(module.exports, {
   // https://vercel.com/docs/cron-jobs
   automaticVercelMonitors: true,
 });
+
+export default sentryConfig;

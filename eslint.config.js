@@ -26,7 +26,60 @@ export default [
         document: 'readonly',
         navigator: 'readonly',
         console: 'readonly',
-        process: 'readonly'
+        process: 'readonly',
+        // Browser APIs
+        fetch: 'readonly',
+        setTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearTimeout: 'readonly',
+        clearInterval: 'readonly',
+        requestAnimationFrame: 'readonly',
+        performance: 'readonly',
+        localStorage: 'readonly',
+        sessionStorage: 'readonly',
+        alert: 'readonly',
+        confirm: 'readonly',
+        prompt: 'readonly',
+        Buffer: 'readonly',
+        URL: 'readonly',
+        URLSearchParams: 'readonly',
+        createImageBitmap: 'readonly',
+        // WebXR globals
+        XRSession: 'readonly',
+        XRSessionMode: 'readonly',
+        XRFrame: 'readonly',
+        XRRigidTransform: 'readonly',
+        XRInputSourceEvent: 'readonly',
+        // Worker globals
+        Worker: 'readonly',
+        self: 'readonly',
+        onmessage: 'readonly',
+        postMessage: 'readonly',
+        // Web Audio API
+        AudioContext: 'readonly',
+        webkitAudioContext: 'readonly',
+        // WebGL
+        WebGLRenderingContext: 'readonly',
+        WebGL2RenderingContext: 'readonly',
+        // WebAssembly
+        WebAssembly: 'readonly',
+        // Text Decoder/Encoder
+        TextDecoder: 'readonly',
+        TextEncoder: 'readonly',
+        // XMLHttpRequest
+        XMLHttpRequest: 'readonly',
+        // Node.js globals (for server-side)
+        global: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        require: 'readonly',
+        module: 'readonly',
+        exports: 'readonly',
+        // AMD
+        define: 'readonly',
+        // Additional Web APIs
+        Audio: 'readonly',
+        data: 'readonly'
       }
     },
     plugins: {
