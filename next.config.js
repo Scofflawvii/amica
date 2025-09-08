@@ -15,7 +15,6 @@ const nextConfig = {
   publicRuntimeConfig: {
     root: process.env.BASE_PATH || "",
   },
-  optimizeFonts: false,
   webpack: (config, { webpack, buildId }) => {
     // See https://webpack.js.org/configuration/resolve/#resolvealias
     config.resolve.alias = {
@@ -31,17 +30,10 @@ const nextConfig = {
             from: "./node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm",
             to: "static/chunks/[name][ext]",
           },
+          // Keep the original filename for compatibility
           {
-            from: "./node_modules/onnxruntime-web/dist/ort-wasm-threaded.wasm",
-            to: "static/chunks/[name][ext]",
-          },
-          {
-            from: "./node_modules/onnxruntime-web/dist/ort-wasm.wasm",
-            to: "static/chunks/[name][ext]",
-          },
-          {
-            from: "./node_modules/onnxruntime-web/dist/ort-wasm-simd.wasm",
-            to: "static/chunks/[name][ext]",
+            from: "./node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm",
+            to: "static/chunks/ort-wasm-threaded.wasm",
           },
           {
             from: "node_modules/@ricky0123/vad-web/dist/vad.worklet.bundle.min.js",

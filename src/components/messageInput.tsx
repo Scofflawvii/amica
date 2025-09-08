@@ -63,15 +63,18 @@ export default function MessageInput({
             // both are 16000
             const audioCtx = new AudioContext();
             const buffer = audioCtx.createBuffer(1, audio.length, 16000);
-            buffer.copyToChannel(audio, 0, 0);
+            // Convert Float32Array to regular array for compatibility
+            const audioArray = Array.from(audio);
+            buffer.copyToChannel(new Float32Array(audioArray), 0, 0);
             transcriber.start(buffer);
             break;
           }
           case 'whisper_openai': {
             console.debug('whisper_openai attempt');
             const wav = new WaveFile();
-            wav.fromScratch(1, 16000, '32f', audio);
-            const file = new File([wav.toBuffer()], "input.wav", { type: "audio/wav" });
+            wav.fromScratch(1, 16000, '32f', Array.from(audio));
+            const wavBuffer = wav.toBuffer();
+            const file = new File([wavBuffer.slice()], "input.wav", { type: "audio/wav" });
 
             let prompt;
             // TODO load prompt if it exists
@@ -90,9 +93,10 @@ export default function MessageInput({
           case 'whispercpp': {
             console.debug('whispercpp attempt');
             const wav = new WaveFile();
-            wav.fromScratch(1, 16000, '32f', audio);
+            wav.fromScratch(1, 16000, '32f', Array.from(audio));
             wav.toBitDepth('16');
-            const file = new File([wav.toBuffer()], "input.wav", { type: "audio/wav" });
+            const wavBuffer = wav.toBuffer();
+            const file = new File([wavBuffer.slice()], "input.wav", { type: "audio/wav" });
 
             let prompt;
             // TODO load prompt if it exists
