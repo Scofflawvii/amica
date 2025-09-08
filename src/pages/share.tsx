@@ -587,7 +587,7 @@ export default function Share() {
                 defaultValue={sqid}
                 readOnly
                 onClick={(e) => {
-                  // @ts-ignore
+                  // @ts-expect-error
                   navigator.clipboard.writeText(e.target.value);
                 }}
               />

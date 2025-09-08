@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { clsx } from "clsx";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import FlexTextarea from "@/components/flexTextarea/flexTextarea";
 import { Message } from "@/features/chat/messages";
 import { IconButton } from "@/components/iconButton";

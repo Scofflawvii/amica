@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-// @ts-ignore
+// @ts-expect-error
 import * as GaussianSplats3D from '@mkkellogg/gaussian-splats-3d';
 import { downscaleModelTextures, logTextureInfo } from '@/utils/textureDownscaler';
 import { OptimizedGLTFLoader } from '@/utils/gltfOptimizer';

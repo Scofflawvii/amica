@@ -26,7 +26,6 @@ export const ChatModeText = ({ messages }: { messages: Message[] }) => {
                                 <Chat
                                     role={msg.role}
                                     message={(msg.content as string).replace(/\[(.*?)\]/g, "")}
-                                    num={i}
                                 />
                             </div>
                         );
@@ -41,11 +40,9 @@ export const ChatModeText = ({ messages }: { messages: Message[] }) => {
 function Chat({
     role,
     message,
-    num,
 }: {
     role: string;
     message: string;
-    num: number;
 }) {
     const { t } = useTranslation();
     const scrollRef = useRef<HTMLDivElement>(null);

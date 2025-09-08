@@ -56,13 +56,13 @@ export function CharacterAnimationPage({
                 setAnimationUrl(url);
                 updateConfig("animation_url", url);
                 setSettingsUpdated(true);
-                // @ts-ignore
                 const animation = url.indexOf("vrma") > 0
                   ? await loadVRMAnimation(url)
                   : await loadMixamoAnimation(url, viewer.model!.vrm!);
 
-                // @ts-ignore
-                viewer.model!.loadAnimation(animation);
+                if (animation) {
+                  viewer.model!.loadAnimation(animation);
+                }
                 requestAnimationFrame(() => {
                   viewer.resetCamera()
                 });

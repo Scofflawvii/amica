@@ -101,10 +101,10 @@ class OptimizedGLTFLoader {
 
     if (this.options.simplifyMaterials) {
       // Simplify material settings
-      // @ts-ignore
+      // @ts-expect-error
       material.fog = false;
       material.dithering = false;
-      // @ts-ignore
+      // @ts-expect-error
       material.flatShading = true;
       
       if (material instanceof THREE.MeshStandardMaterial) {
