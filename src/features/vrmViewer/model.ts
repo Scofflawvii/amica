@@ -76,7 +76,7 @@ export class Model {
       },
       onTexture: (texture) => {
         // Custom texture optimizations
-        texture.encoding = THREE.LinearEncoding;
+        texture.colorSpace = THREE.LinearSRGBColorSpace;
       },
     });
     */

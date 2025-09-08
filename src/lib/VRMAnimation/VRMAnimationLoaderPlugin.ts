@@ -5,7 +5,6 @@ import {
   GLTFParser,
 } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { VRMAnimationLoaderPluginOptions } from "./VRMAnimationLoaderPluginOptions";
-import { GLTF as GLTFSchema } from "@gltf-transform/core";
 import { VRMCVRMAnimation } from "./VRMCVRMAnimation";
 import { VRMHumanBoneName, VRMHumanBoneParentMap } from "@pixiv/three-vrm";
 import { VRMAnimation } from "./VRMAnimation";
@@ -44,7 +43,7 @@ export class VRMAnimationLoaderPlugin implements GLTFLoaderPlugin {
   }
 
   public async afterRoot(gltf: GLTF): Promise<void> {
-    const defGltf = gltf.parser.json as GLTFSchema.IGLTF;
+    const defGltf = gltf.parser.json as any;
     const defExtensionsUsed = defGltf.extensionsUsed;
 
     if (
@@ -167,7 +166,7 @@ export class VRMAnimationLoaderPlugin implements GLTFLoaderPlugin {
 
   private _parseAnimation(
     animationClip: THREE.AnimationClip,
-    defAnimation: GLTFSchema.IAnimation,
+    defAnimation: any,
     nodeMap: VRMAnimationLoaderPluginNodeMap,
     worldMatrixMap: VRMAnimationLoaderPluginWorldMatrixMap
   ): VRMAnimation {
@@ -178,7 +177,7 @@ export class VRMAnimationLoaderPlugin implements GLTFLoaderPlugin {
 
     result.duration = animationClip.duration;
 
-    defChannels.forEach((channel, iChannel) => {
+    defChannels.forEach((channel: any, iChannel: number) => {
       const { node, path } = channel.target;
       const origTrack = tracks[iChannel];
 
@@ -247,8 +246,8 @@ export class VRMAnimationLoaderPlugin implements GLTFLoaderPlugin {
 
           const newTrack = new THREE.NumberKeyframeTrack(
             `${expressionName}.weight`,
-            times as any,
-            values as any
+            times,
+            values
           );
           result.expressionTracks.set(expressionName, newTrack);
         } else {
