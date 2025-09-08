@@ -102,5 +102,13 @@
   },
   "engines": {
     "node": ">=18.18.0"
+  },
+  "overrides": {
+    "glob": "^11.0.3",
+    "rimraf": "^6.0.1",
+    "sourcemap-codec": "npm:@jridgewell/sourcemap-codec@^1.5.5",
+    "inflight": "npm:lru-cache@^10.2.2",
+    "source-map": "^0.7.6",
+    "ajv": "^8.17.1"
   }
 }
