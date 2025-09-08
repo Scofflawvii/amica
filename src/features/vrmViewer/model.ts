@@ -115,10 +115,10 @@ export class Model {
     }
 
     if (config("use_webgpu") === "true") {
-      // create a WebGPU compatible MToonMaterialLoaderPlugin
+      // Use WebGPU compatible MToonNodeMaterial for WebGPU rendering
       // @ts-ignore
-      // TODO currently MToonNodeMaterial is broken in amica
-      // materialType = MTonNodeMaterial;
+      const { MToonNodeMaterial } = await import("@pixiv/three-vrm/nodes");
+      materialType = MToonNodeMaterial;
     }
 
     loader.register((parser) => {

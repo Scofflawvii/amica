@@ -1,19 +1,17 @@
 diff --git a/node_modules/@pixiv/three-vrm/lib/nodes/index.module.js b/node_modules/@pixiv/three-vrm/lib/nodes/index.module.js
-index 6863e41..affde6a 100644
+index 6863e41..5a2b8c9 100644
 --- a/node_modules/@pixiv/three-vrm/lib/nodes/index.module.js
 +++ b/node_modules/@pixiv/three-vrm/lib/nodes/index.module.js
-@@ -100,10 +100,12 @@ var matcap = nodeImmutable(THREE3.PropertyNode, "vec3").toVar("matcap");
+@@ -100,10 +100,7 @@ var matcap = nodeImmutable(THREE3.PropertyNode, "vec3").toVar("matcap");
  var parametricRim = nodeImmutable(THREE3.PropertyNode, "vec3").toVar("ParametricRim");
  var FnCompat = (jsFunc) => {
-   const threeRevision2 = parseInt(THREE_WEBGPU.REVISION, 10);
-+  // Three.js r168+ uses THREE_TSL.Fn, r166-r167 uses THREE_WEBGPU.Fn (tslFn was renamed)
-   if (threeRevision2 >= 168) {
-     return THREE_TSL.Fn(jsFunc);
-+  } else if (typeof THREE_WEBGPU.Fn !== 'undefined') {
-+    return THREE_WEBGPU.Fn(jsFunc);
-   } else {
+-  const threeRevision2 = parseInt(THREE_WEBGPU.REVISION, 10);
+-  if (threeRevision2 >= 168) {
+-    return THREE_TSL.Fn(jsFunc);
+-  } else {
 -    return THREE_WEBGPU.tslFn(jsFunc);
-+    return THREE_WEBGPU.tslFn(jsFunc);
-   }
+-  }
++  // Simplified for Three.js r180+ - always use THREE_TSL.Fn
++  return THREE_TSL.Fn(jsFunc);
  };
  var linearstep = FnCompat(
