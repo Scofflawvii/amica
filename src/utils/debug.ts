@@ -35,7 +35,8 @@ function getInitialEnabled(): boolean {
     typeof process !== "undefined" && process.env?.NODE_ENV === "development";
 
   // 2) Config flags
-  const cfg = config("debug_mode") === "true" || config("debug_gfx") === "true";
+  const cfg =
+    readBoolConfig("debug_mode", false) || readBoolConfig("debug_gfx", false);
 
   // 3) Environment variable (server/runtime)
   const envDebug =

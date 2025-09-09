@@ -1,6 +1,11 @@
 import { handleConfig, serverConfig } from "@/features/externalAPI/externalAPI";
 
 export const defaults: Readonly<Record<string, string>> = {
+  // Debug settings
+  debug_mode: process.env.NEXT_PUBLIC_DEBUG_MODE ?? "false",
+  debug_log: process.env.NEXT_PUBLIC_DEBUG_LOG ?? "true",
+  debug_info: process.env.NEXT_PUBLIC_DEBUG_INFO ?? "true",
+  debug_warn: process.env.NEXT_PUBLIC_DEBUG_WARN ?? "true",
   // AllTalk TTS specific settings
   localXTTS_url:
     process.env.NEXT_PUBLIC_LOCALXTTS_URL ?? "http://127.0.0.1:7851",
