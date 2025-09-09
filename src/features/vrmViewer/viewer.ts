@@ -235,8 +235,6 @@ export class Viewer {
   private _onResize?: () => void;
   private _onVisibility?: () => void;
   private _onMouseMove?: (event: MouseEvent) => void;
-  // Whether a real WebGPU device is in use (not a fallback)
-  private webgpuActive: boolean = false;
 
   constructor() {
     this.isReady = false;
@@ -251,15 +249,8 @@ export class Viewer {
   public async setup(canvas: HTMLCanvasElement) {
     console.log("setup canvas");
     const parentElement = canvas.parentElement;
-    // Robustly determine initial render size; fall back to viewport if 0
-    const rect = parentElement?.getBoundingClientRect();
-    let width = (rect && rect.width) || parentElement?.clientWidth || 0;
-    let height = (rect && rect.height) || parentElement?.clientHeight || 0;
-    if (!width || !height) {
-      // As a last resort, use the viewport
-      width = typeof window !== "undefined" ? window.innerWidth : 1280;
-      height = typeof window !== "undefined" ? window.innerHeight : 720;
-    }
+    const width = parentElement?.clientWidth || canvas.width;
+    const height = parentElement?.clientHeight || canvas.height;
 
     // Prefer WebGPU if requested (or auto with support), else fallback to WebGL
     let renderer: THREE.WebGLRenderer;
@@ -271,36 +262,23 @@ export class Viewer {
         (navigator as any).gpu);
     if (wantWebGPU) {
       try {
-        // Ensure an adapter is available; if not, force WebGL path
-        const adapter = await (async () => {
-          try {
-            return await (navigator as any)?.gpu?.requestAdapter?.();
-          } catch {
-            return null;
-          }
-        })();
-        if (!adapter) throw new Error("No WebGPU adapter available");
-
         const WebGPURenderer = (
           await import("three/src/renderers/webgpu/WebGPURenderer.js")
         ).default as any;
-        const wgpuRenderer = new WebGPURenderer({
+        renderer = new WebGPURenderer({
           canvas,
           alpha: true,
           antialias: true,
           powerPreference: "high-performance",
-        });
-        renderer = wgpuRenderer as unknown as THREE.WebGLRenderer;
-        this.webgpuActive = true;
+        }) as unknown as THREE.WebGLRenderer;
       } catch (err) {
-        console.warn("WebGPU not available; using WebGL", err);
+        console.warn("WebGPU init failed; falling back to WebGL", err);
         renderer = new THREE.WebGLRenderer({
           canvas,
           alpha: true,
           antialias: true,
           powerPreference: "high-performance",
         });
-        this.webgpuActive = false;
       }
     } else {
       renderer = new THREE.WebGLRenderer({
@@ -309,7 +287,6 @@ export class Viewer {
         antialias: true,
         powerPreference: "high-performance",
       });
-      this.webgpuActive = false;
     }
     this.renderer = renderer;
 
@@ -339,10 +316,7 @@ export class Viewer {
       Math.max(this.pixelRatioMin, devicePR),
     );
 
-    renderer.setSize(
-      Math.max(1, Math.floor(width)),
-      Math.max(1, Math.floor(height)),
-    );
+    renderer.setSize(width, height);
     renderer.setPixelRatio(this.pixelRatio);
     renderer.xr.enabled = true;
     // TODO should this be enabled for only the quest3?
@@ -351,7 +325,7 @@ export class Viewer {
       !Number.isNaN(xrScale) ? xrScale : 2.0,
     ); // reduce pixelation with minimal performance hit on quest 3
     // Set XR foveation only on WebGL renderers that support it
-    if (!this.webgpuActive) {
+    if (!(renderer as any).isWebGPURenderer) {
       const foveation = parseFloat(config("xr_foveation"));
       if (typeof (renderer.xr as any).setFoveation === "function") {
         renderer.xr.setFoveation(!Number.isNaN(foveation) ? foveation : 0);
@@ -394,17 +368,17 @@ export class Viewer {
     directionalLight.castShadow = false;
     scene.add(directionalLight);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 2.2);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 2);
     scene.add(ambientLight);
 
     scene.add(this.roomBVHHelperGroup);
 
     // camera
-    const camera = new THREE.PerspectiveCamera(25.0, width / height, 0.1, 50.0);
+    const camera = new THREE.PerspectiveCamera(20.0, width / height, 0.1, 20.0);
     this.camera = camera;
 
     // Temp Disable : WebXR y -> -3
-    camera.position.set(0, 5.5, 6.0);
+    camera.position.set(0, 8.5, 3.5);
 
     const cameraControls = new OrbitControls(camera, renderer.domElement);
     this.cameraControls = cameraControls;
@@ -848,12 +822,7 @@ export class Viewer {
     // setLoadingProgress("Loading VRM");
 
     // gltf and vrm
-    // Prefer node materials only when we actually initialized a WebGPU renderer
-    const preferNodeMaterial = this.webgpuActive === true;
-    this.model = new Model(
-      this.camera || new THREE.Object3D(),
-      preferNodeMaterial,
-    );
+    this.model = new Model(this.camera || new THREE.Object3D());
     await this.model.loadVRM(url, setLoadingProgress);
     // Temp Disable : WebXR
     // setLoadingProgress("VRM loaded");
@@ -1123,17 +1092,13 @@ export class Viewer {
 
     // Preserve adaptive pixel ratio selection
     this.renderer.setPixelRatio(this.pixelRatio);
-    const rect = parentElement.getBoundingClientRect();
-    const w = rect.width || parentElement.clientWidth || window.innerWidth || 1;
-    const h =
-      rect.height || parentElement.clientHeight || window.innerHeight || 1;
     this.renderer.setSize(
-      Math.max(1, Math.floor(w)),
-      Math.max(1, Math.floor(h)),
+      parentElement.clientWidth,
+      parentElement.clientHeight,
     );
 
-    const aspectDen = h || 1;
-    this.camera!.aspect = (w || 1) / aspectDen;
+    this.camera!.aspect =
+      parentElement.clientWidth / parentElement.clientHeight;
     this.camera!.updateProjectionMatrix();
   }
 
@@ -1146,24 +1111,17 @@ export class Viewer {
     // Preserve adaptive pixel ratio selection
     this.renderer.setPixelRatio(this.pixelRatio);
 
-    const rect = parentElement.getBoundingClientRect();
-    let width =
-      rect.width || parentElement.clientWidth || window.innerWidth || 1;
-    let height =
-      rect.height || parentElement.clientHeight || window.innerHeight || 1;
+    let width = parentElement.clientWidth;
+    let height = parentElement.clientHeight;
     if (on) {
       width = width / 2;
       height = height / 2;
     }
 
-    this.renderer.setSize(
-      Math.max(1, Math.floor(width)),
-      Math.max(1, Math.floor(height)),
-    );
+    this.renderer.setSize(width, height);
 
     if (!this.camera) return;
-    const aspectDen = height || 1;
-    this.camera.aspect = (width || 1) / aspectDen;
+    this.camera.aspect = parentElement.clientWidth / parentElement.clientHeight;
     this.camera.updateProjectionMatrix();
   }
 
@@ -1173,20 +1131,15 @@ export class Viewer {
   public resetCamera() {
     const headNode = this.model?.vrm?.humanoid.getNormalizedBoneNode("head");
 
-    if (headNode && this.camera && this.cameraControls) {
+    if (headNode) {
       const headPos = headNode.getWorldPosition(new THREE.Vector3());
-      this.camera.position.set(
+      this.camera?.position.set(
         this.camera.position.x,
         headPos.y,
         this.camera.position.z,
       );
-      this.cameraControls.target.set(headPos.x, headPos.y, headPos.z);
-      this.cameraControls.update();
-    } else if (this.camera && this.cameraControls) {
-      // Fallback sensible target if head not ready
-      this.camera.position.set(0, 5.5, 6.0);
-      this.cameraControls.target.set(0, 1.4, 0);
-      this.cameraControls.update();
+      this.cameraControls?.target.set(headPos.x, headPos.y, headPos.z);
+      this.cameraControls?.update();
     }
   }
 
@@ -1398,18 +1351,6 @@ export class Viewer {
   }
 
   public update(_time?: DOMHighResTimeStamp, _frame?: XRFrame) {
-    // Skip if core rendering objects aren’t ready yet
-    if (!this.renderer || !this.scene || !this.camera) return;
-    // Skip heavy work when tab is hidden
-    if (this.pausedHeavy) return;
-    // If WebGL context is lost, skip until restored
-    try {
-      const ctx = (this.renderer as any).getContext?.();
-      if (ctx?.isContextLost?.()) return;
-    } catch {
-      // ignore inability to query context; continue
-    }
-
     let utime = performance.now(); // count total update time
 
     // WebXR: quick exit until setup finishes
