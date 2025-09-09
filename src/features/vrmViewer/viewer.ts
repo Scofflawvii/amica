@@ -231,6 +231,10 @@ export class Viewer {
   private fpsCanvas?: HTMLCanvasElement;
   private fpsCtx?: CanvasRenderingContext2D | null;
   private fpsValue: number = 60;
+  // Stored listeners for cleanup
+  private _onResize?: () => void;
+  private _onVisibility?: () => void;
+  private _onMouseMove?: (event: MouseEvent) => void;
 
   constructor() {
     this.isReady = false;
@@ -248,22 +252,52 @@ export class Viewer {
     const width = parentElement?.clientWidth || canvas.width;
     const height = parentElement?.clientHeight || canvas.height;
 
-    let WebRendererType = THREE.WebGLRenderer;
-    if (config("use_webgpu") === "true") {
-      WebRendererType = (
-        await import("three/src/renderers/webgpu/WebGPURenderer.js")
-      ).default as any;
+    // Prefer WebGPU if requested (or auto with support), else fallback to WebGL
+    let renderer: THREE.WebGLRenderer;
+    const webgpuPref = config("use_webgpu");
+    const wantWebGPU =
+      webgpuPref === "true" ||
+      (webgpuPref === "auto" &&
+        typeof navigator !== "undefined" &&
+        (navigator as any).gpu);
+    if (wantWebGPU) {
+      try {
+        const WebGPURenderer = (
+          await import("three/src/renderers/webgpu/WebGPURenderer.js")
+        ).default as any;
+        renderer = new WebGPURenderer({
+          canvas,
+          alpha: true,
+          antialias: true,
+          powerPreference: "high-performance",
+        }) as unknown as THREE.WebGLRenderer;
+      } catch (err) {
+        console.warn("WebGPU init failed; falling back to WebGL", err);
+        renderer = new THREE.WebGLRenderer({
+          canvas,
+          alpha: true,
+          antialias: true,
+          powerPreference: "high-performance",
+        });
+      }
+    } else {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        alpha: true,
+        antialias: true,
+        powerPreference: "high-performance",
+      });
     }
-
-    const renderer = new WebRendererType({
-      canvas: canvas,
-      alpha: true,
-      antialias: true,
-      powerPreference: "high-performance",
-    }) as THREE.WebGLRenderer;
     this.renderer = renderer;
 
     renderer.setClearColor(0x000000, 0);
+    // Modern defaults: color space, tone mapping, physically correct lighting
+    if ((renderer as any).outputColorSpace !== undefined) {
+      (renderer as any).outputColorSpace = THREE.SRGBColorSpace;
+    }
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+    (renderer as any).physicallyCorrectLights = true;
     renderer.shadowMap.enabled = false;
 
     // Adaptive pixel ratio setup
@@ -290,10 +324,12 @@ export class Viewer {
     renderer.xr.setFramebufferScaleFactor(
       !Number.isNaN(xrScale) ? xrScale : 2.0,
     ); // reduce pixelation with minimal performance hit on quest 3
-    // webgpu does not support foveation yet
-    if (config("use_webgpu") !== "true") {
+    // Set XR foveation only on WebGL renderers that support it
+    if (!(renderer as any).isWebGPURenderer) {
       const foveation = parseFloat(config("xr_foveation"));
-      renderer.xr.setFoveation(!Number.isNaN(foveation) ? foveation : 0);
+      if (typeof (renderer.xr as any).setFoveation === "function") {
+        renderer.xr.setFoveation(!Number.isNaN(foveation) ? foveation : 0);
+      }
     }
 
     // Temp Disable : WebXR
@@ -348,6 +384,8 @@ export class Viewer {
     this.cameraControls = cameraControls;
 
     cameraControls.screenSpacePanning = true;
+    cameraControls.enableDamping = true;
+    cameraControls.dampingFactor = 0.08;
     cameraControls.minDistance = 0.5;
     // Temp Disable : WebXR max -> 8
     cameraControls.maxDistance = 4;
@@ -364,7 +402,7 @@ export class Viewer {
     igroup.listenToPointerEvents(renderer, camera);
 
     const pointerFromCanvas = config("pointer_from_canvas") !== "false"; // default true
-    canvas.addEventListener("mousemove", (event) => {
+    this._onMouseMove = (event: MouseEvent) => {
       if (pointerFromCanvas) {
         const rect = canvas.getBoundingClientRect();
         const x = (event.clientX - rect.left) / rect.width;
@@ -375,7 +413,8 @@ export class Viewer {
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
       }
-    });
+    };
+    canvas.addEventListener("mousemove", this._onMouseMove);
 
     // check if controller is available
     try {
@@ -653,14 +692,15 @@ export class Viewer {
     //   this.newParticleInstance();
     // });
 
-    window.addEventListener("resize", () => {
-      this.resize();
-    });
+    // Store listeners so we can clean them up
+    this._onResize = () => this.resize();
+    window.addEventListener("resize", this._onResize);
     if (typeof document !== "undefined") {
-      document.addEventListener("visibilitychange", () => {
+      this._onVisibility = () => {
         this.pausedHeavy =
           document.hidden && config("pause_when_hidden") !== "false";
-      });
+      };
+      document.addEventListener("visibilitychange", this._onVisibility);
     }
 
     this.isReady = true;
@@ -1050,7 +1090,8 @@ export class Viewer {
     const parentElement = this.renderer.domElement.parentElement;
     if (!parentElement) return;
 
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    // Preserve adaptive pixel ratio selection
+    this.renderer.setPixelRatio(this.pixelRatio);
     this.renderer.setSize(
       parentElement.clientWidth,
       parentElement.clientHeight,
@@ -1067,7 +1108,8 @@ export class Viewer {
     const parentElement = this.renderer.domElement.parentElement;
     if (!parentElement) return;
 
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    // Preserve adaptive pixel ratio selection
+    this.renderer.setPixelRatio(this.pixelRatio);
 
     let width = parentElement.clientWidth;
     let height = parentElement.clientHeight;
@@ -1108,7 +1150,10 @@ export class Viewer {
       1.3,
       this.camera?.position.z,
     );
-    this.camera?.position.lerpVectors(this.camera?.position, newPosition, 0);
+    const from = this.camera?.position.clone();
+    if (from) {
+      this.camera!.position.lerpVectors(from, newPosition, 0.1);
+    }
     // this.cameraControls?.target.lerpVectors(this.cameraControls?.target,headWPos,0.5);
     // this.cameraControls?.update();
   }
@@ -1237,7 +1282,7 @@ export class Viewer {
 
     if (!this.usingController1 && !this.usingController2) {
       this.raycaster.setFromCamera(this.mouse, this.camera!);
-      checkIntersection(this.closestPart1!);
+      if (this.closestPart1) checkIntersection(this.closestPart1);
     }
 
     const handleController = (
@@ -1266,14 +1311,16 @@ export class Viewer {
     };
 
     if (this.hand1) {
-      handleHand(this.jointMeshes1, this.closestPart1!);
+      if (this.closestPart1) handleHand(this.jointMeshes1, this.closestPart1);
     } else if (this.controller1) {
-      handleController(this.controller1, this.closestPart1!);
+      if (this.closestPart1)
+        handleController(this.controller1, this.closestPart1);
     }
     if (this.hand2) {
-      handleHand(this.jointMeshes2, this.closestPart2!);
+      if (this.closestPart2) handleHand(this.jointMeshes2, this.closestPart2);
     } else if (this.controller2) {
-      handleController(this.controller2, this.closestPart2!);
+      if (this.closestPart2)
+        handleController(this.controller2, this.closestPart2);
     }
   }
 
@@ -1568,5 +1615,33 @@ export class Viewer {
     ctx.fillRect(8, 28, barW, 12);
     ctx.strokeStyle = "#fff";
     ctx.strokeRect(8, 28, w - 16, 12);
+  }
+
+  // Clean up resources and listeners
+  public dispose() {
+    try {
+      // Stop animation loop
+      if (this.renderer) this.renderer.setAnimationLoop(null as any);
+      // Remove listeners
+      if (this._onResize) window.removeEventListener("resize", this._onResize);
+      if (this._onVisibility && typeof document !== "undefined")
+        document.removeEventListener("visibilitychange", this._onVisibility);
+      const canvas = this.renderer?.domElement;
+      if (canvas && this._onMouseMove)
+        canvas.removeEventListener("mousemove", this._onMouseMove);
+      // Remove UI overlays
+      this.setFpsOverlayEnabled(false);
+      // Dispose helpers
+      if (this.modelBVHHelper) this.scene?.remove(this.modelBVHHelper);
+      if (this.modelMeshHelper) this.scene?.remove(this.modelMeshHelper);
+      if (this.roomBVHHelperGroup) this.scene?.remove(this.roomBVHHelperGroup);
+      // Dispose scene contents via VRM utilities when unloading models/rooms
+      this.unloadVRM();
+      this.unloadRoom();
+      // Dispose renderer
+      this.renderer?.dispose();
+    } catch (e) {
+      console.warn("Viewer dispose error", e);
+    }
   }
 }

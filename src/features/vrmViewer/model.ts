@@ -110,8 +110,8 @@ export class Model {
         break;
     }
 
-    if (config("use_webgpu") === "true") {
-      // Use WebGPU compatible MToonNodeMaterial for WebGPU rendering
+    if (config("use_webgpu") !== "false") {
+      // Use WebGPU-compatible MToonNodeMaterial when WebGPU is enabled or auto
       const { MToonNodeMaterial } = await import("@pixiv/three-vrm/nodes");
       materialType = MToonNodeMaterial;
     }
@@ -234,7 +234,7 @@ export class Model {
   }
 
   public setTransparency(opacity: number) {
-    if (! this.vrm) {
+    if (!this.vrm) {
       return;
     }
 
