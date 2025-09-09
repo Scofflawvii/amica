@@ -169,7 +169,8 @@ export class Model {
           vrm.scene.name = "VRMRoot";
 
           VRMUtils.removeUnnecessaryVertices(gltf.scene);
-          VRMUtils.removeUnnecessaryJoints(gltf.scene);
+          // Combine skeletons for better performance and to avoid deprecation warnings
+          VRMUtils.combineSkeletons(gltf.scene);
 
           // await downscaleModelTextures(gltf, 128);
 
