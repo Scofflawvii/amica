@@ -153,4 +153,19 @@ export default [
       "@typescript-eslint/ban-ts-comment": "warn",
     },
   },
+  {
+    files: ["**/*.d.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "no-undef": "off",
+    },
+  },
+  {
+    files: ["src/pages/api/**/*.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any":
+        process.env.NODE_ENV === "production" ? "off" : "warn",
+    },
+  },
 ];
