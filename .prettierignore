@@ -1,0 +1,19 @@
+# Build outputs
+.next/
+dist/
+build/
+coverage/
+
+# Public artifacts
+public/**/*.js
+public/**/*.map
+public/**/*.wasm
+
+# Worker bundles
+src/workers/**/*.min.js
+src/workers/bvh/**
+public/generateMeshBVH.worker.js
+
+# Package manager files
+pnpm-lock.yaml
+yarn.lock

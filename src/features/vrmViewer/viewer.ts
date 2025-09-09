@@ -192,7 +192,7 @@ export class Viewer {
 
   private ammo: any;
   private collisionConfiguration: any;
-  private dispatcher: any
+  private dispatcher: any;
   private broadphase: any;
   private solver: any;
   private physicsWorld: any;
@@ -210,6 +210,11 @@ export class Viewer {
   private pixelRatio: number = 1.0;
   private fpsSamples: number[] = [];
   private fpsWindowSec = 1.5; // adjust every ~1.5s
+  // Minimal FPS overlay
+  private fpsEnabled: boolean = false;
+  private fpsCanvas?: HTMLCanvasElement;
+  private fpsCtx?: CanvasRenderingContext2D | null;
+  private fpsValue: number = 60;
 
   constructor() {
     this.isReady = false;
@@ -242,25 +247,33 @@ export class Viewer {
     }) as THREE.WebGLRenderer;
     this.renderer = renderer;
 
-    renderer.setClearColor(0x000000, 0)
+    renderer.setClearColor(0x000000, 0);
     renderer.shadowMap.enabled = false;
 
     // Adaptive pixel ratio setup
-  this.adaptiveEnabled = config("adaptive_pixel_ratio") === "true";
-  // bounds from config, with safe parsing
-  const prMin = parseFloat(config("min_pixel_ratio"));
-  const prMax = parseFloat(config("max_pixel_ratio"));
-  if (!Number.isNaN(prMin)) this.pixelRatioMin = Math.max(0.5, Math.min(1.0, prMin));
-  if (!Number.isNaN(prMax)) this.pixelRatioMax = Math.max(this.pixelRatioMin, Math.min(2.0, prMax));
-  const devicePR = typeof window !== "undefined" ? (window.devicePixelRatio || 1) : 1;
-  this.pixelRatio = Math.min(this.pixelRatioMax, Math.max(this.pixelRatioMin, devicePR));
+    this.adaptiveEnabled = config("adaptive_pixel_ratio") === "true";
+    // bounds from config, with safe parsing
+    const prMin = parseFloat(config("min_pixel_ratio"));
+    const prMax = parseFloat(config("max_pixel_ratio"));
+    if (!Number.isNaN(prMin))
+      this.pixelRatioMin = Math.max(0.5, Math.min(1.0, prMin));
+    if (!Number.isNaN(prMax))
+      this.pixelRatioMax = Math.max(this.pixelRatioMin, Math.min(2.0, prMax));
+    const devicePR =
+      typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+    this.pixelRatio = Math.min(
+      this.pixelRatioMax,
+      Math.max(this.pixelRatioMin, devicePR),
+    );
 
     renderer.setSize(width, height);
     renderer.setPixelRatio(this.pixelRatio);
     renderer.xr.enabled = true;
     // TODO should this be enabled for only the quest3?
     const xrScale = parseFloat(config("xr_framebuffer_scale"));
-    renderer.xr.setFramebufferScaleFactor(!Number.isNaN(xrScale) ? xrScale : 2.0); // reduce pixelation with minimal performance hit on quest 3
+    renderer.xr.setFramebufferScaleFactor(
+      !Number.isNaN(xrScale) ? xrScale : 2.0,
+    ); // reduce pixelation with minimal performance hit on quest 3
     // webgpu does not support foveation yet
     if (config("use_webgpu") !== "true") {
       const foveation = parseFloat(config("xr_foveation"));
@@ -324,7 +337,7 @@ export class Viewer {
     cameraControls.maxDistance = 4;
     cameraControls.update();
 
-  const igroup = new InteractiveGroup();
+    const igroup = new InteractiveGroup();
     this.igroup = igroup;
 
     igroup.position.set(-0.25, 1.3, -0.8);
@@ -388,12 +401,12 @@ export class Viewer {
 
       const hand1 = renderer.xr.getHand(0);
       this.hand1 = hand1;
-      this.hand1.add(handModelFactory.createHandModel(this.hand1,"mesh"))
+      this.hand1.add(handModelFactory.createHandModel(this.hand1, "mesh"));
       scene.add(hand1);
 
       const hand2 = renderer.xr.getHand(1);
       this.hand2 = hand2;
-      this.hand2.add(handModelFactory.createHandModel(this.hand2,"mesh"))
+      this.hand2.add(handModelFactory.createHandModel(this.hand2, "mesh"));
       scene.add(hand2);
 
       hand1.addEventListener("pinchstart", () => {
@@ -478,7 +491,8 @@ export class Viewer {
       this.stats = stats;
 
       // Support both stats.js APIs: `.dom` (modern) and `.domElement` (legacy)
-      const statsDom: HTMLElement | null = (stats as any).dom || (stats as any).domElement || null;
+      const statsDom: HTMLElement | null =
+        (stats as any).dom || (stats as any).domElement || null;
       if (typeof document !== "undefined" && statsDom) {
         statsDom.style.width = "80px";
         statsDom.style.height = "48px";
@@ -487,10 +501,14 @@ export class Viewer {
         statsDom.style.left = window.innerWidth - 80 + "px";
         document.body.appendChild(statsDom);
       } else {
-        console.warn("Stats DOM element not available; skipping on-page stats overlay.");
+        console.warn(
+          "Stats DOM element not available; skipping on-page stats overlay.",
+        );
       }
 
-      const hasPanels = typeof (Stats as any).Panel === "function" && typeof (stats as any).addPanel === "function";
+      const hasPanels =
+        typeof (Stats as any).Panel === "function" &&
+        typeof (stats as any).addPanel === "function";
       const noopPanel = { update: (_v: any, _max?: number) => {} };
       if (hasPanels) {
         this.updateMsPanel = (stats as any).addPanel(
@@ -508,7 +526,9 @@ export class Viewer {
         this.modelMsPanel = (stats as any).addPanel(
           new (Stats as any).Panel("model_ms", "#f8f", "#212"),
         );
-        this.bvhMsPanel = (stats as any).addPanel(new (Stats as any).Panel("bvh_ms", "#8ff", "#122"));
+        this.bvhMsPanel = (stats as any).addPanel(
+          new (Stats as any).Panel("bvh_ms", "#8ff", "#122"),
+        );
         this.raycastMsPanel = (stats as any).addPanel(
           new (Stats as any).Panel("raycast_ms", "#f8f", "#212"),
         );
@@ -577,7 +597,7 @@ export class Viewer {
     //   for (const _ of joints) {
     //     // Make joint mesh invisible
     //     const clonedMesh = mesh.clone();
-    //     clonedMesh.visible = false; 
+    //     clonedMesh.visible = false;
 
     //     this.jointMeshes1.push(clonedMesh);
     //     this.jointMeshes2.push(clonedMesh);
@@ -623,11 +643,14 @@ export class Viewer {
     });
     if (typeof document !== "undefined") {
       document.addEventListener("visibilitychange", () => {
-        this.pausedHeavy = document.hidden && config("pause_when_hidden") !== "false";
+        this.pausedHeavy =
+          document.hidden && config("pause_when_hidden") !== "false";
       });
     }
 
     this.isReady = true;
+    // FPS overlay initial state from config
+    this.setFpsOverlayEnabled(config("show_fps_overlay") === "true");
     renderer.setAnimationLoop(() => {
       this.update();
     });
@@ -844,8 +867,8 @@ export class Viewer {
         this.scene!.remove(this.modelBVHHelper as THREE.Object3D);
       }
       this.model?.unLoadVrm();
-  // Clear caches
-  this.cachedHumanoidNodes = [];
+      // Clear caches
+      this.cachedHumanoidNodes = [];
     }
   }
 
@@ -926,7 +949,8 @@ export class Viewer {
           if (typeof g.disposeBoundsTree === "function") g.disposeBoundsTree();
         } catch (e) {
           // ignore dispose errors in teardown
-          if (config("debug_gfx") === "true") console.warn("disposeBoundsTree failed", e);
+          if (config("debug_gfx") === "true")
+            console.warn("disposeBoundsTree failed", e);
         }
       }
       this.roomTargets = [];
@@ -1047,8 +1071,7 @@ export class Viewer {
     this.renderer.setSize(width, height);
 
     if (!this.camera) return;
-    this.camera.aspect =
-      parentElement.clientWidth / parentElement.clientHeight;
+    this.camera.aspect = parentElement.clientWidth / parentElement.clientHeight;
     this.camera.updateProjectionMatrix();
   }
 
@@ -1284,7 +1307,7 @@ export class Viewer {
     this.elapsedMsSlow += delta;
     this.elapsedMsMid += delta;
 
-  this.updateHands();
+    this.updateHands();
 
     // Stats.js legacy export provides update(); call if present
     if (this.stats && typeof (this.stats as any).update === "function") {
@@ -1301,7 +1324,7 @@ export class Viewer {
     //   console.error("scenario update error", e);
     // }
     // this.scenarioMsPanel.update(performance.now() - ptime, 100);
-    
+
     // Temp Disable : WebXR
     // ptime = performance.now();
     // try {
@@ -1311,7 +1334,7 @@ export class Viewer {
     // }
     // this.physicsMsPanel.update(performance.now() - ptime, 100);
 
-  ptime = performance.now();
+    ptime = performance.now();
     try {
       this.model?.update(delta);
     } catch (e) {
@@ -1320,7 +1343,7 @@ export class Viewer {
 
     this.modelMsPanel.update(performance.now() - ptime, 40);
 
-  ptime = performance.now();
+    ptime = performance.now();
     try {
       this.renderer!.render(this.scene!, this.camera!);
     } catch (e) {
@@ -1336,7 +1359,7 @@ export class Viewer {
       this.doublePinchHandler();
     }
 
-  if (!this.pausedHeavy && this.elapsedMsMid > 1 / 30) {
+    if (!this.pausedHeavy && this.elapsedMsMid > 1 / 30) {
       /*
       const dir = this.
       this.applyWind(
@@ -1352,13 +1375,13 @@ export class Viewer {
       this.elapsedMsMid = 0;
     }
 
-  if (!this.pausedHeavy && this.elapsedMsSlow > 1) {
+    if (!this.pausedHeavy && this.elapsedMsSlow > 1) {
       // updating the texture for this is very slow
       ptime = performance.now();
-  if (this.statsMesh && (this.statsMesh.material as any)?.map) {
+      if (this.statsMesh && (this.statsMesh.material as any)?.map) {
         (this.statsMesh.material as any).map.update();
       }
-  if (this.guiMesh && (this.guiMesh.material as any)?.map) {
+      if (this.guiMesh && (this.guiMesh.material as any)?.map) {
         (this.guiMesh.material as any).map.update();
       }
       this.statsMsPanel.update(performance.now() - ptime, 100);
@@ -1387,7 +1410,8 @@ export class Viewer {
 
       // Adjust roughly every fpsWindowSec seconds
       if (this.elapsedMsSlow > this.fpsWindowSec) {
-        const avgFps = this.fpsSamples.reduce((a, b) => a + b, 0) / this.fpsSamples.length;
+        const avgFps =
+          this.fpsSamples.reduce((a, b) => a + b, 0) / this.fpsSamples.length;
         let newPR = this.pixelRatio;
         if (avgFps < 50 && this.pixelRatio > this.pixelRatioMin) {
           newPR = Math.max(this.pixelRatioMin, this.pixelRatio - 0.1);
@@ -1398,37 +1422,45 @@ export class Viewer {
           this.pixelRatio = newPR;
           this.renderer.setPixelRatio(this.pixelRatio);
           const parent = this.renderer.domElement.parentElement;
-          if (parent) this.renderer.setSize(parent.clientWidth, parent.clientHeight);
+          if (parent)
+            this.renderer.setSize(parent.clientWidth, parent.clientHeight);
         }
       }
+    }
+
+    // FPS overlay update/draw
+    if (this.fpsEnabled) {
+      this.fpsValue = 1000 / Math.max(1e-3, frameMs);
+      this.drawFpsOverlay();
     }
   }
 
   public startStreaming(videoElement: HTMLVideoElement) {
     if (!this.renderer) return;
-  
+
     // Create a stream from the renderer's canvas
     const stream = this.renderer.domElement.captureStream(60); // 60 FPS for smooth streaming
 
     this.videoStream = stream;
-  
+
     // Assign the stream to the provided video element for live view
     videoElement.srcObject = stream;
     videoElement.play();
 
-    console.log("Start streaming!")
+    console.log("Start streaming!");
   }
 
   public stopStreaming() {
     if (!this.videoStream) return;
 
     // Stop all tracks on the stream to end streaming
-    this.videoStream.getTracks().forEach((track: { stop: () => any; }) => track.stop());
+    this.videoStream
+      .getTracks()
+      .forEach((track: { stop: () => any }) => track.stop());
     this.videoStream = null; // Clear the stream reference
 
     console.log("Streaming stopped!");
-}
-  
+  }
 
   // Method to start recording
   public startRecording() {
@@ -1436,10 +1468,10 @@ export class Viewer {
 
     // Create a stream from the renderer's canvas
     const stream = this.renderer.domElement.captureStream(60); // 30 FPS
-    
+
     // Higher quality and bit rate for better video clarity
     const options = {
-      mimeType: 'video/webm;codecs=vp9',
+      mimeType: "video/webm;codecs=vp9",
       videoBitsPerSecond: 8000000, // 8 Mbps for higher quality
     };
 
@@ -1456,14 +1488,15 @@ export class Viewer {
     this.mediaRecorder.start();
   }
 
-
   // Method to stop recording and trigger callback
   public stopRecording(callback: BlobCallback) {
     if (!this.mediaRecorder) return;
 
     // Stop recording and create the video blob
     this.mediaRecorder.onstop = () => {
-      const recordedBlob = new Blob(this.recordedChunks, { type: 'video/webm' });
+      const recordedBlob = new Blob(this.recordedChunks, {
+        type: "video/webm",
+      });
       callback(recordedBlob); // Pass the video blob to the callback
       this.recordedChunks = []; // Clear chunks for the next recording
     };
@@ -1479,4 +1512,53 @@ export class Viewer {
 
   // Cached humanoid bone nodes for quick nearest-bone queries
   private cachedHumanoidNodes: THREE.Object3D[] = [];
+
+  // Toggle a tiny on-screen FPS overlay (no Stats.js, minimal cost)
+  public setFpsOverlayEnabled(on: boolean) {
+    // Persist state
+    this.fpsEnabled = on;
+    if (typeof document === "undefined") return;
+
+    if (on && !this.fpsCanvas) {
+      const c = document.createElement("canvas");
+      c.width = 96;
+      c.height = 48;
+      c.style.position = "absolute";
+      c.style.top = "0";
+      c.style.right = "0";
+      c.style.pointerEvents = "none";
+      c.style.zIndex = "1000";
+      document.body.appendChild(c);
+      this.fpsCanvas = c;
+      this.fpsCtx = c.getContext("2d", { alpha: true });
+    } else if (!on && this.fpsCanvas) {
+      this.fpsCanvas.remove();
+      this.fpsCanvas = undefined;
+      this.fpsCtx = undefined;
+    }
+  }
+
+  private drawFpsOverlay() {
+    if (!this.fpsCanvas || !this.fpsCtx) return;
+    const ctx = this.fpsCtx;
+    const w = this.fpsCanvas.width;
+    const h = this.fpsCanvas.height;
+    ctx.clearRect(0, 0, w, h);
+    // Background with slight alpha
+    ctx.fillStyle = "rgba(0,0,0,0.4)";
+    ctx.fillRect(0, 0, w, h);
+    // Text
+    ctx.fillStyle = "#0f0";
+    ctx.font = "bold 16px monospace";
+    const fpsText = `${Math.round(this.fpsValue)} fps`;
+    ctx.fillText(fpsText, 8, 20);
+    // Simple bar showing load (0..16.7ms green; 33ms red)
+    const ms = Math.min(33, 1000 / Math.max(1, this.fpsValue));
+    const t = ms / 33; // 0..1
+    const barW = Math.round((1 - t) * (w - 16));
+    ctx.fillStyle = t < 0.5 ? "#0f0" : t < 0.8 ? "#ff0" : "#f00";
+    ctx.fillRect(8, 28, barW, 12);
+    ctx.strokeStyle = "#fff";
+    ctx.strokeRect(8, 28, w - 16, 12);
+  }
 }

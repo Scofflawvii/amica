@@ -4,6 +4,10 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 const withPWA = withPWAFunction({
   dest: "public",
+  disable: process.env.NODE_ENV === "development",
+  workboxOptions: {
+    maximumFileSizeToCacheInBytes: 50 * 1024 * 1024, // allow large WASM/ONNX assets
+  },
 });
 
 const output = process.env.NEXT_OUTPUT || undefined;
