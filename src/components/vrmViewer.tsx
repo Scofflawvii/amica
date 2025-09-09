@@ -1,4 +1,5 @@
-import { useContext, useCallback, useState, useEffect, useRef } from "react";
+import * as THREE from "three";
+import { useContext, useCallback, useState } from "react";
 import { ViewerContext } from "@/features/vrmViewer/viewerContext";
 import { buildUrl } from "@/utils/buildUrl";
 import { config } from "@/utils/config";
@@ -18,135 +19,88 @@ export default function VrmViewer({ chatMode }: { chatMode: boolean }) {
   const [loadingError, setLoadingError] = useState(false);
   const isVrmLocal = "local" == config("vrm_save_type");
 
-  // Keep a stable canvas ref and track setup lifecycle
-  const canvasElRef = useRef<HTMLCanvasElement | null>(null);
-  const hasSetupRef = useRef(false);
+  viewer.resizeChatMode(chatMode);
+  window.addEventListener("resize", () => {
+    viewer.resizeChatMode(chatMode);
+  });
 
-  const canvasRef = useCallback((canvas: HTMLCanvasElement | null) => {
-    // Clean up listeners from any previous canvas
-    if (canvasElRef.current && canvasElRef.current !== canvas) {
-      const prev = canvasElRef.current;
-      prev.removeEventListener("dragover", dragOverHandler as EventListener);
-      prev.removeEventListener("drop", dropHandler as EventListener);
-    }
-    canvasElRef.current = canvas;
-  }, []);
+  const canvasRef = useCallback(
+    (canvas: HTMLCanvasElement) => {
+      if (canvas && (!isVrmLocal || !isLoadingVrmList)) {
+        (async () => {
+          await viewer.setup(canvas);
 
-  // Keep handlers stable references
-  const dragOverHandler = useCallback((event: DragEvent) => {
-    event.preventDefault();
-  }, []);
-
-  const dropHandler = useCallback(
-    (event: DragEvent) => {
-      event.preventDefault();
-      const files = event.dataTransfer?.files;
-      if (!files || files.length === 0) return;
-      const file = files[0];
-      const file_type = file.name.split(".").pop();
-      if (file_type === "vrm") {
-        vrmListAddFile(file, viewer);
-      }
-    },
-    [vrmListAddFile, viewer],
-  );
-
-  // Attach DnD listeners to the canvas element
-  useEffect(() => {
-    const canvas = canvasElRef.current;
-    if (!canvas) return;
-    canvas.addEventListener("dragover", dragOverHandler as EventListener);
-    canvas.addEventListener("drop", dropHandler as EventListener);
-    return () => {
-      canvas.removeEventListener("dragover", dragOverHandler as EventListener);
-      canvas.removeEventListener("drop", dropHandler as EventListener);
-    };
-  }, [dragOverHandler, dropHandler, canvasElRef.current]);
-
-  // Setup viewer once when canvas is ready and VRM list is loaded (for local)
-  useEffect(() => {
-    const canvas = canvasElRef.current;
-    if (!canvas) return;
-    if (hasSetupRef.current) return;
-    if (isVrmLocal && isLoadingVrmList) return; // wait for local list
-
-    let cancelled = false;
-    (async () => {
-      try {
-        await viewer.setup(canvas);
-        hasSetupRef.current = true;
-        let currentVrm = getCurrentVrm();
-        if (!currentVrm) {
-          // Fallback to the first available VRM
-          if (vrmList.length > 0) {
-            currentVrm = vrmList[0];
-          } else {
-            console.error("No VRM available to load");
+          try {
+            const currentVrm = getCurrentVrm();
+            if (!currentVrm) {
+              setIsLoading(true);
+              return false;
+            } else {
+              // Temp Disable : WebXR
+              // await viewer.loadScenario(config('scenario_url'));
+              await viewer.loadVrm(buildUrl(currentVrm.url), (progress) => {
+                console.log(`loading model ${progress}`);
+              });
+              return true;
+            }
+          } catch (e) {
+            console.error("vrm loading error", e);
             setLoadingError(true);
             setIsLoading(false);
+            if (isTauri()) invoke("close_splashscreen");
             return false;
           }
-        }
-        setIsLoading(true);
-        await viewer.loadVrm(buildUrl(currentVrm.url), (progress: string) => {
-          if (!cancelled) setLoadingProgress(progress);
+        })().then((loaded) => {
+          if (loaded) {
+            console.log("vrm loaded");
+            setLoadingError(false);
+            setIsLoading(false);
+            if (isTauri()) invoke("close_splashscreen");
+          }
         });
-        return true;
-      } catch (e) {
-        console.error("vrm loading error", e);
-        if (!cancelled) {
-          setLoadingError(true);
-          setIsLoading(false);
-        }
-        if (isTauri()) invoke("close_splashscreen");
-        return false;
+
+        // Replace VRM with Drag and Drop
+        canvas.addEventListener("dragover", function (event) {
+          event.preventDefault();
+        });
+
+        canvas.addEventListener("drop", function (event) {
+          event.preventDefault();
+
+          const files = event.dataTransfer?.files;
+          if (!files) {
+            return;
+          }
+
+          const file = files[0];
+          if (!file) {
+            return;
+          }
+
+          const file_type = file.name.split(".").pop();
+          if (file_type === "vrm") {
+            vrmListAddFile(file, viewer);
+          } /* else if (file_type === "glb") {
+            viewer.loadRoom(URL.createObjectURL(file));
+          }*/
+        });
       }
-    })().then((loaded) => {
-      if (cancelled) return;
-      if (loaded) {
-        setLoadingError(false);
-        setIsLoading(false);
-      }
-      if (isTauri()) invoke("close_splashscreen");
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [viewer, getCurrentVrm, isVrmLocal, isLoadingVrmList]);
-
-  // React to chat mode changes and window resizes
-  useEffect(() => {
-    viewer.resizeChatMode(chatMode);
-  }, [viewer, chatMode]);
-
-  useEffect(() => {
-    const onResize = () => viewer.resizeChatMode(chatMode);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [viewer, chatMode]);
-
-  // Dispose viewer on unmount
-  useEffect(() => {
-    return () => {
-      try {
-        viewer.dispose?.();
-      } catch (e) {
-        // ignore dispose errors during unmount
-      }
-    };
-  }, [viewer]);
+    },
+    [
+      vrmList.findIndex((value) =>
+        value.hashEquals(getCurrentVrm()?.getHash() || ""),
+      ) < 0,
+      viewer,
+    ],
+  );
 
   return (
     <div
       className={clsx(
-        // Ensure container participates in layout and has a stacking context
-        "fixed top-0 left-0 z-[1] h-full w-full",
+        "fixed top-0 left-0 z-1 h-full w-full",
         chatMode ? "top-[50%] left-[65%]" : "top-0 left-0",
       )}>
-      <canvas
-        ref={canvasRef}
-        className={"block h-full min-h-[200px] w-full min-w-[200px]"}></canvas>
+      <canvas ref={canvasRef} className={"h-full w-full"}></canvas>
       {isLoading && (
         <div
           className={
