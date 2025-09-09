@@ -235,6 +235,8 @@ export class Viewer {
   private _onResize?: () => void;
   private _onVisibility?: () => void;
   private _onMouseMove?: (event: MouseEvent) => void;
+  // Whether a real WebGPU device is in use (not a fallback)
+  private webgpuActive: boolean = false;
 
   constructor() {
     this.isReady = false;
@@ -262,23 +264,36 @@ export class Viewer {
         (navigator as any).gpu);
     if (wantWebGPU) {
       try {
+        // Ensure an adapter is available; if not, force WebGL path
+        const adapter = await (async () => {
+          try {
+            return await (navigator as any)?.gpu?.requestAdapter?.();
+          } catch {
+            return null;
+          }
+        })();
+        if (!adapter) throw new Error("No WebGPU adapter available");
+
         const WebGPURenderer = (
           await import("three/src/renderers/webgpu/WebGPURenderer.js")
         ).default as any;
-        renderer = new WebGPURenderer({
+        const wgpuRenderer = new WebGPURenderer({
           canvas,
           alpha: true,
           antialias: true,
           powerPreference: "high-performance",
-        }) as unknown as THREE.WebGLRenderer;
+        });
+        renderer = wgpuRenderer as unknown as THREE.WebGLRenderer;
+        this.webgpuActive = true;
       } catch (err) {
-        console.warn("WebGPU init failed; falling back to WebGL", err);
+        console.warn("WebGPU not available; using WebGL", err);
         renderer = new THREE.WebGLRenderer({
           canvas,
           alpha: true,
           antialias: true,
           powerPreference: "high-performance",
         });
+        this.webgpuActive = false;
       }
     } else {
       renderer = new THREE.WebGLRenderer({
@@ -287,6 +302,7 @@ export class Viewer {
         antialias: true,
         powerPreference: "high-performance",
       });
+      this.webgpuActive = false;
     }
     this.renderer = renderer;
 
@@ -325,7 +341,7 @@ export class Viewer {
       !Number.isNaN(xrScale) ? xrScale : 2.0,
     ); // reduce pixelation with minimal performance hit on quest 3
     // Set XR foveation only on WebGL renderers that support it
-    if (!(renderer as any).isWebGPURenderer) {
+    if (!this.webgpuActive) {
       const foveation = parseFloat(config("xr_foveation"));
       if (typeof (renderer.xr as any).setFoveation === "function") {
         renderer.xr.setFoveation(!Number.isNaN(foveation) ? foveation : 0);
@@ -822,7 +838,12 @@ export class Viewer {
     // setLoadingProgress("Loading VRM");
 
     // gltf and vrm
-    this.model = new Model(this.camera || new THREE.Object3D());
+    // Prefer node materials only when we actually initialized a WebGPU renderer
+    const preferNodeMaterial = this.webgpuActive === true;
+    this.model = new Model(
+      this.camera || new THREE.Object3D(),
+      preferNodeMaterial,
+    );
     await this.model.loadVRM(url, setLoadingProgress);
     // Temp Disable : WebXR
     // setLoadingProgress("VRM loaded");
@@ -1351,6 +1372,18 @@ export class Viewer {
   }
 
   public update(_time?: DOMHighResTimeStamp, _frame?: XRFrame) {
+    // Skip if core rendering objects aren’t ready yet
+    if (!this.renderer || !this.scene || !this.camera) return;
+    // Skip heavy work when tab is hidden
+    if (this.pausedHeavy) return;
+    // If WebGL context is lost, skip until restored
+    try {
+      const ctx = (this.renderer as any).getContext?.();
+      if (ctx?.isContextLost?.()) return;
+    } catch {
+      // ignore inability to query context; continue
+    }
+
     let utime = performance.now(); // count total update time
 
     // WebXR: quick exit until setup finishes

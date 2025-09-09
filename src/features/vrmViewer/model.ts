@@ -26,12 +26,14 @@ export class Model {
 
   private _lookAtTargetParent: THREE.Object3D;
   public _lipSync?: LipSync;
+  private _preferNodeMaterial: boolean;
 
   public _currentAction?: THREE.AnimationAction;
 
-  constructor(lookAtTargetParent: THREE.Object3D) {
+  constructor(lookAtTargetParent: THREE.Object3D, preferNodeMaterial = false) {
     this._lookAtTargetParent = lookAtTargetParent;
     this._lipSync = new LipSync(new AudioContext());
+    this._preferNodeMaterial = preferNodeMaterial;
   }
 
   public async loadVRM(
@@ -81,39 +83,40 @@ export class Model {
     const helperRoot = new THREE.Group();
     helperRoot.renderOrder = 10000;
 
-    // the type of material to use
-    // should usually be MToonMaterial
-    let materialType: any;
-    switch (config("mtoon_material_type")) {
-      case "mtoon":
-        materialType = MToonMaterial;
-        break;
-      case "mtoon_node": {
-        const { MToonNodeMaterial } = await import("@pixiv/three-vrm/nodes");
-        materialType = MToonNodeMaterial;
-        break;
-      }
-      case "meshtoon":
-        materialType = THREE.MeshToonMaterial;
-        break;
-      case "basic":
-        materialType = THREE.MeshBasicMaterial;
-        break;
-      case "depth":
-        materialType = THREE.MeshDepthMaterial;
-        break;
-      case "normal":
-        materialType = THREE.MeshNormalMaterial;
-        break;
-      default:
-        console.error("mtoon_material_type not found");
-        break;
-    }
-
-    if (config("use_webgpu") !== "false") {
-      // Use WebGPU-compatible MToonNodeMaterial when WebGPU is enabled or auto
+    // Decide material type:
+    // - If WebGPU is active, prefer node material (MToonNodeMaterial)
+    // - Otherwise, follow configuration with classic MToon as default
+    let materialType: any = MToonMaterial;
+    if (this._preferNodeMaterial) {
       const { MToonNodeMaterial } = await import("@pixiv/three-vrm/nodes");
       materialType = MToonNodeMaterial;
+    } else {
+      switch (config("mtoon_material_type")) {
+        case "mtoon":
+          materialType = MToonMaterial;
+          break;
+        case "mtoon_node": {
+          // Allow override but only when explicitly requested via config
+          const { MToonNodeMaterial } = await import("@pixiv/three-vrm/nodes");
+          materialType = MToonNodeMaterial;
+          break;
+        }
+        case "meshtoon":
+          materialType = THREE.MeshToonMaterial;
+          break;
+        case "basic":
+          materialType = THREE.MeshBasicMaterial;
+          break;
+        case "depth":
+          materialType = THREE.MeshDepthMaterial;
+          break;
+        case "normal":
+          materialType = THREE.MeshNormalMaterial;
+          break;
+        default:
+          // fallback already set
+          break;
+      }
     }
 
     loader.register((parser) => {
@@ -178,19 +181,23 @@ export class Model {
           vrm.scene.traverse((obj: any) => {
             obj.frustumCulled = false;
 
-            if (mtoonDebugMode !== "none") {
-              if (obj.material) {
-                if (Array.isArray(obj.material)) {
-                  obj.material.forEach((mat: any) => {
-                    if (mat.isMToonMaterial) {
-                      mat.debugMode = mtoonDebugMode;
-                    }
-                  });
-                } else {
-                  if (obj.material.isMToonMaterial) {
-                    obj.material.debugMode = mtoonDebugMode;
-                  }
+            if (mtoonDebugMode !== "none" && obj.material) {
+              const applyDebug = (mat: any) => {
+                // Only apply to classic MToonMaterial. Node material variant
+                // (used for WebGPU) does not support this property and can
+                // trigger TSL assign errors.
+                if (
+                  mat?.isMToonMaterial === true &&
+                  mat?.isNodeMaterial !== true &&
+                  "debugMode" in mat
+                ) {
+                  mat.debugMode = mtoonDebugMode;
                 }
+              };
+              if (Array.isArray(obj.material)) {
+                obj.material.forEach(applyDebug);
+              } else {
+                applyDebug(obj.material);
               }
             }
           });

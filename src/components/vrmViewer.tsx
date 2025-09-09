@@ -75,11 +75,17 @@ export default function VrmViewer({ chatMode }: { chatMode: boolean }) {
       try {
         await viewer.setup(canvas);
         hasSetupRef.current = true;
-
-        const currentVrm = getCurrentVrm();
+        let currentVrm = getCurrentVrm();
         if (!currentVrm) {
-          setIsLoading(true);
-          return false;
+          // Fallback to the first available VRM
+          if (vrmList.length > 0) {
+            currentVrm = vrmList[0];
+          } else {
+            console.error("No VRM available to load");
+            setLoadingError(true);
+            setIsLoading(false);
+            return false;
+          }
         }
         setIsLoading(true);
         await viewer.loadVrm(buildUrl(currentVrm.url), (progress: string) => {

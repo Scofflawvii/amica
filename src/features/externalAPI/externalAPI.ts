@@ -23,11 +23,11 @@ function makeApiUrl(type: string): string | null {
   return url.toString();
 }
 
-const configUrl = () => makeApiUrl("config");
-const userInputUrl = () => makeApiUrl("userInputMessages");
-const subconsciousUrl = () => makeApiUrl("subconscious");
-const logsUrl = () => makeApiUrl("logs");
-const chatLogsUrl = () => makeApiUrl("chatLogs");
+export const configUrl = () => makeApiUrl("config");
+export const userInputUrl = () => makeApiUrl("userInputMessages");
+export const subconsciousUrl = () => makeApiUrl("subconscious");
+export const logsUrl = () => makeApiUrl("logs");
+export const chatLogsUrl = () => makeApiUrl("chatLogs");
 
 // Cached server config
 export let serverConfig: Record<string, string> = {};
