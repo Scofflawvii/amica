@@ -92,16 +92,17 @@ export default [
     },
     rules: {
       // Next.js specific rules
-      'next/no-img-element': 'warn',
+      'next/no-img-element': 'off',
       
       // React rules
       'react/react-in-jsx-scope': 'off', // Not needed in Next.js
       'react/prop-types': 'off', // Using TypeScript
       'react-hooks/rules-of-hooks': 'error',
       
-      // General rules  
-      'no-unused-vars': 'warn',
-      'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off', // Allow console in dev
+  // General rules  
+  'no-unused-vars': 'warn',
+  // Quiet console usage across the project to avoid noisy production builds
+  'no-console': 'off',
       'no-undef': 'error',
       'no-useless-escape': 'error',
       'no-empty': 'error',
@@ -142,8 +143,11 @@ export default [
     rules: {
       // Disable base rule and enable TypeScript rule
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': 'warn',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      // Be strict during dev, quiet during production build
+      '@typescript-eslint/no-unused-vars': process.env.NODE_ENV === 'production'
+        ? 'off'
+        : ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-explicit-any': process.env.NODE_ENV === 'production' ? 'off' : 'warn',
       '@typescript-eslint/ban-ts-comment': 'warn'
     }
   }

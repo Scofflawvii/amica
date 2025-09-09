@@ -69,7 +69,7 @@ const tts = async (text, speaker_embeddings) => {
     self.postMessage({
       status: "update",
       task: "text-to-speech",
-      data: data,
+      data: item,
     });
   }
 
