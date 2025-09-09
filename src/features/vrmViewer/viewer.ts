@@ -201,6 +201,15 @@ export class Viewer {
 
   private scenario: any;
   private scenarioLoading: boolean = false;
+  private pausedHeavy: boolean = false;
+
+  // Adaptive resolution controls
+  private adaptiveEnabled: boolean = false;
+  private pixelRatioMin: number = 0.75;
+  private pixelRatioMax: number = 1.0;
+  private pixelRatio: number = 1.0;
+  private fpsSamples: number[] = [];
+  private fpsWindowSec = 1.5; // adjust every ~1.5s
 
   constructor() {
     this.isReady = false;
@@ -236,14 +245,26 @@ export class Viewer {
     renderer.setClearColor(0x000000, 0)
     renderer.shadowMap.enabled = false;
 
+    // Adaptive pixel ratio setup
+  this.adaptiveEnabled = config("adaptive_pixel_ratio") === "true";
+  // bounds from config, with safe parsing
+  const prMin = parseFloat(config("min_pixel_ratio"));
+  const prMax = parseFloat(config("max_pixel_ratio"));
+  if (!Number.isNaN(prMin)) this.pixelRatioMin = Math.max(0.5, Math.min(1.0, prMin));
+  if (!Number.isNaN(prMax)) this.pixelRatioMax = Math.max(this.pixelRatioMin, Math.min(2.0, prMax));
+  const devicePR = typeof window !== "undefined" ? (window.devicePixelRatio || 1) : 1;
+  this.pixelRatio = Math.min(this.pixelRatioMax, Math.max(this.pixelRatioMin, devicePR));
+
     renderer.setSize(width, height);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(this.pixelRatio);
     renderer.xr.enabled = true;
     // TODO should this be enabled for only the quest3?
-    renderer.xr.setFramebufferScaleFactor(2.0); // reduce pixelation with minimal performance hit on quest 3
+    const xrScale = parseFloat(config("xr_framebuffer_scale"));
+    renderer.xr.setFramebufferScaleFactor(!Number.isNaN(xrScale) ? xrScale : 2.0); // reduce pixelation with minimal performance hit on quest 3
     // webgpu does not support foveation yet
     if (config("use_webgpu") !== "true") {
-      renderer.xr.setFoveation(0);
+      const foveation = parseFloat(config("xr_foveation"));
+      renderer.xr.setFoveation(!Number.isNaN(foveation) ? foveation : 0);
     }
 
     // Temp Disable : WebXR
@@ -303,7 +324,7 @@ export class Viewer {
     cameraControls.maxDistance = 4;
     cameraControls.update();
 
-    const igroup = new InteractiveGroup();
+  const igroup = new InteractiveGroup();
     this.igroup = igroup;
 
     igroup.position.set(-0.25, 1.3, -0.8);
@@ -313,9 +334,18 @@ export class Viewer {
 
     igroup.listenToPointerEvents(renderer, camera);
 
+    const pointerFromCanvas = config("pointer_from_canvas") !== "false"; // default true
     canvas.addEventListener("mousemove", (event) => {
-      this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      if (pointerFromCanvas) {
+        const rect = canvas.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width;
+        const y = (event.clientY - rect.top) / rect.height;
+        this.mouse.x = x * 2 - 1;
+        this.mouse.y = -(y * 2 - 1);
+      } else {
+        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      }
     });
 
     // check if controller is available
@@ -403,112 +433,122 @@ export class Viewer {
     }
 
     // gui
-    const gui = new GUI();
-    this.gui = gui;
-    let updateDebounceId: ReturnType<typeof setTimeout> | null = null;
-    gui.add(this.gparams, "room-x", -10, 10).onChange((value: number) => {
-      this.room?.room?.position.setX(value);
-    });
-    gui.add(this.gparams, "room-y", -10, 10).onChange((value: number) => {
-      this.room?.room?.position.setY(value);
-    });
-    gui.add(this.gparams, "room-z", -10, 10).onChange((value: number) => {
-      this.room?.room?.position.setZ(value);
-    });
-    gui.add(this.gparams, "room-scale", 0, 1).onChange((value: number) => {
-      this.room?.room?.scale.set(value, value, value);
-    });
+    const showDebugUI = config("debug_gfx") === "true";
+    if (showDebugUI) {
+      const gui = new GUI();
+      this.gui = gui;
+      let updateDebounceId: ReturnType<typeof setTimeout> | null = null;
+      gui.add(this.gparams, "room-x", -10, 10).onChange((value: number) => {
+        this.room?.room?.position.setX(value);
+      });
+      gui.add(this.gparams, "room-y", -10, 10).onChange((value: number) => {
+        this.room?.room?.position.setY(value);
+      });
+      gui.add(this.gparams, "room-z", -10, 10).onChange((value: number) => {
+        this.room?.room?.position.setZ(value);
+      });
+      gui.add(this.gparams, "room-scale", 0, 1).onChange((value: number) => {
+        this.room?.room?.scale.set(value, value, value);
+      });
 
-    gui.add(this.gparams, "y-offset", -0.2, 0.2).onChange((value: number) => {
-      if (updateDebounceId) {
-        clearTimeout(updateDebounceId);
-      }
+      gui.add(this.gparams, "y-offset", -0.2, 0.2).onChange((value: number) => {
+        if (updateDebounceId) {
+          clearTimeout(updateDebounceId);
+        }
 
-      updateDebounceId = setTimeout(() => {
-        this.teleport(0, value, 0);
-        this.gparams["y-offset"] = 0;
-      }, 1000);
-    });
+        updateDebounceId = setTimeout(() => {
+          this.teleport(0, value, 0);
+          this.gparams["y-offset"] = 0;
+        }, 1000);
+      });
 
-    // Temp Disable : WebXR
-    gui.domElement.style.visibility = 'hidden';
+      const guiMesh = new HTMLMesh(gui.domElement);
+      this.guiMesh = guiMesh;
 
-    const guiMesh = new HTMLMesh(gui.domElement);
-    this.guiMesh = guiMesh;
-
-    guiMesh.position.x = 0;
-    guiMesh.position.y = 0;
-    guiMesh.position.z = 0;
-    guiMesh.scale.setScalar(2);
-    igroup.add(guiMesh);
+      guiMesh.position.x = 0;
+      guiMesh.position.y = 0;
+      guiMesh.position.z = 0;
+      guiMesh.scale.setScalar(2);
+      igroup.add(guiMesh);
+    }
 
     // stats
-    const stats = new Stats();
-    this.stats = stats;
+    if (showDebugUI) {
+      const stats = new Stats();
+      this.stats = stats;
 
-    // Support both stats.js APIs: `.dom` (modern) and `.domElement` (legacy)
-    const statsDom: HTMLElement | null = (stats as any).dom || (stats as any).domElement || null;
-    if (typeof document !== "undefined" && statsDom) {
-      statsDom.style.width = "80px";
-      statsDom.style.height = "48px";
-      statsDom.style.position = "absolute";
-      statsDom.style.top = "0px";
-      statsDom.style.left = window.innerWidth - 80 + "px";
-      document.body.appendChild(statsDom);
+      // Support both stats.js APIs: `.dom` (modern) and `.domElement` (legacy)
+      const statsDom: HTMLElement | null = (stats as any).dom || (stats as any).domElement || null;
+      if (typeof document !== "undefined" && statsDom) {
+        statsDom.style.width = "80px";
+        statsDom.style.height = "48px";
+        statsDom.style.position = "absolute";
+        statsDom.style.top = "0px";
+        statsDom.style.left = window.innerWidth - 80 + "px";
+        document.body.appendChild(statsDom);
+      } else {
+        console.warn("Stats DOM element not available; skipping on-page stats overlay.");
+      }
 
-      // Temp Disable : WebXR
-      statsDom.style.visibility = "hidden";
+      const hasPanels = typeof (Stats as any).Panel === "function" && typeof (stats as any).addPanel === "function";
+      const noopPanel = { update: (_v: any, _max?: number) => {} };
+      if (hasPanels) {
+        this.updateMsPanel = (stats as any).addPanel(
+          new (Stats as any).Panel("update_ms", "#fff", "#221"),
+        );
+        this.renderMsPanel = (stats as any).addPanel(
+          new (Stats as any).Panel("render_ms", "#ff8", "#221"),
+        );
+        this.scenarioMsPanel = (stats as any).addPanel(
+          new (Stats as any).Panel("scenario_ms", "#f8f", "#221"),
+        );
+        this.physicsMsPanel = (stats as any).addPanel(
+          new (Stats as any).Panel("physics_ms", "#88f", "#212"),
+        );
+        this.modelMsPanel = (stats as any).addPanel(
+          new (Stats as any).Panel("model_ms", "#f8f", "#212"),
+        );
+        this.bvhMsPanel = (stats as any).addPanel(new (Stats as any).Panel("bvh_ms", "#8ff", "#122"));
+        this.raycastMsPanel = (stats as any).addPanel(
+          new (Stats as any).Panel("raycast_ms", "#f8f", "#212"),
+        );
+        this.statsMsPanel = (stats as any).addPanel(
+          new (Stats as any).Panel("stats_ms", "#8f8", "#212"),
+        );
+      } else {
+        // Fallback: provide no-op panels, legacy stats.js doesn't support custom panels
+        const noop = { update: (_v: any, _max?: number) => {} };
+        this.updateMsPanel = noop;
+        this.renderMsPanel = noop;
+        this.scenarioMsPanel = noop;
+        this.physicsMsPanel = noop;
+        this.modelMsPanel = noop;
+        this.bvhMsPanel = noop;
+        this.raycastMsPanel = noop;
+        this.statsMsPanel = noop;
+      }
+
+      if (statsDom) {
+        const statsMesh = new HTMLMesh(statsDom);
+        this.statsMesh = statsMesh;
+
+        statsMesh.position.x = 0;
+        statsMesh.position.y = 0.25;
+        statsMesh.position.z = 0;
+        statsMesh.scale.setScalar(2.5);
+        igroup.add(statsMesh);
+      }
     } else {
-      console.warn("Stats DOM element not available; skipping on-page stats overlay.");
-    }
-
-    const hasPanels = typeof (Stats as any).Panel === "function" && typeof (stats as any).addPanel === "function";
-    const noopPanel = { update: (_v: any, _max?: number) => {} };
-    if (hasPanels) {
-      this.updateMsPanel = (stats as any).addPanel(
-        new (Stats as any).Panel("update_ms", "#fff", "#221"),
-      );
-      this.renderMsPanel = (stats as any).addPanel(
-        new (Stats as any).Panel("render_ms", "#ff8", "#221"),
-      );
-      this.scenarioMsPanel = (stats as any).addPanel(
-        new (Stats as any).Panel("scenario_ms", "#f8f", "#221"),
-      );
-      this.physicsMsPanel = (stats as any).addPanel(
-        new (Stats as any).Panel("physics_ms", "#88f", "#212"),
-      );
-      this.modelMsPanel = (stats as any).addPanel(
-        new (Stats as any).Panel("model_ms", "#f8f", "#212"),
-      );
-      this.bvhMsPanel = (stats as any).addPanel(new (Stats as any).Panel("bvh_ms", "#8ff", "#122"));
-      this.raycastMsPanel = (stats as any).addPanel(
-        new (Stats as any).Panel("raycast_ms", "#f8f", "#212"),
-      );
-      this.statsMsPanel = (stats as any).addPanel(
-        new (Stats as any).Panel("stats_ms", "#8f8", "#212"),
-      );
-    } else {
-      // Fallback: provide no-op panels, legacy stats.js doesn't support custom panels
-      this.updateMsPanel = noopPanel;
-      this.renderMsPanel = noopPanel;
-      this.scenarioMsPanel = noopPanel;
-      this.physicsMsPanel = noopPanel;
-      this.modelMsPanel = noopPanel;
-      this.bvhMsPanel = noopPanel;
-      this.raycastMsPanel = noopPanel;
-      this.statsMsPanel = noopPanel;
-    }
-
-    // Temp Disable : WebXR
-    if (statsDom) {
-      const statsMesh = new HTMLMesh(statsDom);
-      this.statsMesh = statsMesh;
-
-      statsMesh.position.x = 0;
-      statsMesh.position.y = 0.25;
-      statsMesh.position.z = 0;
-      statsMesh.scale.setScalar(2.5);
-      igroup.add(statsMesh);
+      // Ensure panels are no-ops when UI disabled
+      const noop = { update: (_v: any, _max?: number) => {} };
+      this.updateMsPanel = noop;
+      this.renderMsPanel = noop;
+      this.scenarioMsPanel = noop;
+      this.physicsMsPanel = noop;
+      this.modelMsPanel = noop;
+      this.bvhMsPanel = noop;
+      this.raycastMsPanel = noop;
+      this.statsMsPanel = noop;
     }
 
     // this.bvhWorker = new GenerateMeshBVHWorker();
@@ -581,6 +621,11 @@ export class Viewer {
     window.addEventListener("resize", () => {
       this.resize();
     });
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", () => {
+        this.pausedHeavy = document.hidden && config("pause_when_hidden") !== "false";
+      });
+    }
 
     this.isReady = true;
     renderer.setAnimationLoop(() => {
@@ -741,6 +786,11 @@ export class Viewer {
 
     this.scene!.add(this.model.vrm.scene);
 
+    // Cache humanoid nodes for faster closest-bone queries
+    this.cachedHumanoidNodes = amicaBones
+      .map((b) => this.model!.vrm!.humanoid.getNormalizedBoneNode(b))
+      .filter((n): n is THREE.Object3D => !!n);
+
     // TODO since poses still work for procedural animation, we can use this to debug
     if (config("animation_procedural") !== "true") {
       // Temp Disable : WebXR
@@ -794,6 +844,8 @@ export class Viewer {
         this.scene!.remove(this.modelBVHHelper as THREE.Object3D);
       }
       this.model?.unLoadVrm();
+  // Clear caches
+  this.cachedHumanoidNodes = [];
     }
   }
 
@@ -867,6 +919,17 @@ export class Viewer {
           }
         }
       }
+      // Dispose BVH trees on room meshes
+      for (const m of this.roomTargets) {
+        try {
+          const g = m.geometry as any;
+          if (typeof g.disposeBoundsTree === "function") g.disposeBoundsTree();
+        } catch (e) {
+          // ignore dispose errors in teardown
+          if (config("debug_gfx") === "true") console.warn("disposeBoundsTree failed", e);
+        }
+      }
+      this.roomTargets = [];
       this.scene!.remove(this.roomBVHHelperGroup);
     }
   }
@@ -1100,33 +1163,23 @@ export class Viewer {
       }
 
       const highlightClosestBone = (point: THREE.Vector3) => {
-        if (!this.model?.vrm) {
-          return;
-        }
+        if (!this.cachedHumanoidNodes.length) return;
 
-        let vec3 = new THREE.Vector3(); // tmp
+        const vec3 = new THREE.Vector3();
+        let closest: THREE.Object3D | null = null;
+        let minDist = Number.MAX_VALUE;
 
-        let closestBone = null;
-        let mindist = Number.MAX_VALUE;
-        let closestname = "";
-
-        for (const bone of amicaBones) {
-          const node = this.model?.vrm?.humanoid.getNormalizedBoneNode(bone);
-          if (!node) continue;
-
+        for (const node of this.cachedHumanoidNodes) {
           const dist = point.distanceTo(node.getWorldPosition(vec3));
-          if (dist < mindist) {
-            mindist = dist;
-            closestBone = node;
-            closestname = bone;
+          if (dist < minDist) {
+            minDist = dist;
+            closest = node;
           }
         }
 
-        if (closestBone) {
-          closestPart.position.copy(closestBone.getWorldPosition(vec3));
+        if (closest) {
+          closestPart.position.copy(closest.getWorldPosition(vec3));
           closestPart.scale.setScalar(0.1);
-          // closestPart.visible = true;
-          // console.log('closest bone', closestname);
         }
       };
 
@@ -1231,7 +1284,7 @@ export class Viewer {
     this.elapsedMsSlow += delta;
     this.elapsedMsMid += delta;
 
-    this.updateHands();
+  this.updateHands();
 
     // Stats.js legacy export provides update(); call if present
     if (this.stats && typeof (this.stats as any).update === "function") {
@@ -1258,7 +1311,7 @@ export class Viewer {
     // }
     // this.physicsMsPanel.update(performance.now() - ptime, 100);
 
-    ptime = performance.now();
+  ptime = performance.now();
     try {
       this.model?.update(delta);
     } catch (e) {
@@ -1267,7 +1320,7 @@ export class Viewer {
 
     this.modelMsPanel.update(performance.now() - ptime, 40);
 
-    ptime = performance.now();
+  ptime = performance.now();
     try {
       this.renderer!.render(this.scene!, this.camera!);
     } catch (e) {
@@ -1283,7 +1336,7 @@ export class Viewer {
       this.doublePinchHandler();
     }
 
-    if (this.elapsedMsMid > 1 / 30) {
+  if (!this.pausedHeavy && this.elapsedMsMid > 1 / 30) {
       /*
       const dir = this.
       this.applyWind(
@@ -1299,13 +1352,13 @@ export class Viewer {
       this.elapsedMsMid = 0;
     }
 
-    if (this.elapsedMsSlow > 1) {
+  if (!this.pausedHeavy && this.elapsedMsSlow > 1) {
       // updating the texture for this is very slow
       ptime = performance.now();
-      if (this.statsMesh && (this.statsMesh.material as any)?.map) {
+  if (this.statsMesh && (this.statsMesh.material as any)?.map) {
         (this.statsMesh.material as any).map.update();
       }
-      if (this.guiMesh && (this.guiMesh.material as any)?.map) {
+  if (this.guiMesh && (this.guiMesh.material as any)?.map) {
         (this.guiMesh.material as any).map.update();
       }
       this.statsMsPanel.update(performance.now() - ptime, 100);
@@ -1323,7 +1376,32 @@ export class Viewer {
       this.sendScreenshotToCallback = false;
     }
 
-    this.updateMsPanel.update(performance.now() - utime, 40);
+    const frameMs = performance.now() - utime;
+    this.updateMsPanel.update(frameMs, 40);
+
+    // Adaptive pixel ratio feedback loop
+    if (this.adaptiveEnabled && !this.renderer?.xr.isPresenting) {
+      this.fpsSamples.push(1000 / Math.max(1e-3, frameMs));
+      const maxSamples = Math.max(10, Math.floor(60 * this.fpsWindowSec));
+      if (this.fpsSamples.length > maxSamples) this.fpsSamples.shift();
+
+      // Adjust roughly every fpsWindowSec seconds
+      if (this.elapsedMsSlow > this.fpsWindowSec) {
+        const avgFps = this.fpsSamples.reduce((a, b) => a + b, 0) / this.fpsSamples.length;
+        let newPR = this.pixelRatio;
+        if (avgFps < 50 && this.pixelRatio > this.pixelRatioMin) {
+          newPR = Math.max(this.pixelRatioMin, this.pixelRatio - 0.1);
+        } else if (avgFps > 58 && this.pixelRatio < this.pixelRatioMax) {
+          newPR = Math.min(this.pixelRatioMax, this.pixelRatio + 0.1);
+        }
+        if (Math.abs(newPR - this.pixelRatio) > 1e-3 && this.renderer) {
+          this.pixelRatio = newPR;
+          this.renderer.setPixelRatio(this.pixelRatio);
+          const parent = this.renderer.domElement.parentElement;
+          if (parent) this.renderer.setSize(parent.clientWidth, parent.clientHeight);
+        }
+      }
+    }
   }
 
   public startStreaming(videoElement: HTMLVideoElement) {
@@ -1398,4 +1476,7 @@ export class Viewer {
     this.screenshotCallback = callback;
     this.sendScreenshotToCallback = true;
   };
+
+  // Cached humanoid bone nodes for quick nearest-bone queries
+  private cachedHumanoidNodes: THREE.Object3D[] = [];
 }
