@@ -140,10 +140,13 @@ export default function VrmViewer({ chatMode }: { chatMode: boolean }) {
   return (
     <div
       className={clsx(
-        "fixed top-0 left-0 z-1 h-full w-full",
+        // Ensure container participates in layout and has a stacking context
+        "fixed top-0 left-0 z-[1] h-full w-full",
         chatMode ? "top-[50%] left-[65%]" : "top-0 left-0",
       )}>
-      <canvas ref={canvasRef} className={"h-full w-full"}></canvas>
+      <canvas
+        ref={canvasRef}
+        className={"block h-full min-h-[200px] w-full min-w-[200px]"}></canvas>
       {isLoading && (
         <div
           className={

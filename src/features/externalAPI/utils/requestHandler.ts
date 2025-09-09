@@ -5,30 +5,34 @@ import {
   chatLogsUrl,
 } from "@/features/externalAPI/externalAPI";
 
+function normalizeUrl(u: string | null | undefined): string | null {
+  return u ?? null;
+}
+
 export const requestMemory = async () => {
-  const url = subconsciousUrl();
-  if (!url) return [];
+  const url = normalizeUrl(subconsciousUrl());
+  if (!url) return [] as any[];
   const response = await fetch(url);
   return response.json();
 };
 
 export const requestLogs = async () => {
-  const url = logsUrl();
-  if (!url) return [];
+  const url = normalizeUrl(logsUrl());
+  if (!url) return [] as any[];
   const response = await fetch(url);
   return response.json();
 };
 
 export const requestUserInputMessages = async () => {
-  const url = userInputUrl();
-  if (!url) return [];
+  const url = normalizeUrl(userInputUrl());
+  if (!url) return [] as any[];
   const response = await fetch(url);
   return response.json();
 };
 
 export const requestChatHistory = async () => {
-  const url = chatLogsUrl();
-  if (!url) return [];
+  const url = normalizeUrl(chatLogsUrl());
+  if (!url) return [] as any[];
   const response = await fetch(url);
   return response.json();
 };
