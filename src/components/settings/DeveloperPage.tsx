@@ -111,6 +111,11 @@ export function DeveloperPage({
                 setSettingsUpdated(true);
               }}
             />
+            <p className="mt-1 max-w-sm text-xs text-gray-500">
+              {t(
+                "Default is Auto: Amica will use WebGPU when supported and fall back to WebGL. This switch forces WebGPU on or off and requires a restart.",
+              )}
+            </p>
           </FormRow>
         </li>
       </ul>
