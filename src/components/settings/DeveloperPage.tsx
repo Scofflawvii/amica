@@ -1,9 +1,9 @@
 import { useTranslation } from "react-i18next";
 
 import { BasicPage, FormRow } from "./common";
-import { IconButton } from "@/components/iconButton";
 import { SwitchBox } from "@/components/switchBox";
 import { updateConfig } from "@/utils/config";
+import { debug } from "@/utils/debug";
 
 const mtoonDebugModes = [
   { key: "none", label: "None" },
@@ -22,6 +22,14 @@ const mtoonMaterialTypes = [
 ];
 
 export function DeveloperPage({
+  debugMode,
+  setDebugMode,
+  levelLog,
+  setLevelLog,
+  levelInfo,
+  setLevelInfo,
+  levelWarn,
+  setLevelWarn,
   debugGfx,
   setDebugGfx,
   mtoonDebugMode,
@@ -32,6 +40,14 @@ export function DeveloperPage({
   setUseWebGPU,
   setSettingsUpdated,
 }: {
+  debugMode: boolean;
+  setDebugMode: (value: boolean) => void;
+  levelLog: boolean;
+  setLevelLog: (value: boolean) => void;
+  levelInfo: boolean;
+  setLevelInfo: (value: boolean) => void;
+  levelWarn: boolean;
+  setLevelWarn: (value: boolean) => void;
   debugGfx: boolean;
   setDebugGfx: (value: boolean) => void;
   mtoonDebugMode: string;
@@ -52,6 +68,76 @@ export function DeveloperPage({
       )}>
       <ul role="list" className="max-w-xs divide-y divide-gray-100">
         <li className="py-4">
+          <FormRow label={t("Debug Logging")}>
+            <SwitchBox
+              value={debugMode}
+              label={t("Enable Debug Logging")}
+              onChange={(value: boolean) => {
+                setDebugMode(value);
+                updateConfig("debug_mode", value ? "true" : "false");
+                // Apply immediately at runtime
+                if (value) debug.enable();
+                else debug.disable();
+                setSettingsUpdated(true);
+              }}
+            />
+          </FormRow>
+        </li>
+        <li className="py-4">
+          <FormRow label={t("Log Levels")}>
+            <div className="space-y-2">
+              <SwitchBox
+                value={levelLog}
+                label={t("Console.log")}
+                onChange={(value: boolean) => {
+                  setLevelLog(value);
+                  updateConfig("debug_log", value ? "true" : "false");
+                  debug.setLevels({ log: value });
+                  setSettingsUpdated(true);
+                }}
+              />
+              <SwitchBox
+                value={levelInfo}
+                label={t("Console.info")}
+                onChange={(value: boolean) => {
+                  setLevelInfo(value);
+                  updateConfig("debug_info", value ? "true" : "false");
+                  debug.setLevels({ info: value });
+                  setSettingsUpdated(true);
+                }}
+              />
+              <SwitchBox
+                value={levelWarn}
+                label={t("Console.warn")}
+                onChange={(value: boolean) => {
+                  setLevelWarn(value);
+                  updateConfig("debug_warn", value ? "true" : "false");
+                  debug.setLevels({ warn: value });
+                  setSettingsUpdated(true);
+                }}
+              />
+            </div>
+          </FormRow>
+        </li>
+        <li className="py-4">
+          <FormRow label={t("Clear DEBUG flag (localStorage)")}>
+            <button
+              className="mt-2 rounded bg-gray-200 px-3 py-1 text-gray-800 hover:bg-gray-300"
+              onClick={() => {
+                try {
+                  if (typeof window !== "undefined") {
+                    window.localStorage?.removeItem("DEBUG");
+                  }
+                } catch {
+                  /* no-op */
+                }
+                setSettingsUpdated(true);
+              }}>
+              {t("Clear")}
+            </button>
+          </FormRow>
+        </li>
+        <li className="py-4">
           <FormRow label={t("Debug Rendering")}>
             <SwitchBox
               value={debugGfx}
@@ -69,7 +155,7 @@ export function DeveloperPage({
             <select
               value={mtoonDebugMode}
               className="mt-2 block w-full rounded-md border-0 py-1.5 pr-10 pl-3 text-gray-900 ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
                 setMtoonDebugMode(event.target.value);
                 updateConfig("mtoon_debug_mode", event.target.value);
                 setSettingsUpdated(true);
@@ -87,7 +173,7 @@ export function DeveloperPage({
             <select
               value={mtoonMaterialType}
               className="mt-2 block w-full rounded-md border-0 py-1.5 pr-10 pl-3 text-gray-900 ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
                 setMtoonMaterialType(event.target.value);
                 updateConfig("mtoon_material_type", event.target.value);
                 setSettingsUpdated(true);
