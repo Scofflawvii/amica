@@ -1,4 +1,5 @@
-import "@/i18n";
+// Initialize i18n only on the client to avoid SSR-time browser dependency issues
+import { useEffect } from "react";
 
 import "@/styles/globals.css";
 import "@charcoal-ui/icons";
@@ -21,6 +22,11 @@ const alert = new Alert();
 const amicaLife = new AmicaLife();
 
 export default function App({ Component, pageProps }: AppProps) {
+  // Client-only i18n init
+  useEffect(() => {
+    // Dynamic import to ensure browser-only libs are loaded on client
+    import("@/i18n").catch(() => {});
+  }, []);
   return (
     <>
       <Head>

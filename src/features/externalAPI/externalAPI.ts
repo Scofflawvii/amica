@@ -6,40 +6,43 @@ import {
 } from "../amicaLife/eventHandler";
 import { Message } from "../chat/messages";
 
-export const configUrl = new URL(
-  `${process.env.NEXT_PUBLIC_DEVELOPMENT_BASE_URL}/api/dataHandler`,
-);
-configUrl.searchParams.append("type", "config");
+// Build URLs lazily and safely to avoid ReferenceError/TypeError in SSR or
+// when NEXT_PUBLIC_DEVELOPMENT_BASE_URL is unset.
+function getBaseOrigin(): string | null {
+  if (typeof window !== "undefined") return window.location.origin;
+  const base = process.env.NEXT_PUBLIC_DEVELOPMENT_BASE_URL ?? "";
+  if (/^https?:\/\//i.test(base)) return base;
+  return null; // no safe base on server without absolute env
+}
 
-export const userInputUrl = new URL(
-  `${process.env.NEXT_PUBLIC_DEVELOPMENT_BASE_URL}/api/dataHandler`,
-);
-userInputUrl.searchParams.append("type", "userInputMessages");
+function makeApiUrl(type: string): string | null {
+  const base = getBaseOrigin();
+  if (!base) return null;
+  const url = new URL("/api/dataHandler", base);
+  url.searchParams.set("type", type);
+  return url.toString();
+}
 
-export const subconsciousUrl = new URL(
-  `${process.env.NEXT_PUBLIC_DEVELOPMENT_BASE_URL}/api/dataHandler`,
-);
-subconsciousUrl.searchParams.append("type", "subconscious");
-
-export const logsUrl = new URL(
-  `${process.env.NEXT_PUBLIC_DEVELOPMENT_BASE_URL}/api/dataHandler`,
-);
-logsUrl.searchParams.append("type", "logs");
-
-export const chatLogsUrl = new URL(
-  `${process.env.NEXT_PUBLIC_DEVELOPMENT_BASE_URL}/api/dataHandler`,
-);
-chatLogsUrl.searchParams.append("type", "chatLogs");
+const configUrl = () => makeApiUrl("config");
+const userInputUrl = () => makeApiUrl("userInputMessages");
+const subconsciousUrl = () => makeApiUrl("subconscious");
+const logsUrl = () => makeApiUrl("logs");
+const chatLogsUrl = () => makeApiUrl("chatLogs");
 
 // Cached server config
 export let serverConfig: Record<string, string> = {};
 
-export async function fetcher(method: string, url: URL, data?: any) {
+export async function fetcher(
+  method: string,
+  urlStr: string | null,
+  data?: any,
+) {
+  if (!urlStr) return; // Nothing to do without a valid absolute URL
   let response: any;
   switch (method) {
     case "POST":
       try {
-        response = await fetch(url, {
+        response = await fetch(urlStr, {
           method: method,
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
@@ -51,7 +54,7 @@ export async function fetcher(method: string, url: URL, data?: any) {
 
     case "GET":
       try {
-        response = await fetch(url);
+        response = await fetch(urlStr);
         if (response.ok) {
           serverConfig = await response.json();
         }
@@ -91,19 +94,19 @@ export async function handleConfig(
       }
 
       // Sync update to server config
-      await fetcher("POST", configUrl, localStorageData);
+      await fetcher("POST", configUrl(), localStorageData);
 
       break;
     }
     case "fetch": {
       // Sync update to server config cache
-      await fetcher("GET", configUrl);
+      await fetcher("GET", configUrl());
 
       break;
     }
 
     case "update": {
-      await fetcher("POST", configUrl, data);
+      await fetcher("POST", configUrl(), data);
 
       break;
     }
@@ -118,7 +121,9 @@ export async function handleUserInput(message: string) {
     return;
   }
 
-  fetch(userInputUrl, {
+  const url = userInputUrl();
+  if (!url) return;
+  fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -133,7 +138,9 @@ export async function handleChatLogs(messages: Message[]) {
     return;
   }
 
-  fetch(chatLogsUrl, {
+  const url = chatLogsUrl();
+  if (!url) return;
+  fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(messages),
@@ -147,7 +154,9 @@ export async function handleSubconscious(
     return;
   }
 
-  const data = await fetch(subconsciousUrl);
+  const subUrl = subconsciousUrl();
+  if (!subUrl) return;
+  const data = await fetch(subUrl);
   if (!data.ok) {
     throw new Error("Failed to get subconscious data");
   }
@@ -164,7 +173,7 @@ export async function handleSubconscious(
     totalStorageTokens -= removed!.prompt.length;
   }
 
-  const response = await fetch(subconsciousUrl, {
+  const response = await fetch(subUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
