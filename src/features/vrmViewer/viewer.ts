@@ -462,28 +462,42 @@ export class Viewer {
       console.warn("Stats DOM element not available; skipping on-page stats overlay.");
     }
 
-    this.updateMsPanel = stats.addPanel(
-      new Stats.Panel("update_ms", "#fff", "#221"),
-    );
-    this.renderMsPanel = stats.addPanel(
-      new Stats.Panel("render_ms", "#ff8", "#221"),
-    );
-    this.scenarioMsPanel = stats.addPanel(
-      new Stats.Panel("scenario_ms", "#f8f", "#221"),
-    );
-    this.physicsMsPanel = stats.addPanel(
-      new Stats.Panel("physics_ms", "#88f", "#212"),
-    );
-    this.modelMsPanel = stats.addPanel(
-      new Stats.Panel("model_ms", "#f8f", "#212"),
-    );
-    this.bvhMsPanel = stats.addPanel(new Stats.Panel("bvh_ms", "#8ff", "#122"));
-    this.raycastMsPanel = stats.addPanel(
-      new Stats.Panel("raycast_ms", "#f8f", "#212"),
-    );
-    this.statsMsPanel = stats.addPanel(
-      new Stats.Panel("stats_ms", "#8f8", "#212"),
-    );
+    const hasPanels = typeof (Stats as any).Panel === "function" && typeof (stats as any).addPanel === "function";
+    const noopPanel = { update: (_v: any, _max?: number) => {} };
+    if (hasPanels) {
+      this.updateMsPanel = (stats as any).addPanel(
+        new (Stats as any).Panel("update_ms", "#fff", "#221"),
+      );
+      this.renderMsPanel = (stats as any).addPanel(
+        new (Stats as any).Panel("render_ms", "#ff8", "#221"),
+      );
+      this.scenarioMsPanel = (stats as any).addPanel(
+        new (Stats as any).Panel("scenario_ms", "#f8f", "#221"),
+      );
+      this.physicsMsPanel = (stats as any).addPanel(
+        new (Stats as any).Panel("physics_ms", "#88f", "#212"),
+      );
+      this.modelMsPanel = (stats as any).addPanel(
+        new (Stats as any).Panel("model_ms", "#f8f", "#212"),
+      );
+      this.bvhMsPanel = (stats as any).addPanel(new (Stats as any).Panel("bvh_ms", "#8ff", "#122"));
+      this.raycastMsPanel = (stats as any).addPanel(
+        new (Stats as any).Panel("raycast_ms", "#f8f", "#212"),
+      );
+      this.statsMsPanel = (stats as any).addPanel(
+        new (Stats as any).Panel("stats_ms", "#8f8", "#212"),
+      );
+    } else {
+      // Fallback: provide no-op panels, legacy stats.js doesn't support custom panels
+      this.updateMsPanel = noopPanel;
+      this.renderMsPanel = noopPanel;
+      this.scenarioMsPanel = noopPanel;
+      this.physicsMsPanel = noopPanel;
+      this.modelMsPanel = noopPanel;
+      this.bvhMsPanel = noopPanel;
+      this.raycastMsPanel = noopPanel;
+      this.statsMsPanel = noopPanel;
+    }
 
     // Temp Disable : WebXR
     if (statsDom) {
@@ -1219,7 +1233,10 @@ export class Viewer {
 
     this.updateHands();
 
-    this.stats!.update();
+    // Stats.js legacy export provides update(); call if present
+    if (this.stats && typeof (this.stats as any).update === "function") {
+      (this.stats as any).update();
+    }
 
     let ptime = performance.now();
 
