@@ -132,7 +132,7 @@ export class Viewer {
 
   private mediaRecorder?: MediaRecorder;
   private recordedChunks: Blob[] = [];
-  private videoStream: any;
+  private videoStream: MediaStream | null = null;
 
   // XR
   public currentSession: XRSession | null = null;
@@ -155,14 +155,30 @@ export class Viewer {
     "room-z": 0,
     "room-scale": 1,
   };
-  private updateMsPanel: any = null;
-  private renderMsPanel: any = null;
-  private scenarioMsPanel: any = null;
-  private physicsMsPanel: any = null;
-  private modelMsPanel: any = null;
-  private bvhMsPanel: any = null;
-  private raycastMsPanel: any = null;
-  private statsMsPanel: any = null;
+  private updateMsPanel: { update: (v: number, max?: number) => void } = {
+    update: () => {},
+  };
+  private renderMsPanel: { update: (v: number, max?: number) => void } = {
+    update: () => {},
+  };
+  private scenarioMsPanel: { update: (v: number, max?: number) => void } = {
+    update: () => {},
+  };
+  private physicsMsPanel: { update: (v: number, max?: number) => void } = {
+    update: () => {},
+  };
+  private modelMsPanel: { update: (v: number, max?: number) => void } = {
+    update: () => {},
+  };
+  private bvhMsPanel: { update: (v: number, max?: number) => void } = {
+    update: () => {},
+  };
+  private raycastMsPanel: { update: (v: number, max?: number) => void } = {
+    update: () => {},
+  };
+  private statsMsPanel: { update: (v: number, max?: number) => void } = {
+    update: () => {},
+  };
 
   private bvhWorker: WorkerBase | null = null;
   private modelBVHGenerator: StaticGeometryGenerator | null = null;
@@ -190,14 +206,14 @@ export class Viewer {
   // private particleRenderer = new BatchedParticleRenderer();
   // private particleCartoonStarField: THREE.Object3D | null = null;
 
-  private ammo: any;
-  private collisionConfiguration: any;
-  private dispatcher: any;
-  private broadphase: any;
-  private solver: any;
-  private physicsWorld: any;
-  private transformAux1: any;
-  private tempBtVec3_1: any;
+  private ammo: unknown;
+  private collisionConfiguration: unknown;
+  private dispatcher: unknown;
+  private broadphase: unknown;
+  private solver: unknown;
+  private physicsWorld: unknown;
+  private transformAux1: unknown;
+  private tempBtVec3_1: unknown;
 
   private scenario: any;
   private scenarioLoading: boolean = false;
@@ -372,10 +388,10 @@ export class Viewer {
       scene.add(controller1);
       scene.add(controller2);
 
-      controller1.addEventListener("connected", (event) => {
+      controller1.addEventListener("connected", (_event) => {
         this.usingController1 = true;
       });
-      controller2.addEventListener("connected", (event) => {
+      controller2.addEventListener("connected", (_event) => {
         this.usingController2 = true;
       });
 
@@ -509,7 +525,6 @@ export class Viewer {
       const hasPanels =
         typeof (Stats as any).Panel === "function" &&
         typeof (stats as any).addPanel === "function";
-      const noopPanel = { update: (_v: any, _max?: number) => {} };
       if (hasPanels) {
         this.updateMsPanel = (stats as any).addPanel(
           new (Stats as any).Panel("update_ms", "#fff", "#221"),
@@ -683,13 +698,6 @@ export class Viewer {
     immersiveType: XRSessionMode,
   ) {
     if (!this.renderer) return;
-    console.log("session", session);
-
-    const canvas = this.getCanvas();
-    // TODO this needs to be set to none to prevent double render breaking the compositing
-    // except on desktop using emulator, then it should not be changed
-    // canvas!.style.display = "none";
-
     this.renderer.xr.setReferenceSpaceType("local");
     await this.renderer.xr.setSession(session);
 
@@ -734,8 +742,8 @@ export class Viewer {
     this.camera!.position.set(0, -3, 3.5);
     this.resetCamera();
 
-    const canvas = this.getCanvas();
-    canvas!.style.display = "inline";
+    const _canvas = this.getCanvas();
+    _canvas!.style.display = "inline";
 
     this.currentSession.removeEventListener("end", this.onSessionEnded);
     this.currentSession = null;
@@ -1138,7 +1146,7 @@ export class Viewer {
   }
 
   // itype: 0 = amica, 1 = room
-  public createBallAtPoint(point: THREE.Vector3, itype: number = 0) {
+  public createBallAtPoint(point: THREE.Vector3, _itype: number = 0) {
     // Function disabled - removing unreachable code
     return;
   }
@@ -1295,7 +1303,7 @@ export class Viewer {
     this.scenarioLoading = false;
   }
 
-  public update(time?: DOMHighResTimeStamp, frame?: XRFrame) {
+  public update(_time?: DOMHighResTimeStamp, _frame?: XRFrame) {
     let utime = performance.now(); // count total update time
 
     // WebXR: quick exit until setup finishes

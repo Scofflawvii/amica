@@ -1,6 +1,6 @@
 import { handleConfig, serverConfig } from "@/features/externalAPI/externalAPI";
 
-export const defaults = {
+export const defaults: Readonly<Record<string, string>> = {
   // AllTalk TTS specific settings
   localXTTS_url:
     process.env.NEXT_PUBLIC_LOCALXTTS_URL ?? "http://127.0.0.1:7851",
@@ -186,16 +186,22 @@ export function config(key: string): string {
     typeof localStorage !== "undefined" &&
     Object.prototype.hasOwnProperty.call(localStorage, prefixed(key))
   ) {
-    return (<any>localStorage).getItem(prefixed(key))!;
+    return localStorage.getItem(prefixed(key))!;
   }
 
   // Fallback to serverConfig if localStorage is unavailable or missing
-  if (serverConfig && Object.prototype.hasOwnProperty.call(serverConfig, key)) {
-    return serverConfig[key];
+  if (
+    serverConfig &&
+    Object.prototype.hasOwnProperty.call(
+      serverConfig as Record<string, string>,
+      key,
+    )
+  ) {
+    return (serverConfig as Record<string, string>)[key];
   }
 
   if (Object.prototype.hasOwnProperty.call(defaults, key)) {
-    return (<any>defaults)[key];
+    return defaults[key as keyof typeof defaults];
   }
 
   throw new Error(`config key not found: ${key}`);
@@ -219,7 +225,7 @@ export async function updateConfig(key: string, value: string) {
 
 export function defaultConfig(key: string): string {
   if (Object.prototype.hasOwnProperty.call(defaults, key)) {
-    return (<any>defaults)[key];
+    return defaults[key as keyof typeof defaults];
   }
 
   throw new Error(`config key not found: ${key}`);
