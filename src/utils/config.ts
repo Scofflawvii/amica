@@ -22,7 +22,7 @@ export const defaults: Readonly<Record<string, string>> = {
   xr_framebuffer_scale: "2.0",
   xr_foveation: "0",
   show_fps_overlay: "false",
-  use_webgpu: "false",
+  use_webgpu: "auto",
   mtoon_debug_mode: "none",
   mtoon_material_type: "mtoon",
   language: process.env.NEXT_PUBLIC_LANGUAGE ?? "en",
