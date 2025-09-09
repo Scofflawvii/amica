@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+/**
+ * Development PWA stub middleware
+ * Provides stub responses for PWA-related files that don't exist when PWA is disabled in development,
+ * preventing 404 errors and console noise during development.
+ */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
