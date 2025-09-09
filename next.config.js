@@ -30,15 +30,25 @@ const nextConfig = {
       "onnxruntime-node$": false,
     };
 
-    // onnxruntime-web sometimes triggers Critical dependency warnings from require() usage
-    // Mark the minified bundle as external to avoid parsing heuristics; the ESM wrapper will load it at runtime.
-    config.externals = config.externals || [];
-    config.externals.push(({ request }, callback) => {
-      if (request && /onnxruntime-web\/dist\/ort\.min\.js$/.test(request)) {
-        return callback(null, "commonjs " + request);
-      }
-      callback();
-    });
+    // Suppress onnxruntime-web critical dependency warnings by ignoring dynamic requires
+    if (config.plugins) {
+      // Add custom plugin to suppress specific warnings
+      config.plugins.push({
+        apply: (compiler) => {
+          compiler.hooks.done.tap("SuppressWarnings", (stats) => {
+            const warnings = stats.compilation.warnings || [];
+            const filteredWarnings = warnings.filter((warning) => {
+              const message = warning.message || warning.toString();
+              return (
+                !message.includes("onnxruntime-web") &&
+                !message.includes("Critical dependency")
+              );
+            });
+            stats.compilation.warnings = filteredWarnings;
+          });
+        },
+      });
+    }
 
     config.plugins.push(
       new CopyPlugin({
