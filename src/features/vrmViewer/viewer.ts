@@ -446,15 +446,21 @@ export class Viewer {
     const stats = new Stats();
     this.stats = stats;
 
-    stats.dom.style.width = "80px";
-    stats.dom.style.height = "48px";
-    stats.dom.style.position = "absolute";
-    stats.dom.style.top = "0px";
-    stats.dom.style.left = window.innerWidth - 80 + "px";
-    document.body.appendChild(stats.dom);
+    // Support both stats.js APIs: `.dom` (modern) and `.domElement` (legacy)
+    const statsDom: HTMLElement | null = (stats as any).dom || (stats as any).domElement || null;
+    if (typeof document !== "undefined" && statsDom) {
+      statsDom.style.width = "80px";
+      statsDom.style.height = "48px";
+      statsDom.style.position = "absolute";
+      statsDom.style.top = "0px";
+      statsDom.style.left = window.innerWidth - 80 + "px";
+      document.body.appendChild(statsDom);
 
-    // Temp Disable : WebXR
-    stats.dom.style.visibility = "hidden";
+      // Temp Disable : WebXR
+      statsDom.style.visibility = "hidden";
+    } else {
+      console.warn("Stats DOM element not available; skipping on-page stats overlay.");
+    }
 
     this.updateMsPanel = stats.addPanel(
       new Stats.Panel("update_ms", "#fff", "#221"),
@@ -480,14 +486,16 @@ export class Viewer {
     );
 
     // Temp Disable : WebXR
-    const statsMesh = new HTMLMesh(stats.dom);
-    this.statsMesh = statsMesh;
+    if (statsDom) {
+      const statsMesh = new HTMLMesh(statsDom);
+      this.statsMesh = statsMesh;
 
-    statsMesh.position.x = 0;
-    statsMesh.position.y = 0.25;
-    statsMesh.position.z = 0;
-    statsMesh.scale.setScalar(2.5);
-    igroup.add(statsMesh);
+      statsMesh.position.x = 0;
+      statsMesh.position.y = 0.25;
+      statsMesh.position.z = 0;
+      statsMesh.scale.setScalar(2.5);
+      igroup.add(statsMesh);
+    }
 
     // this.bvhWorker = new GenerateMeshBVHWorker();
     this.raycaster.firstHitOnly = true;
@@ -1277,8 +1285,12 @@ export class Viewer {
     if (this.elapsedMsSlow > 1) {
       // updating the texture for this is very slow
       ptime = performance.now();
-      (this.statsMesh!.material as any).map.update();
-      (this.guiMesh!.material as any).map.update();
+      if (this.statsMesh && (this.statsMesh.material as any)?.map) {
+        (this.statsMesh.material as any).map.update();
+      }
+      if (this.guiMesh && (this.guiMesh.material as any)?.map) {
+        (this.guiMesh.material as any).map.update();
+      }
       this.statsMsPanel.update(performance.now() - ptime, 100);
 
       // TODO run this in a web worker

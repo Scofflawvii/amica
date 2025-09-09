@@ -21,7 +21,7 @@ class Debug implements DebugLogger {
   constructor() {
     // Enable debug in development or if explicitly enabled in config
     this.enabled = 
-      process.env.NODE_ENV === 'development' || 
+      (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') || 
       config('debug_mode') === 'true' ||
       config('debug_gfx') === 'true';
   }
