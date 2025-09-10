@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { updateConfig } from "@/utils/config";
 import { useTranslation } from "react-i18next";
+import { Portal } from "./Portal";
 
 export const Introduction = ({ open }: { open: boolean }) => {
   const [opened, setOpened] = useState(open);
@@ -11,14 +12,17 @@ export const Introduction = ({ open }: { open: boolean }) => {
   }
 
   return (
-    <div className="font-M_PLUS_2 z-max pointer-events-auto fixed inset-0 mx-auto h-full w-full bg-black/50 backdrop-blur-sm sm:px-24 lg:px-32">
-      <div className="panel mx-auto max-h-full overflow-auto p-4">
-        <div className="my-4">
-          <div className="my-8 text-xl font-bold">{t("Welcome to Amica")}</div>
-          <p>
-            {t(
-              "amica_intro",
-              `
+    <Portal>
+      <div className="font-M_PLUS_2 z-max pointer-events-auto fixed inset-0 mx-auto h-full w-full bg-black/50 backdrop-blur-sm sm:px-24 lg:px-32">
+        <div className="panel mx-auto max-h-full overflow-auto p-4">
+          <div className="my-4">
+            <div className="my-8 text-xl font-bold">
+              {t("Welcome to Amica")}
+            </div>
+            <p>
+              {t(
+                "amica_intro",
+                `
             Amica is an open source chatbot interface that provides emotion, vision, animations, self triggered actions, text to speech, and speech to text capabilities.
             
             It is designed to be able to be attached to any AI model.
@@ -29,49 +33,50 @@ export const Introduction = ({ open }: { open: boolean }) => {
 
             On launch Amica uses our demo chatbot and TTS server. It may take time to load the first message you send.
           `,
-            )}
-          </p>
-        </div>
-        <div className="my-4">
-          <div className="typography-20 my-8 font-bold">{t("Setup")}</div>
-          <p>
-            {t(
-              "amica_setup",
-              `
+              )}
+            </p>
+          </div>
+          <div className="my-4">
+            <div className="typography-20 my-8 font-bold">{t("Setup")}</div>
+            <p>
+              {t(
+                "amica_setup",
+                `
             Click on the top left of the screen to open settings.
             
             You can change the voice, character system prompt, share/load/save and attach to different backends or in-browser models. 
             
             Please check our docs for more detailed configuration instructions on docs.heyamica.com
           `,
-            )}{" "}
-            <a
-              href="https://docs.heyamica.com"
-              target="_blank"
-              className="text-cyan-500">
-              {t("Read the full documentation here.")}
-            </a>
-          </p>
-        </div>
+              )}{" "}
+              <a
+                href="https://docs.heyamica.com"
+                target="_blank"
+                className="text-cyan-500">
+                {t("Read the full documentation here.")}
+              </a>
+            </p>
+          </div>
 
-        <div className="my-8 flex space-x-4">
-          <button
-            onClick={() => {
-              updateConfig("show_introduction", "false");
-              setOpened(false);
-            }}
-            className="bg-secondary hover:bg-secondary-hover focus-visible:outline-secondary inline-flex items-center rounded-md px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
-            {t("dont_show_again", "Don't show again")}
-          </button>
-          <button
-            onClick={() => {
-              setOpened(false);
-            }}
-            className="bg-surface-alt/70 hover:bg-surface-alt/90 shadow-subtle border-border/50 ml-3 inline-flex items-center rounded-md border px-2.5 py-1.5 text-sm font-semibold text-[hsl(var(--text))]">
-            {t("Close")}
-          </button>
+          <div className="my-8 flex space-x-4">
+            <button
+              onClick={() => {
+                updateConfig("show_introduction", "false");
+                setOpened(false);
+              }}
+              className="bg-secondary hover:bg-secondary-hover focus-visible:outline-secondary inline-flex items-center rounded-md px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+              {t("dont_show_again", "Don't show again")}
+            </button>
+            <button
+              onClick={() => {
+                setOpened(false);
+              }}
+              className="bg-surface-alt/70 hover:bg-surface-alt/90 shadow-subtle border-border/50 ml-3 inline-flex items-center rounded-md border px-2.5 py-1.5 text-sm font-semibold text-[hsl(var(--text))]">
+              {t("Close")}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Portal>
   );
 };
