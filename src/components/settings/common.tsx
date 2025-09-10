@@ -193,7 +193,7 @@ export function getIconFromPage(page: string): React.ReactElement {
     case "external_api":
       return (
         <ArrowTopRightOnSquareIcon
-          className="h-5 w-5 flex-none text-gray-800"
+          className="text h-5 w-5 flex-none"
           aria-hidden="true"
         />
       );

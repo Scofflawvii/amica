@@ -204,7 +204,7 @@ function Chat({
         </button>
       </div>
       <div className="card rounded-b-lg px-4 py-2">
-        <div className="typography-16 font-M_PLUS_2 font-bold text-gray-800">
+        <div className="typography-16 font-M_PLUS_2 text font-bold">
           {role === "assistant" ? (
             <div>{message}</div>
           ) : (

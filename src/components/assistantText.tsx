@@ -38,7 +38,7 @@ export const AssistantText = ({ message }: { message: string }) => {
                 "overflow-y-auto px-8 py-4",
                 unlimited ? "max-h-[calc(75vh)]" : "max-h-32",
               )}>
-              <div className="typography-16 max-h-full min-h-8 font-bold text-gray-700">
+              <div className="typography-16 text max-h-full min-h-8 font-bold">
                 {message.replace(/\[([a-zA-Z]*?)\]/g, "")}
                 <div ref={scrollRef} />
               </div>

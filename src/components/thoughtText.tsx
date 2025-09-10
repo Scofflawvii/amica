@@ -41,7 +41,7 @@ export const ThoughtText = ({ message }: { message: string }) => {
         </div>
         <div
           className={clsx(
-            "overflow-y-auto px-3 py-2 text-gray-700 transition-all duration-300 ease-in-out",
+            "text overflow-y-auto px-3 py-2 transition-all duration-300 ease-in-out",
             expanded ? "max-h-48" : "max-h-20",
           )}>
           <p

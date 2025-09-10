@@ -88,7 +88,7 @@ function Chat({ role, message }: { role: string; message: string }) {
                 "overflow-y-auto px-8 py-4",
                 unlimited ? "max-h-32" : "max-h-[calc(75vh)]",
               )}>
-              <div className="typography-16 max-h-full min-h-8 font-bold text-gray-600">
+              <div className="typography-16 text-muted max-h-full min-h-8 font-bold">
                 {message.replace(/\[([a-zA-Z]*?)\]/g, "")}
                 <div ref={scrollRef} />
               </div>
@@ -96,7 +96,7 @@ function Chat({ role, message }: { role: string; message: string }) {
           )}
           {role === "user" && (
             <div className="max-h-32 overflow-y-auto px-8 py-4">
-              <div className="typography-16 max-h-full min-h-8 font-bold text-gray-600">
+              <div className="typography-16 text-muted max-h-full min-h-8 font-bold">
                 {message.replace(/\[([a-zA-Z]*?)\]/g, "")}
                 <div ref={scrollRef} />
               </div>

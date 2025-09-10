@@ -8,15 +8,14 @@ export default function VrmDemo({
   onLoaded,
   onError,
 }: {
-  vrmUrl: string,
+  vrmUrl: string;
   onScreenShot?: (blob: Blob | null) => void;
-  onLoaded?: () => void,
-  onError?: () => void,
+  onLoaded?: () => void;
+  onError?: () => void;
 }) {
-  
   const { viewer } = useContext(ViewerContext);
   const [isLoading, setIsLoading] = useState(true);
-  const [loadingProgress, setLoadingProgress] = useState('');
+  const [loadingProgress, setLoadingProgress] = useState("");
   const [loadingError, setLoadingError] = useState(false);
 
   useEffect(() => {
@@ -39,14 +38,14 @@ export default function VrmDemo({
         })();
       }
     },
-    [vrmUrl, viewer, setLoadingProgress]
+    [vrmUrl, viewer, setLoadingProgress],
   );
 
   return (
     <div>
       <canvas ref={canvasRef} className={"h-full w-full"} />
       {isLoading && (
-        <div className={"text-gray-500 p-2 text-2xl"}>{loadingProgress}</div>
+        <div className={"text-muted p-2 text-2xl"}>{loadingProgress}</div>
       )}
       {loadingError && (
         <div className={"p-2 text-2xl"}>Error loading VRM model...</div>
@@ -54,4 +53,3 @@ export default function VrmDemo({
     </div>
   );
 }
-

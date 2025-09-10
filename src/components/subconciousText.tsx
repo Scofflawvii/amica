@@ -62,14 +62,14 @@ function Chat({
                 />
               </span>
 
-              <div className="typography-16 float-right mt-1 ml-2 max-h-full min-h-8 text-sm font-bold text-gray-500">
+              <div className="typography-16 text-muted float-right mt-1 ml-2 max-h-full min-h-8 text-sm font-bold">
                 {timeStamp}
               </div>
             </div>
           </div>
 
           <div className="max-h-[calc(75vh)] overflow-y-auto px-8 py-4">
-            <div className="typography-16 max-h-full min-h-8 font-bold text-gray-600">
+            <div className="typography-16 text-muted max-h-full min-h-8 font-bold">
               {prompt}
               <div ref={scrollRef} />
             </div>
