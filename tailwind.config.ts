@@ -32,6 +32,21 @@ export default {
         "danger-hover": "hsl(var(--danger-hover) / <alpha-value>)",
         "danger-press": "hsl(var(--danger-press) / <alpha-value>)",
         "danger-disabled": "hsl(var(--danger) / 0.35)",
+        info: "hsl(var(--info) / <alpha-value>)",
+        "info-hover": "hsl(var(--info-hover) / <alpha-value>)",
+        "info-press": "hsl(var(--info-press) / <alpha-value>)",
+        warning: "hsl(var(--warning) / <alpha-value>)",
+        "warning-hover": "hsl(var(--warning-hover) / <alpha-value>)",
+        "warning-press": "hsl(var(--warning-press) / <alpha-value>)",
+        // Neutral scale (optional)
+        neutral: {
+          50: "hsl(var(--neutral-50) / <alpha-value>)",
+          100: "hsl(var(--neutral-100) / <alpha-value>)",
+          200: "hsl(var(--neutral-200) / <alpha-value>)",
+          300: "hsl(var(--neutral-300) / <alpha-value>)",
+          600: "hsl(var(--neutral-600) / <alpha-value>)",
+          700: "hsl(var(--neutral-700) / <alpha-value>)",
+        },
         base: "#FBE2CA", // legacy token still used in places
         "text-primary": "#514062", // legacy (can be migrated to text)
       },

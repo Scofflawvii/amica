@@ -25,6 +25,19 @@
   --danger: 0 72% 51%; /* red-500 */
   --danger-hover: 0 72% 57%;
   --danger-press: 0 72% 63%;
+  --info: 210 90% 56%;
+  --info-hover: 210 90% 62%;
+  --info-press: 210 90% 68%;
+  --warning: 40 95% 55%;
+  --warning-hover: 40 95% 60%;
+  --warning-press: 40 95% 65%;
+  /* Neutral scale (optional use) */
+  --neutral-50: 270 20% 98%;
+  --neutral-100: 270 15% 95%;
+  --neutral-200: 270 12% 88%;
+  --neutral-300: 270 10% 75%;
+  --neutral-600: 270 12% 40%;
+  --neutral-700: 270 15% 30%;
 }
 
 /* Dark mode overrides */
@@ -49,6 +62,18 @@
   --danger: 0 72% 56%;
   --danger-hover: 0 72% 62%;
   --danger-press: 0 72% 68%;
+  --info: 210 90% 60%;
+  --info-hover: 210 90% 66%;
+  --info-press: 210 90% 72%;
+  --warning: 40 95% 58%;
+  --warning-hover: 40 95% 64%;
+  --warning-press: 40 95% 70%;
+  --neutral-50: 260 22% 15%;
+  --neutral-100: 260 22% 18%;
+  --neutral-200: 260 18% 22%;
+  --neutral-300: 260 15% 30%;
+  --neutral-600: 260 12% 60%;
+  --neutral-700: 260 12% 72%;
 }
 
 body {

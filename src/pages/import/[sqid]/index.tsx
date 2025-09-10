@@ -141,7 +141,7 @@ export default function Import() {
         {error && (
           <div>
             <div
-              className="relative rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700"
+              className="border-danger/40 bg-danger/10 text-danger relative rounded border px-4 py-3"
               role="alert">
               <strong className="font-bold">{t("Error!")}</strong>{" "}
               <span className="block sm:inline">
