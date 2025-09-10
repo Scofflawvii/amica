@@ -14,7 +14,7 @@ export const ArbiusIntroduction = ({
   }
 
   return (
-    <div className="font-M_PLUS_2 z-modal fixed inset-0 mx-auto h-full w-full bg-black/40 backdrop-blur-sm sm:px-24 lg:px-32">
+    <div className="font-M_PLUS_2 z-max pointer-events-auto fixed inset-0 mx-auto h-full w-full bg-black/50 backdrop-blur-sm sm:px-24 lg:px-32">
       <div className="panel mx-auto max-h-full overflow-auto p-4">
         <div className="my-4">
           <div className="my-8 text-xl font-bold">
