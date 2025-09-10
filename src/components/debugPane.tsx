@@ -4,6 +4,7 @@ import { IconButton } from "@/components/iconButton";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 import { clsx } from "clsx";
 import { config } from "@/utils/config";
+import { Portal } from "./Portal";
 
 const TOTAL_ITEMS_TO_SHOW = 100;
 
@@ -90,132 +91,136 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
   }
 
   return (
-    <div className="bg-surface/95 z-floating fixed top-0 left-0 h-full w-full text-[hsl(var(--text))]">
-      <div className="z-floating fixed top-0 left-0 max-h-full w-full text-left text-xs">
-        <div className="bg-surface-alt/70 border-border/50 border-b p-2 backdrop-blur">
-          <IconButton
-            iconName="24/Close"
-            isProcessing={false}
-            className="bg-secondary hover:bg-secondary-hover active:bg-secondary-active"
-            onClick={onClickClose}
-          />
-          <IconButton
-            iconName="24/Description"
-            isProcessing={false}
-            className="bg-primary hover:bg-primary-hover active:bg-primary-active ml-4"
-            onClick={onClickCopy}
-          />
+    <Portal>
+      <div className="bg-surface/95 z-max fixed top-0 left-0 h-full w-full text-[hsl(var(--text))]">
+        <div className="z-floating fixed top-0 left-0 max-h-full w-full text-left text-xs">
+          <div className="bg-surface-alt/70 border-border/50 border-b p-2 backdrop-blur">
+            <IconButton
+              iconName="24/Close"
+              isProcessing={false}
+              className="bg-secondary hover:bg-secondary-hover active:bg-secondary-active"
+              onClick={onClickClose}
+            />
+            <IconButton
+              iconName="24/Description"
+              isProcessing={false}
+              className="bg-primary hover:bg-primary-hover active:bg-primary-active ml-4"
+              onClick={onClickCopy}
+            />
 
-          <div className="text-muted ml-2 inline-block items-center">
-            <span className="px-1">
-              <span className="text-muted text-xs">llm: </span>
-              <span className="text-xs">{config("chatbot_backend")}</span>
-            </span>
-            <span className="px-1">
-              <span className="text-muted text-xs">tts: </span>
-              <span className="text-xs">{config("tts_backend")}</span>
-            </span>
-            <span className="px-1">
-              <span className="text-muted text-xs">stt: </span>
-              <span className="text-xs">{config("stt_backend")}</span>
-            </span>
-            <span className="px-1">
-              <span className="text-muted text-xs">bid: </span>
-              <span className="text-xs">
-                {process.env.NEXT_PUBLIC_CONFIG_BUILD_ID}
+            <div className="text-muted ml-2 inline-block items-center">
+              <span className="px-1">
+                <span className="text-muted text-xs">llm: </span>
+                <span className="text-xs">{config("chatbot_backend")}</span>
+              </span>
+              <span className="px-1">
+                <span className="text-muted text-xs">tts: </span>
+                <span className="text-xs">{config("tts_backend")}</span>
+              </span>
+              <span className="px-1">
+                <span className="text-muted text-xs">stt: </span>
+                <span className="text-xs">{config("stt_backend")}</span>
+              </span>
+              <span className="px-1">
+                <span className="text-muted text-xs">bid: </span>
+                <span className="text-xs">
+                  {process.env.NEXT_PUBLIC_CONFIG_BUILD_ID}
+                </span>
+              </span>
+            </div>
+          </div>
+          <div className="bg-surface-alt/60 border-border/30 border-b p-2">
+            <span className="ml-2">
+              <span className="bg-surface-alt/60 text-muted ring-border/40 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
+                debug
+                <SwitchToggle
+                  enabled={typeDebugEnabled}
+                  set={setTypeDebugEnabled}
+                />
+              </span>
+              <span className="bg-success/15 text-success ring-success/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
+                info
+                <SwitchToggle
+                  enabled={typeInfoEnabled}
+                  set={setTypeInfoEnabled}
+                />
+              </span>
+              <span className="bg-warning/15 text-warning ring-warning/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
+                warn
+                <SwitchToggle
+                  enabled={typeWarnEnabled}
+                  set={setTypeWarnEnabled}
+                />
+              </span>
+              <span className="bg-danger/15 text-danger ring-danger/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
+                error
+                <SwitchToggle
+                  enabled={typeErrorEnabled}
+                  set={setTypeErrorEnabled}
+                />
               </span>
             </span>
           </div>
-        </div>
-        <div className="bg-surface-alt/60 border-border/30 border-b p-2">
-          <span className="ml-2">
-            <span className="bg-surface-alt/60 text-muted ring-border/40 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
-              debug
-              <SwitchToggle
-                enabled={typeDebugEnabled}
-                set={setTypeDebugEnabled}
-              />
-            </span>
-            <span className="bg-success/15 text-success ring-success/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
-              info
-              <SwitchToggle
-                enabled={typeInfoEnabled}
-                set={setTypeInfoEnabled}
-              />
-            </span>
-            <span className="bg-warning/15 text-warning ring-warning/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
-              warn
-              <SwitchToggle
-                enabled={typeWarnEnabled}
-                set={setTypeWarnEnabled}
-              />
-            </span>
-            <span className="bg-danger/15 text-danger ring-danger/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
-              error
-              <SwitchToggle
-                enabled={typeErrorEnabled}
-                set={setTypeErrorEnabled}
-              />
-            </span>
-          </span>
-        </div>
-        <div className="relative inline-block max-h-screen w-full overflow-y-scroll px-2 md:px-8">
-          {getLogs()
-            .slice(-TOTAL_ITEMS_TO_SHOW)
-            .filter((log) => {
-              if (log.type === "debug" && !typeDebugEnabled) return false;
-              if (
-                (log.type === "info" || log.type === "log") &&
-                !typeInfoEnabled
-              )
-                return false;
-              if (log.type === "warn" && !typeWarnEnabled) return false;
-              if (log.type === "error" && !typeErrorEnabled) return false;
-              return true;
-            })
-            .map((log, idx: number) => (
-              <div
-                key={log.ts + idx}
-                className={clsx(
-                  "my-0.5 rounded",
-                  log.type === "error" ? "bg-danger/10" : "bg-surface-alt/40",
-                )}>
-                {log.type === "debug" && (
-                  <span className="bg-surface-alt/60 text-muted ring-border/40 inline-flex w-12 items-center rounded-md px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
-                    debug
-                  </span>
-                )}
-                {(log.type === "info" || log.type === "log") && (
-                  <span className="bg-success/15 text-success ring-success/30 inline-flex w-12 items-center rounded-md px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
-                    info
-                  </span>
-                )}
-                {log.type === "warn" && (
-                  <span className="bg-warning/15 text-warning ring-warning/30 inline-flex w-12 items-center rounded-md px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
-                    warn
-                  </span>
-                )}
-                {log.type === "error" && (
-                  <span className="bg-danger/15 text-danger ring-danger/30 inline-flex w-12 items-center rounded-md px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
-                    error
-                  </span>
-                )}
+          <div className="relative inline-block max-h-screen w-full overflow-y-scroll px-2 md:px-8">
+            {getLogs()
+              .slice(-TOTAL_ITEMS_TO_SHOW)
+              .filter((log) => {
+                if (log.type === "debug" && !typeDebugEnabled) return false;
+                if (
+                  (log.type === "info" || log.type === "log") &&
+                  !typeInfoEnabled
+                )
+                  return false;
+                if (log.type === "warn" && !typeWarnEnabled) return false;
+                if (log.type === "error" && !typeErrorEnabled) return false;
+                return true;
+              })
+              .map((log, idx: number) => (
+                <div
+                  key={log.ts + idx}
+                  className={clsx(
+                    "my-0.5 rounded",
+                    log.type === "error" ? "bg-danger/10" : "bg-surface-alt/40",
+                  )}>
+                  {log.type === "debug" && (
+                    <span className="bg-surface-alt/60 text-muted ring-border/40 inline-flex w-12 items-center rounded-md px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
+                      debug
+                    </span>
+                  )}
+                  {(log.type === "info" || log.type === "log") && (
+                    <span className="bg-success/15 text-success ring-success/30 inline-flex w-12 items-center rounded-md px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
+                      info
+                    </span>
+                  )}
+                  {log.type === "warn" && (
+                    <span className="bg-warning/15 text-warning ring-warning/30 inline-flex w-12 items-center rounded-md px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
+                      warn
+                    </span>
+                  )}
+                  {log.type === "error" && (
+                    <span className="bg-danger/15 text-danger ring-danger/30 inline-flex w-12 items-center rounded-md px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
+                      error
+                    </span>
+                  )}
 
-                <small className="text-muted px-1 font-mono">
-                  {(log.ts / 1000) | 0}
-                </small>
+                  <small className="text-muted px-1 font-mono">
+                    {(log.ts / 1000) | 0}
+                  </small>
 
-                <span className="text-text text-md">
-                  {[...log.arguments]
-                    .map((v) => (typeof v === "object" ? JSON.stringify(v) : v))
-                    .join(" ")}
-                </span>
-              </div>
-            ))}
-          <div ref={scrollRef} className="my-20" />
-          <div className="my-20 h-40 md:my-2 md:h-0" />
+                  <span className="text-text text-md">
+                    {[...log.arguments]
+                      .map((v) =>
+                        typeof v === "object" ? JSON.stringify(v) : v,
+                      )
+                      .join(" ")}
+                  </span>
+                </div>
+              ))}
+            <div ref={scrollRef} className="my-20" />
+            <div className="my-20 h-40 md:my-2 md:h-0" />
+          </div>
         </div>
       </div>
-    </div>
+    </Portal>
   );
 }
