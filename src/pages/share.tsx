@@ -361,10 +361,10 @@ export default function Share() {
 
           {showUploadLocalVrmMessage && (
             <div className="mt-4 max-w-md rounded-xl sm:col-span-3">
-              <label className="block text-sm leading-6 font-medium text-gray-900">
+              <label className="text-muted block text-xs leading-6 font-medium tracking-wide uppercase">
                 {t("Upload VRM")}
               </label>
-              <div className="mt-2 text-sm leading-6 text-gray-900">
+              <div className="mt-2 text-sm leading-6">
                 <p>{t("VRM upload message")}</p>
                 <p>{t("VRM local share message")}</p>
                 <div className="mt-2 max-w-md rounded-xl sm:col-span-3">
@@ -384,14 +384,14 @@ export default function Share() {
               "mt-4 max-w-md rounded-xl sm:col-span-3" +
               (!showUploadLocalVrmMessage ? "" : " hidden")
             }>
-            <label className="block text-sm leading-6 font-medium text-gray-900">
+            <label className="text-muted block text-xs leading-6 font-medium tracking-wide uppercase">
               {t("VRM Url")}
             </label>
             <div className="mt-2">
               <p className="text-xs text-slate-500"></p>
               <input
                 type="text"
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
+                className="input-base placeholder:text-muted/60 block w-full"
                 value={vrmUrl}
                 readOnly={!!sqid}
                 onChange={(e) => {

@@ -166,7 +166,7 @@ export default function Import() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
-          <div className="mt-4 max-w-md rounded-xl bg-gray-100 sm:col-span-3">
+          <div className="bg-surface-alt/60 border-border/40 mt-4 max-w-md rounded-xl border sm:col-span-3">
             {loaded && (
               <VrmDemo
                 vrmUrl={vrmUrl}
@@ -212,13 +212,13 @@ export default function Import() {
         <div>
           {description && (
             <div className="mt-4 max-w-md rounded-xl sm:col-span-3">
-              <label className="block text-sm leading-6 font-medium text-gray-900">
+              <label className="text-muted block text-xs leading-6 font-medium tracking-wide uppercase">
                 {t("Description")}
               </label>
               <div className="mt-2">
                 <textarea
                   rows={4}
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
+                  className="input-base placeholder:text-muted/60 block w-full"
                   defaultValue={description}
                   disabled={true}
                 />
@@ -228,13 +228,13 @@ export default function Import() {
 
           {name && name != defaultConfig("name") && (
             <div className="mt-4 max-w-md rounded-xl sm:col-span-3">
-              <label className="block text-sm leading-6 font-medium text-gray-900">
+              <label className="text-muted block text-xs leading-6 font-medium tracking-wide uppercase">
                 {t("Name")}
               </label>
               <div className="mt-2">
                 <input
                   type="text"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
+                  className="input-base placeholder:text-muted/60 block w-full"
                   defaultValue={name}
                   disabled={true}
                 />
@@ -244,13 +244,13 @@ export default function Import() {
 
           {systemPrompt && systemPrompt != defaultConfig("system_prompt") && (
             <div className="mt-4 max-w-md rounded-xl sm:col-span-3">
-              <label className="block text-sm leading-6 font-medium text-gray-900">
+              <label className="text-muted block text-xs leading-6 font-medium tracking-wide uppercase">
                 {t("System Prompt")}
               </label>
               <div className="mt-2">
                 <textarea
                   rows={4}
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
+                  className="input-base placeholder:text-muted/60 block w-full"
                   defaultValue={systemPrompt}
                   disabled={true}
                 />
@@ -261,13 +261,13 @@ export default function Import() {
           {visionSystemPrompt &&
             visionSystemPrompt != defaultConfig("vision_system_prompt") && (
               <div className="mt-4 max-w-md rounded-xl sm:col-span-3">
-                <label className="block text-sm leading-6 font-medium text-gray-900">
+                <label className="text-muted block text-xs leading-6 font-medium tracking-wide uppercase">
                   {t("Vision System Prompt")}
                 </label>
                 <div className="mt-2">
                   <textarea
                     rows={4}
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
+                    className="input-base placeholder:text-muted/60 block w-full"
                     defaultValue={visionSystemPrompt}
                     disabled={true}
                   />
@@ -277,13 +277,13 @@ export default function Import() {
 
           {bgUrl && bgUrl != defaultConfig("bg_url") && (
             <div className="mt-4 max-w-md rounded-xl sm:col-span-3">
-              <label className="block text-sm leading-6 font-medium text-gray-900">
+              <label className="text-muted block text-xs leading-6 font-medium tracking-wide uppercase">
                 {t("Background Url")}
               </label>
               <div className="mt-2">
                 <input
                   type="text"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
+                  className="input-base placeholder:text-muted/60 block w-full"
                   defaultValue={bgUrl}
                   disabled={true}
                 />
@@ -295,13 +295,13 @@ export default function Import() {
           {youtubeVideoId &&
             youtubeVideoId != defaultConfig("youtube_videoid") && (
               <div className="mt-4 max-w-md rounded-xl sm:col-span-3">
-                <label className="block text-sm leading-6 font-medium text-gray-900">
+                <label className="text-muted block text-xs leading-6 font-medium tracking-wide uppercase">
                   {t("Youtube Video Id")}
                 </label>
                 <div className="mt-2">
                   <input
                     type="text"
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
+                    className="input-base placeholder:text-muted/60 block w-full"
                     defaultValue={youtubeVideoId}
                     disabled={true}
                   />
@@ -319,13 +319,13 @@ export default function Import() {
 
           {vrmUrl && vrmUrl != defaultConfig("vrm_url") && (
             <div className="mt-4 max-w-md rounded-xl sm:col-span-3">
-              <label className="block text-sm leading-6 font-medium text-gray-900">
+              <label className="text-muted block text-xs leading-6 font-medium tracking-wide uppercase">
                 {t("VRM Url")}
               </label>
               <div className="mt-2">
                 <input
                   type="text"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
+                  className="input-base placeholder:text-muted/60 block w-full"
                   defaultValue={vrmUrl}
                   disabled={true}
                 />
@@ -335,13 +335,13 @@ export default function Import() {
 
           {animationUrl && animationUrl != defaultConfig("animation_url") && (
             <div className="mt-4 max-w-md rounded-xl sm:col-span-3">
-              <label className="block text-sm leading-6 font-medium text-gray-900">
+              <label className="text-muted block text-xs leading-6 font-medium tracking-wide uppercase">
                 {t("Animation Url")}
               </label>
               <div className="mt-2">
                 <input
                   type="text"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
+                  className="input-base placeholder:text-muted/60 block w-full"
                   defaultValue={animationUrl}
                   disabled={true}
                 />
@@ -351,13 +351,13 @@ export default function Import() {
 
           {voiceUrl && voiceUrl != defaultConfig("voice_url") && (
             <div className="mt-4 max-w-md rounded-xl sm:col-span-3">
-              <label className="block text-sm leading-6 font-medium text-gray-900">
+              <label className="text-muted block text-xs leading-6 font-medium tracking-wide uppercase">
                 {t("Voice Url")}
               </label>
               <div className="mt-2">
                 <input
                   type="text"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
+                  className="input-base placeholder:text-muted/60 block w-full"
                   defaultValue={voiceUrl}
                   disabled={true}
                 />
