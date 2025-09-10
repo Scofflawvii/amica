@@ -17,6 +17,14 @@
   --secondary: 350 100% 68%; /* #FF617F */
   --secondary-hover: 350 100% 75%;
   --secondary-press: 350 100% 80%;
+
+  /* Status palettes */
+  --success: 158 64% 42%; /* emerald-500-ish */
+  --success-hover: 158 64% 48%;
+  --success-press: 158 64% 54%;
+  --danger: 0 72% 51%; /* red-500 */
+  --danger-hover: 0 72% 57%;
+  --danger-press: 0 72% 63%;
 }
 
 /* Dark mode overrides */
@@ -34,6 +42,13 @@
   --secondary: 350 100% 72%;
   --secondary-hover: 350 100% 78%;
   --secondary-press: 350 100% 82%;
+
+  --success: 158 64% 46%;
+  --success-hover: 158 64% 52%;
+  --success-press: 158 64% 58%;
+  --danger: 0 72% 56%;
+  --danger-hover: 0 72% 62%;
+  --danger-press: 0 72% 68%;
 }
 
 body {

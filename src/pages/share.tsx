@@ -18,6 +18,7 @@ import "filepond/dist/filepond.min.css";
 import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css";
 import { vrmDataProvider } from "@/features/vrmStore/vrmDataProvider";
 import { IconButton } from "@/components/iconButton";
+import { TextButton } from "@/components/textButton";
 
 registerPlugin(FilePondPluginImagePreview, FilePondPluginFileValidateType);
 
@@ -367,11 +368,12 @@ export default function Share() {
                 <p>{t("VRM upload message")}</p>
                 <p>{t("VRM local share message")}</p>
                 <div className="mt-2 max-w-md rounded-xl sm:col-span-3">
-                  <button
+                  <TextButton
                     onClick={uploadVrmFromIndexedDb}
-                    className="inline-flex items-center rounded-md border border-transparent bg-fuchsia-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-fuchsia-600 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-fuchsia-500">
+                    variant="secondary"
+                    className="px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50">
                     {t("Upload Vrm")}
-                  </button>
+                  </TextButton>
                 </div>
               </div>
             </div>
@@ -588,9 +590,10 @@ export default function Share() {
 
           {!sqid && (
             <div className="mt-8 max-w-md rounded-xl sm:col-span-3">
-              <button
+              <TextButton
                 onClick={registerCharacter}
-                className="inline-flex items-center rounded-md border border-transparent bg-fuchsia-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-fuchsia-600 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-fuchsia-500"
+                variant="secondary"
+                className="px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={
                   !vrmLoaded ||
                   showUploadLocalVrmMessage ||
@@ -598,7 +601,7 @@ export default function Share() {
                   isRegistering
                 }>
                 {t("Save Character")}
-              </button>
+              </TextButton>
             </div>
           )}
 
@@ -607,7 +610,7 @@ export default function Share() {
               <p className="text-sm">{t("Share this code (click to copy):")}</p>
               <input
                 type="text"
-                className="inline-flex items-center rounded-md border border-transparent bg-fuchsia-100 px-2 py-2 text-sm font-medium text-fuchsia-600 shadow-sm hover:cursor-copy hover:bg-fuchsia-200 focus:border-transparent focus:outline-transparent disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-fuchsia-50"
+                className="input-base bg-surface-alt/70 px-2 py-2 text-sm font-medium hover:cursor-copy"
                 defaultValue={sqid}
                 readOnly
                 onClick={(e) => {
@@ -627,9 +630,11 @@ export default function Share() {
               </p>
 
               <Link href="/">
-                <button className="mt-6 inline-flex items-center rounded-md border border-transparent bg-emerald-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-600 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-emerald-500">
+                <TextButton
+                  variant="success"
+                  className="mt-6 px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50">
                   {t("Return Home")}
-                </button>
+                </TextButton>
               </Link>
             </div>
           )}

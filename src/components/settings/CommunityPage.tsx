@@ -1,6 +1,6 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
-import { BasicPage } from './common';
+import { BasicPage } from "./common";
 import { GitHubLink } from "@/components/githubLink";
 
 export function CommunityPage() {
@@ -9,15 +9,16 @@ export function CommunityPage() {
   return (
     <BasicPage
       title={t("Community")}
-      description={t("community_desc", "Join the Amica community to connect with others exploring this technology.")}
-    >
-      <ul role="list" className="divide-y divide-gray-100 max-w-xs">
+      description={t(
+        "community_desc",
+        "Join the Amica community to connect with others exploring this technology.",
+      )}>
+      <ul role="list" className="max-w-xs divide-y divide-gray-100">
         <li className="py-4">
           <a
             href="https://t.me/arbius_ai"
             target="_blank"
-            className="rounded bg-indigo-600 px-2 py-1 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
+            className="rounded bg-indigo-600 px-2 py-1 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             {t("Telegram")}
           </a>
         </li>
@@ -25,8 +26,7 @@ export function CommunityPage() {
           <a
             href="https://twitter.com/arbius_ai"
             target="_blank"
-            className="rounded bg-indigo-600 px-2 py-1 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
+            className="rounded bg-indigo-600 px-2 py-1 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             {t("Twitter")}
           </a>
         </li>
@@ -34,8 +34,7 @@ export function CommunityPage() {
           <a
             href="https://discord.gg/SVtjU4d9jB"
             target="_blank"
-            className="rounded bg-indigo-600 px-2 py-1 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
+            className="rounded bg-indigo-600 px-2 py-1 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             {t("Discord")}
           </a>
         </li>
@@ -46,8 +45,7 @@ export function CommunityPage() {
           <a
             href="https://docs.heyamica.com"
             target="_blank"
-            className="rounded bg-emerald-600 px-2 py-1 text-lg font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
-            >
+            className="bg-success hover:bg-success-hover focus-visible:outline-success rounded px-2 py-1 text-lg font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
             {t("Documentation")}
           </a>
         </li>

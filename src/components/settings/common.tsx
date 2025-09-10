@@ -573,7 +573,7 @@ export function ResetToDefaultButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center rounded border border-transparent bg-rose-600 px-2.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-rose-700 focus:outline-none">
+      className="bg-danger hover:bg-danger-hover active:bg-danger-press inline-flex items-center rounded px-2.5 py-1.5 text-xs font-medium text-white shadow-sm">
       {t("Reset to Default")}
     </button>
   );

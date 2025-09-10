@@ -24,6 +24,14 @@ export default {
         "secondary-press": "hsl(var(--secondary-press) / <alpha-value>)",
         "secondary-active": "hsl(var(--secondary-hover) / <alpha-value>)",
         "secondary-disabled": "hsl(var(--secondary) / 0.35)",
+        success: "hsl(var(--success) / <alpha-value>)",
+        "success-hover": "hsl(var(--success-hover) / <alpha-value>)",
+        "success-press": "hsl(var(--success-press) / <alpha-value>)",
+        "success-disabled": "hsl(var(--success) / 0.35)",
+        danger: "hsl(var(--danger) / <alpha-value>)",
+        "danger-hover": "hsl(var(--danger-hover) / <alpha-value>)",
+        "danger-press": "hsl(var(--danger-press) / <alpha-value>)",
+        "danger-disabled": "hsl(var(--danger) / 0.35)",
         base: "#FBE2CA", // legacy token still used in places
         "text-primary": "#514062", // legacy (can be migrated to text)
       },
