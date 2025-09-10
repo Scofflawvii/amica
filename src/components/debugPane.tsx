@@ -4,7 +4,7 @@ import { IconButton } from "@/components/iconButton";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 import { clsx } from "clsx";
 import { config } from "@/utils/config";
-import { Portal } from "./Portal";
+// Portal removed: component rendered within GuiLayer parent portal.
 
 const TOTAL_ITEMS_TO_SHOW = 100;
 
@@ -91,7 +91,7 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
   }
 
   return (
-    <Portal>
+    <>
       <div className="bg-surface/95 z-max fixed top-0 left-0 h-full w-full text-[hsl(var(--text))]">
         <div className="z-floating fixed top-0 left-0 max-h-full w-full text-left text-xs">
           <div className="bg-surface-alt/70 border-border/50 border-b p-2 backdrop-blur">
@@ -221,6 +221,6 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
           </div>
         </div>
       </div>
-    </Portal>
+    </>
   );
 }

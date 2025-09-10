@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { updateConfig } from "@/utils/config";
 import { useTranslation } from "react-i18next";
-import { Portal } from "./Portal";
+// Portal removed: component rendered within GuiLayer parent portal.
 
 export const Introduction = ({ open }: { open: boolean }) => {
   const [opened, setOpened] = useState(open);
@@ -12,7 +12,7 @@ export const Introduction = ({ open }: { open: boolean }) => {
   }
 
   return (
-    <Portal>
+    <>
       <div className="font-M_PLUS_2 z-max pointer-events-auto fixed inset-0 mx-auto h-full w-full bg-black/50 backdrop-blur-sm sm:px-24 lg:px-32">
         <div className="panel mx-auto max-h-full overflow-auto p-4">
           <div className="my-4">
@@ -77,6 +77,6 @@ export const Introduction = ({ open }: { open: boolean }) => {
           </div>
         </div>
       </div>
-    </Portal>
+    </>
   );
 };
