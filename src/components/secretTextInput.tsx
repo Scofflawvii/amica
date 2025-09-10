@@ -1,7 +1,7 @@
-import { useState, ButtonHTMLAttributes } from "react";
+import { useState, InputHTMLAttributes } from "react";
 import { Switch } from "@headlessui/react";
 import { clsx } from "clsx";
-type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
+type Props = Omit<InputHTMLAttributes<HTMLInputElement>, "onChange"> & {
   value: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };

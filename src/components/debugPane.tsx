@@ -59,10 +59,34 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
     });
   }, []);
 
-  function onClickCopy() {
-    navigator.clipboard.writeText(
-      JSON.stringify((window as any).error_handler_logs),
+  // Shape of a captured console log item (mirrors error handler injection logic)
+  interface LogItem {
+    ts: number; // timestamp ms
+    type: "debug" | "info" | "log" | "warn" | "error";
+    arguments: unknown[]; // original console args captured
+  }
+
+  // Safely read global logs list.
+  const getLogs = (): LogItem[] => {
+    const anyWindow = window as unknown as { error_handler_logs?: unknown };
+    if (!Array.isArray(anyWindow.error_handler_logs)) return [];
+    // Runtime validate minimal structure
+    return (anyWindow.error_handler_logs as unknown[]).filter(
+      (l): l is LogItem => {
+        if (!l || typeof l !== "object") return false;
+        const rec = l as Record<string, unknown>;
+        if (typeof rec.ts !== "number") return false;
+        if (typeof rec.type !== "string") return false;
+        if (!["debug", "info", "log", "warn", "error"].includes(rec.type))
+          return false;
+        if (!Array.isArray(rec.arguments)) return false;
+        return true;
+      },
     );
+  };
+
+  function onClickCopy() {
+    navigator.clipboard.writeText(JSON.stringify(getLogs()));
   }
 
   return (
@@ -136,9 +160,9 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
           </span>
         </div>
         <div className="relative inline-block max-h-screen w-full overflow-y-scroll px-2 md:px-8">
-          {(window as any).error_handler_logs
+          {getLogs()
             .slice(-TOTAL_ITEMS_TO_SHOW)
-            .filter((log: any) => {
+            .filter((log) => {
               if (log.type === "debug" && !typeDebugEnabled) return false;
               if (
                 (log.type === "info" || log.type === "log") &&
@@ -149,7 +173,7 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
               if (log.type === "error" && !typeErrorEnabled) return false;
               return true;
             })
-            .map((log: any, idx: number) => (
+            .map((log, idx: number) => (
               <div
                 key={log.ts + idx}
                 className={clsx(

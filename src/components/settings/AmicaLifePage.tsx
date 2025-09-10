@@ -155,9 +155,10 @@ export function AmicaLifePage({
                   value={timeBeforeIdle}
                   min={0}
                   max={60 * 60}
-                  onChange={(event: React.ChangeEvent<any>) => {
-                    setTimeBeforeIdle(event.target.value);
-                    updateConfig("time_before_idle_sec", event.target.value);
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    const val = Number(event.target.value);
+                    setTimeBeforeIdle(val);
+                    updateConfig("time_before_idle_sec", String(val));
                     setSettingsUpdated(true);
                   }}
                 />
@@ -171,9 +172,10 @@ export function AmicaLifePage({
                   value={timeToSleep}
                   min={0}
                   max={60 * 60}
-                  onChange={(event: React.ChangeEvent<any>) => {
-                    setTimeToSleep(event.target.value);
-                    updateConfig("time_to_sleep_sec", event.target.value);
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    const val = Number(event.target.value);
+                    setTimeToSleep(val);
+                    updateConfig("time_to_sleep_sec", String(val));
                     setSettingsUpdated(true);
                   }}
                 />
@@ -186,14 +188,16 @@ export function AmicaLifePage({
                 <RangeInput
                   min={minTimeInterval}
                   max={maxTimeInterval}
-                  minChange={(event: React.ChangeEvent<any>) => {
-                    setMinTimeInterval(event.target.value);
-                    updateConfig("min_time_interval_sec", event.target.value);
+                  minChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    const val = Number(event.target.value);
+                    setMinTimeInterval(val);
+                    updateConfig("min_time_interval_sec", String(val));
                     setSettingsUpdated(true);
                   }}
-                  maxChange={(event: React.ChangeEvent<any>) => {
-                    setMaxTimeInterval(event.target.value);
-                    updateConfig("max_time_interval_sec", event.target.value);
+                  maxChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    const val = Number(event.target.value);
+                    setMaxTimeInterval(val);
+                    updateConfig("max_time_interval_sec", String(val));
                     setSettingsUpdated(true);
                   }}
                 />
@@ -208,9 +212,10 @@ export function AmicaLifePage({
               <FormRow label="Reasoning Engine Url">
                 <TextInput
                   value={reasoningEngineUrl}
-                  onChange={(event: React.ChangeEvent<any>) => {
-                    setReasoningEngineUrl(event.target.value);
-                    updateConfig("reasoning_engine_url", event.target.value);
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    const val = event.target.value;
+                    setReasoningEngineUrl(val);
+                    updateConfig("reasoning_engine_url", val);
                     setSettingsUpdated(true);
                   }}
                 />

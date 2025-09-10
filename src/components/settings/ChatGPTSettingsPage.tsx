@@ -1,8 +1,7 @@
-import { BasicPage, FormRow, NotUsingAlert } from './common';
-import { TextInput } from '@/components/textInput';
-import { SecretTextInput } from '@/components/secretTextInput';
+import { BasicPage, FormRow, NotUsingAlert } from "./common";
+import { TextInput } from "@/components/textInput";
+import { SecretTextInput } from "@/components/secretTextInput";
 import { config, updateConfig } from "@/utils/config";
-
 
 export function ChatGPTSettingsPage({
   openAIApiKey,
@@ -21,26 +20,33 @@ export function ChatGPTSettingsPage({
   setOpenAIModel: (model: string) => void;
   setSettingsUpdated: (updated: boolean) => void;
 }) {
-  const description = <>Configure ChatGPT settings. You can get an API key from <a href="https://platform.openai.com">platform.openai.com</a>. You can generally use other OpenAI compatible URLs and models here too, such as <a href="https://openrouter.ai/">OpenRouter</a> or <a href="https://lmstudio.ai/">LM Studio</a>.</>;
+  const description = (
+    <>
+      Configure ChatGPT settings. You can get an API key from{" "}
+      <a href="https://platform.openai.com">platform.openai.com</a>. You can
+      generally use other OpenAI compatible URLs and models here too, such as{" "}
+      <a href="https://openrouter.ai/">OpenRouter</a> or{" "}
+      <a href="https://lmstudio.ai/">LM Studio</a>.
+    </>
+  );
 
   return (
-    <BasicPage
-      title="ChatGPT Settings"
-      description={description}
-    >
-      { config("chatbot_backend") !== "chatgpt" && (
+    <BasicPage title="ChatGPT Settings" description={description}>
+      {config("chatbot_backend") !== "chatgpt" && (
         <NotUsingAlert>
-          You are not currently using ChatGPT as your ChatBot backend. These settings will not be used.
+          You are not currently using ChatGPT as your ChatBot backend. These
+          settings will not be used.
         </NotUsingAlert>
-      ) }
-      <ul role="list" className="divide-y divide-gray-100 max-w-xs">
+      )}
+      <ul role="list" className="max-w-xs divide-y divide-gray-100">
         <li className="py-4">
           <FormRow label="OpenAI API Key">
             <SecretTextInput
               value={openAIApiKey}
-              onChange={(event: React.ChangeEvent<any>) => {
-                setOpenAIApiKey(event.target.value);
-                updateConfig("openai_apikey", event.target.value);
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                const val = event.target.value;
+                setOpenAIApiKey(val);
+                updateConfig("openai_apikey", val);
                 setSettingsUpdated(true);
               }}
             />
@@ -50,9 +56,10 @@ export function ChatGPTSettingsPage({
           <FormRow label="OpenAI URL">
             <TextInput
               value={openAIUrl}
-              onChange={(event: React.ChangeEvent<any>) => {
-                setOpenAIUrl(event.target.value);
-                updateConfig("openai_url", event.target.value);
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                const val = event.target.value;
+                setOpenAIUrl(val);
+                updateConfig("openai_url", val);
                 setSettingsUpdated(true);
               }}
             />
@@ -62,9 +69,10 @@ export function ChatGPTSettingsPage({
           <FormRow label="OpenAI Model">
             <TextInput
               value={openAIModel}
-              onChange={(event: React.ChangeEvent<any>) => {
-                setOpenAIModel(event.target.value);
-                updateConfig("openai_model", event.target.value);
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                const val = event.target.value;
+                setOpenAIModel(val);
+                updateConfig("openai_model", val);
                 setSettingsUpdated(true);
               }}
             />

@@ -25,22 +25,22 @@ export function LoadingProgress() {
   const [progressCnt, setProgressCnt] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (w) {
-        const progress = w.chatvrm_loading_progress || {};
-        const cnt = w.chatvrm_loading_progress_cnt || 0;
-        if (progressCnt !== cnt) {
-          setFiles(
-            Object.entries(progress).map(([k, v]) => ({
-              file: k as string,
-              progress: v as number,
-            })),
-          );
-          setProgressCnt(cnt);
-        }
+    const id = setInterval(() => {
+      if (!w) return;
+      const progress = w.chatvrm_loading_progress || {};
+      const cnt = w.chatvrm_loading_progress_cnt || 0;
+      if (progressCnt !== cnt) {
+        setFiles(
+          Object.entries(progress).map(([k, v]) => ({
+            file: k,
+            progress: v,
+          })),
+        );
+        setProgressCnt(cnt);
       }
     }, 100);
-  }, []);
+    return () => clearInterval(id);
+  }, [progressCnt, w]);
 
   return (
     <div className="z-floating absolute top-16 right-0 mt-4 w-30 pt-16 pr-2 text-right text-xs text-white">
