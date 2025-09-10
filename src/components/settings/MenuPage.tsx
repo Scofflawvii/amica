@@ -1,8 +1,8 @@
-import { useTranslation } from 'react-i18next';
-import { clsx } from 'clsx';
+import { useTranslation } from "react-i18next";
+import { clsx } from "clsx";
 
-import { ChevronRightIcon } from '@heroicons/react/20/solid';
-import { Link, pagesToLinks } from './common';
+import { ChevronRightIcon } from "@heroicons/react/20/solid";
+import { Link, pagesToLinks } from "./common";
 
 export function MenuPage({
   keys,
@@ -15,29 +15,32 @@ export function MenuPage({
 
   const links = pagesToLinks(keys);
   return (
-    <ul role="list" className="divide-y divide-black/5 bg-white rounded-lg shadow-lg">
+    <ul role="list" className="divide-border/40 panel divide-y">
       {links.map((link) => (
         <li
           key={link.key}
-          className="relative flex items-center space-x-4 py-4 cursor-pointer rounded-lg hover:bg-gray-50 p-4 transition-all"
+          className="hover:bg-surface-alt/60 relative flex cursor-pointer items-center space-x-4 rounded-lg p-4 py-4 transition-all"
           onClick={() => {
             menuClick(link);
-          }}
-        >
+          }}>
           <div className="min-w-0 flex-auto">
             <div className="flex items-center gap-x-3">
-              <h2 className="min-w-0 text-sm font-semibold leading-6">
-                <span className={clsx(
-                  'whitespace-nowrap flex w-0 flex-1 gap-x-2 items-center',
-                  link.className,
-                )}>
+              <h2 className="min-w-0 text-sm leading-6 font-semibold">
+                <span
+                  className={clsx(
+                    "flex w-0 flex-1 items-center gap-x-2 whitespace-nowrap",
+                    link.className,
+                  )}>
                   {link.icon}
                   {t(link.label)}
                 </span>
               </h2>
             </div>
           </div>
-          <ChevronRightIcon className="h-5 w-5 flex-none text-gray-400" aria-hidden="true" />
+          <ChevronRightIcon
+            className="text-muted h-5 w-5 flex-none"
+            aria-hidden="true"
+          />
         </li>
       ))}
     </ul>

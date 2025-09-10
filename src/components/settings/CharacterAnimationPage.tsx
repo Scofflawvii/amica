@@ -1,8 +1,8 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 import { Viewer } from "@/features/vrmViewer/viewer";
 import { BasicPage, FormRow, basename } from "./common";
-import { SwitchBox } from '@/components/switchBox';
+import { SwitchBox } from "@/components/switchBox";
 import { animationList } from "@/paths";
 import { updateConfig } from "@/utils/config";
 import { loadMixamoAnimation } from "@/lib/VRMAnimation/loadMixamoAnimation";
@@ -28,9 +28,10 @@ export function CharacterAnimationPage({
   return (
     <BasicPage
       title={t("Character Animation")}
-      description={t("Select the animation to play when idle. To load more animations refer to docs.")}
-    >
-      <ul role="list" className="divide-y divide-gray-100 max-w-xs">
+      description={t(
+        "Select the animation to play when idle. To load more animations refer to docs.",
+      )}>
+      <ul role="list" className="max-w-xs divide-y divide-gray-100">
         <li className="py-4">
           <FormRow label={t("Procedural Animation")}>
             <SwitchBox
@@ -48,7 +49,7 @@ export function CharacterAnimationPage({
           <FormRow label={t("Animation")}>
             <select
               value={animationUrl}
-              className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              className="input-base mt-2 block w-full pr-10 pl-3"
               disabled={animationProcedural}
               onChange={async (event: React.ChangeEvent<any>) => {
                 event.preventDefault();
@@ -56,26 +57,23 @@ export function CharacterAnimationPage({
                 setAnimationUrl(url);
                 updateConfig("animation_url", url);
                 setSettingsUpdated(true);
-                const animation = url.indexOf("vrma") > 0
-                  ? await loadVRMAnimation(url)
-                  : await loadMixamoAnimation(url, viewer.model!.vrm!);
+                const animation =
+                  url.indexOf("vrma") > 0
+                    ? await loadVRMAnimation(url)
+                    : await loadMixamoAnimation(url, viewer.model!.vrm!);
 
                 if (animation) {
                   viewer.model!.loadAnimation(animation);
                 }
                 requestAnimationFrame(() => {
-                  viewer.resetCamera()
+                  viewer.resetCamera();
                 });
-              }}
-            >
-              {animationList.map((url) =>
-                <option
-                  key={url}
-                  value={url}
-                >
+              }}>
+              {animationList.map((url) => (
+                <option key={url} value={url}>
                   {basename(url)}
                 </option>
-              )}
+              ))}
             </select>
           </FormRow>
         </li>

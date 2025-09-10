@@ -1,24 +1,26 @@
-import { useTranslation } from 'react-i18next';
-import { useEffect, useState } from 'react';
+import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
 import { getWindowAI } from "window.ai";
-import { BasicPage, Link, FormRow, getLinkFromPage } from './common';
+import { BasicPage, Link, FormRow, getLinkFromPage } from "./common";
 import { updateConfig } from "@/utils/config";
 import { isTauri } from "@/utils/isTauri";
 
 const chatbotBackends = [
-  {key: "echo",       label: "Echo"},
-  {key: "arbius_llm", label: "Arbius"},
-  {key: "chatgpt",    label: "ChatGPT"},
-  {key: "llamacpp",   label: "LLama.cpp"},
-  ...isTauri() ? [] : [{key: "windowai", label: "Window.ai"}], // Hides Window.ai when using the desktop app
-  {key: "ollama",     label: "Ollama"},
-  {key: "koboldai",   label: "KoboldAI"},
-  {key: "moshi",      label: "Moshi"},
-  {key: "openrouter", label: "OpenRouter"},
+  { key: "echo", label: "Echo" },
+  { key: "arbius_llm", label: "Arbius" },
+  { key: "chatgpt", label: "ChatGPT" },
+  { key: "llamacpp", label: "LLama.cpp" },
+  ...(isTauri() ? [] : [{ key: "windowai", label: "Window.ai" }]), // Hides Window.ai when using the desktop app
+  { key: "ollama", label: "Ollama" },
+  { key: "koboldai", label: "KoboldAI" },
+  { key: "moshi", label: "Moshi" },
+  { key: "openrouter", label: "OpenRouter" },
 ];
 
 function idToTitle(id: string): string {
-  return chatbotBackends[chatbotBackends.findIndex((engine) => engine.key === id)].label;
+  return chatbotBackends[
+    chatbotBackends.findIndex((engine) => engine.key === id)
+  ].label;
 }
 
 export function ChatbotBackendPage({
@@ -46,8 +48,8 @@ export function ChatbotBackendPage({
         if (windowAI) {
           setWindowAiDetected(true);
         }
-      } catch(e) {
-        console.error("window.ai", e)
+      } catch (e) {
+        console.error("window.ai", e);
       }
     })();
   }, []);
@@ -55,50 +57,63 @@ export function ChatbotBackendPage({
   return (
     <BasicPage
       title={t("Chatbot Backend")}
-      description={t("Chatbot_Backend_desc", "Select the chatbot backend to use. Echo simply responds with what you type, it is used for testing and demonstration. ChatGPT is a commercial chatbot API from OpenAI, however there are multiple compatible API providers which can be used in lieu of OpenAI. LLama.cpp is a free and open source chatbot backend.")}
-    >
-      <ul role="list" className="divide-y divide-gray-100 max-w-xs">
+      description={t(
+        "Chatbot_Backend_desc",
+        "Select the chatbot backend to use. Echo simply responds with what you type, it is used for testing and demonstration. ChatGPT is a commercial chatbot API from OpenAI, however there are multiple compatible API providers which can be used in lieu of OpenAI. LLama.cpp is a free and open source chatbot backend.",
+      )}>
+      <ul role="list" className="max-w-xs divide-y divide-gray-100">
         <li className="py-4">
           <FormRow label={t("Chatbot Backend")}>
             <select
-              className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              className="input-base mt-2 block w-full pr-10 pl-3"
               value={chatbotBackend}
               onChange={(event: React.ChangeEvent<any>) => {
                 setChatbotBackend(event.target.value);
                 updateConfig("chatbot_backend", event.target.value);
                 setSettingsUpdated(true);
-              }}
-            >
+              }}>
               {chatbotBackends.map((engine) => (
-                <option key={engine.key} value={engine.key}>{t(engine.label)}</option>
+                <option key={engine.key} value={engine.key}>
+                  {t(engine.label)}
+                </option>
               ))}
             </select>
           </FormRow>
         </li>
-        { ["arbius_llm", "chatgpt", "llamacpp", "ollama", "koboldai", "moshi"].includes(chatbotBackend) && (
+        {[
+          "arbius_llm",
+          "chatgpt",
+          "llamacpp",
+          "ollama",
+          "koboldai",
+          "moshi",
+        ].includes(chatbotBackend) && (
           <li className="py-4">
-            <FormRow label={`${t("Configure")} ${t(idToTitle(chatbotBackend))}`}>
+            <FormRow
+              label={`${t("Configure")} ${t(idToTitle(chatbotBackend))}`}>
               <button
                 type="button"
-                className="rounded bg-indigo-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="bg-primary hover:bg-primary-hover active:bg-primary-press focus-visible:ring-primary focus-visible:ring-offset-surface rounded px-2 py-1 text-xs font-semibold text-white shadow-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                 onClick={() => {
                   setPage(`${chatbotBackend}_settings`);
-                  setBreadcrumbs(breadcrumbs.concat([getLinkFromPage(`${chatbotBackend}_settings`)]));
-                }}
-              >
+                  setBreadcrumbs(
+                    breadcrumbs.concat([
+                      getLinkFromPage(`${chatbotBackend}_settings`),
+                    ]),
+                  );
+                }}>
                 {t("Click here to configure")} {t(idToTitle(chatbotBackend))}
               </button>
             </FormRow>
           </li>
         )}
-        { chatbotBackend === 'windowai' && ! windowAiDetected && (
+        {chatbotBackend === "windowai" && !windowAiDetected && (
           <li className="py-4">
             <FormRow label="Window.ai not found">
               <a
                 href="https://windowai.io/"
                 target="_blank"
-                className="rounded bg-indigo-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
+                className="bg-primary hover:bg-primary-hover active:bg-primary-press focus-visible:ring-primary focus-visible:ring-offset-surface rounded px-2 py-1 text-xs font-semibold text-white shadow-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none">
                 Install window.ai
               </a>
             </FormRow>

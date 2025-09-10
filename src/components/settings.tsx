@@ -1045,10 +1045,10 @@ export const Settings = ({ onClickClose }: { onClickClose: () => void }) => {
   }
 
   return (
-    <div className="fixed top-0 left-0 z-20 max-h-full w-full overflow-y-auto text-left text-xs text-black backdrop-blur">
-      <div className="z-index-50 absolute top-0 left-0 h-full w-full bg-gray-700 opacity-10"></div>
+    <div className="text fixed top-0 left-0 z-20 max-h-full w-full overflow-y-auto text-left text-xs backdrop-blur">
+      <div className="z-index-50 absolute top-0 left-0 h-full w-full bg-neutral-900/40 dark:bg-neutral-950/60"></div>
       <div
-        className="dark:bg-surface-alt border-border/50 fixed top-0 left-0 z-50 flex w-full items-center justify-between border-b bg-white p-2"
+        className="dark:bg-surface-alt border-border/50 bg-surface fixed top-0 left-0 z-50 flex w-full items-center justify-between border-b p-2"
         ref={topMenuRef}>
         <nav aria-label="Breadcrumb" className="ml-4 inline-block">
           <ol role="list" className="flex items-center space-x-4">
@@ -1063,7 +1063,7 @@ export const Settings = ({ onClickClose }: { onClickClose: () => void }) => {
                     setPage("main_menu");
                     setBreadcrumbs([]);
                   }}
-                  className="cursor-pointer text-gray-400 hover:text-gray-500">
+                  className="text-muted hover:text cursor-pointer">
                   <HomeIcon
                     className="h-5 w-5 flex-shrink-0"
                     aria-hidden="true"
@@ -1077,7 +1077,7 @@ export const Settings = ({ onClickClose }: { onClickClose: () => void }) => {
               <li key={breadcrumb.key} className="flex">
                 <div className="flex items-center">
                   <ChevronRightIcon
-                    className="h-5 w-5 flex-shrink-0 text-gray-400"
+                    className="text-muted h-5 w-5 flex-shrink-0"
                     aria-hidden="true"
                   />
                   <span
@@ -1092,7 +1092,7 @@ export const Settings = ({ onClickClose }: { onClickClose: () => void }) => {
                       }
                       setBreadcrumbs(nb);
                     }}
-                    className="ml-4 cursor-pointer text-sm font-medium text-gray-500 hover:text-gray-700">
+                    className="text-muted hover:text ml-4 cursor-pointer text-sm font-medium">
                     {breadcrumb.label}
                   </span>
                 </div>

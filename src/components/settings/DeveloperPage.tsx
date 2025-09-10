@@ -66,7 +66,7 @@ export function DeveloperPage({
       description={t(
         "For developers. These settings require a restart to take effect.",
       )}>
-      <ul role="list" className="max-w-xs divide-y divide-gray-100">
+      <ul role="list" className="divide-border/40 max-w-xs divide-y">
         <li className="py-4">
           <FormRow label={t("Debug Logging")}>
             <SwitchBox
@@ -122,7 +122,7 @@ export function DeveloperPage({
         <li className="py-4">
           <FormRow label={t("Clear DEBUG flag (localStorage)")}>
             <button
-              className="mt-2 rounded bg-gray-200 px-3 py-1 text-gray-800 hover:bg-gray-300"
+              className="bg-surface-alt/70 text hover:bg-surface-alt/90 border-border/50 mt-2 rounded border px-3 py-1"
               onClick={() => {
                 try {
                   if (typeof window !== "undefined") {
@@ -154,7 +154,7 @@ export function DeveloperPage({
           <FormRow label={t("MToon Debug Mode")}>
             <select
               value={mtoonDebugMode}
-              className="mt-2 block w-full rounded-md border-0 py-1.5 pr-10 pl-3 text-gray-900 ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              className="input-base mt-2 block w-full pr-10 pl-3"
               onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
                 setMtoonDebugMode(event.target.value);
                 updateConfig("mtoon_debug_mode", event.target.value);
@@ -172,7 +172,7 @@ export function DeveloperPage({
           <FormRow label={t("MToon Material Type")}>
             <select
               value={mtoonMaterialType}
-              className="mt-2 block w-full rounded-md border-0 py-1.5 pr-10 pl-3 text-gray-900 ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              className="input-base mt-2 block w-full pr-10 pl-3"
               onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
                 setMtoonMaterialType(event.target.value);
                 updateConfig("mtoon_material_type", event.target.value);
@@ -197,7 +197,7 @@ export function DeveloperPage({
                 setSettingsUpdated(true);
               }}
             />
-            <p className="mt-1 max-w-sm text-xs text-gray-500">
+            <p className="text-muted mt-1 max-w-sm text-xs">
               {t(
                 "Default is Auto: Amica will use WebGPU when supported and fall back to WebGL. This switch forces WebGPU on or off and requires a restart.",
               )}
