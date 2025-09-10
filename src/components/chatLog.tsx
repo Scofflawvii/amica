@@ -183,10 +183,12 @@ function Chat({
       )}>
       <div
         className={clsx(
-          "flex justify-between rounded-t-lg px-8 py-2 font-bold tracking-wider shadow-inner backdrop-blur-lg",
-          role === "assistant" ? "bg-pink-600/80" : "bg-cyan-600/80",
+          "flex justify-between rounded-t-lg px-8 py-2 font-bold tracking-wider text-white shadow-inner backdrop-blur-lg",
+          role === "assistant"
+            ? "from-primary to-secondary/90 bg-gradient-to-r"
+            : "from-secondary to-primary/80 bg-gradient-to-r",
         )}>
-        <div className="text-bold text-white">
+        <div className="text-bold">
           {role === "assistant" && config("name").toUpperCase()}
           {role === "user" && t("YOU")}
         </div>

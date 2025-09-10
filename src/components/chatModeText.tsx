@@ -59,13 +59,15 @@ function Chat({ role, message }: { role: string; message: string }) {
         <div className="card">
           <div
             className={clsx(
-              "bg-rose/90 rounded-t-lg py-3 pr-1 font-bold tracking-wider text-white",
-              role === "assistant" ? "px-8" : "px-8",
+              "rounded-t-lg py-3 pr-1 font-bold tracking-wider text-white",
+              role === "assistant"
+                ? "from-primary to-secondary/90 bg-gradient-to-r px-8"
+                : "from-secondary to-primary/80 bg-gradient-to-r px-8",
             )}>
             <span
               className={clsx(
                 "rounded-lg rounded-tl-none rounded-tr-none p-4 shadow-sm",
-                role === "assistant" ? "bg-pink-600/80" : "bg-cyan-600/80",
+                role === "assistant" ? "bg-primary/80" : "bg-secondary/80",
               )}>
               {role === "assistant" && config("name").toUpperCase()}
               {role === "user" && t("YOU")}

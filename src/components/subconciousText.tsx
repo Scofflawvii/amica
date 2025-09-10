@@ -52,9 +52,9 @@ function Chat({
     <div className="mx-auto my-8 max-w-sm">
       <div className="rounded-lg backdrop-blur-lg">
         <div className="card">
-          <div className="bg-rose/90 top-0 flex items-center justify-between rounded-t-lg px-8 pr-1 font-bold tracking-wider text-white">
+          <div className="from-primary to-secondary/90 top-0 flex items-center justify-between rounded-t-lg bg-gradient-to-r px-8 pr-1 font-bold tracking-wider text-white">
             <div className="flex items-center space-x-6">
-              <span className="rounded-lg rounded-tl-none rounded-tr-none bg-cyan-600/80 p-2 shadow-sm">
+              <span className="bg-primary/80 rounded-lg rounded-tl-none rounded-tr-none p-2 shadow-sm">
                 <IconBrain
                   className="h-7 w-7 text-xs text-white opacity-100"
                   aria-hidden="true"

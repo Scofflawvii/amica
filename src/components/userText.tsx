@@ -20,8 +20,8 @@ export const UserText = ({ message }: { message: string }) => {
       <div className="mx-auto w-full max-w-4xl px-4 md:px-16">
         <div className="rounded-lg backdrop-blur-lg">
           <div className="card">
-            <div className="bg-rose/90 rounded-t-lg px-8 py-3 pr-1 font-bold tracking-wider text-white">
-              <span className="rounded-lg rounded-tl-none rounded-tr-none bg-cyan-600/80 p-4 shadow-sm">
+            <div className="from-secondary to-primary/80 rounded-t-lg bg-gradient-to-r px-8 py-3 pr-1 font-bold tracking-wider text-white">
+              <span className="bg-secondary/80 rounded-lg rounded-tl-none rounded-tr-none p-4 shadow-sm">
                 {t("YOU")}
               </span>
             </div>
