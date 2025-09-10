@@ -95,30 +95,33 @@ export default function VrmViewer({ chatMode }: { chatMode: boolean }) {
   );
 
   return (
-    <div
-      className={clsx(
-        "fixed top-0 left-0 z-1 h-full w-full",
-        chatMode ? "top-[50%] left-[65%]" : "top-0 left-0",
-      )}>
-      <canvas ref={canvasRef} className={"h-full w-full"}></canvas>
-      {isLoading && (
-        <div
-          className={
-            "bg-opacity-50 absolute top-0 left-0 flex h-full w-full items-center justify-center bg-black"
-          }>
-          <div className={"text-2xl text-white"}>{loadingProgress}</div>
-        </div>
-      )}
-      {loadingError && (
-        <div
-          className={
-            "bg-opacity-50 absolute top-0 left-0 flex h-full w-full items-center justify-center bg-black"
-          }>
-          <div className={"text-2xl text-white"}>
-            Error loading VRM model...
+    <>
+      {/* z-layering: background (z-0) < VRM (z-[2]) < UI (>= z-10). */}
+      <div
+        className={clsx(
+          "z-vrm fixed top-0 left-0 h-full w-full",
+          chatMode ? "top-[50%] left-[65%]" : "top-0 left-0",
+        )}>
+        <canvas ref={canvasRef} className={"h-full w-full"}></canvas>
+        {isLoading && (
+          <div
+            className={
+              "bg-opacity-50 absolute top-0 left-0 flex h-full w-full items-center justify-center bg-black"
+            }>
+            <div className={"text-2xl text-white"}>{loadingProgress}</div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+        {loadingError && (
+          <div
+            className={
+              "bg-opacity-50 absolute top-0 left-0 flex h-full w-full items-center justify-center bg-black"
+            }>
+            <div className={"text-2xl text-white"}>
+              Error loading VRM model...
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 }

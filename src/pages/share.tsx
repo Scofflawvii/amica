@@ -194,7 +194,7 @@ export default function Share() {
           }
         `}
       </style>
-      <div className="fixed top-0 left-0 z-20 max-h-full w-full text-left text-xs text-[hsl(var(--text))]">
+      <div className="z-floating fixed top-0 left-0 max-h-full w-full text-left text-xs text-[hsl(var(--text))]">
         <div className="bg-surface-alt/80 border-border/40 border-b p-2 backdrop-blur">
           <IconButton
             iconName="24/Close"

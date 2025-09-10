@@ -33,7 +33,7 @@ export function Alert() {
   }, []);
 
   return (
-    <div className="pointer-events-none fixed z-[1000] flex w-full items-end justify-center sm:items-start sm:justify-end">
+    <div className="z-max pointer-events-none fixed flex w-full items-end justify-center sm:items-start sm:justify-end">
       <div className="mx-auto w-80 max-w-80">
         <Transition
           show={shownNotification !== null}

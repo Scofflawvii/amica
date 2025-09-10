@@ -1045,10 +1045,10 @@ export const Settings = ({ onClickClose }: { onClickClose: () => void }) => {
   }
 
   return (
-    <div className="text fixed top-0 left-0 z-20 max-h-full w-full overflow-y-auto text-left text-xs backdrop-blur">
+    <div className="text z-floating fixed top-0 left-0 max-h-full w-full overflow-y-auto text-left text-xs backdrop-blur">
       <div className="z-index-50 absolute top-0 left-0 h-full w-full bg-neutral-900/40 dark:bg-neutral-950/60"></div>
       <div
-        className="dark:bg-surface-alt border-border/50 bg-surface fixed top-0 left-0 z-50 flex w-full items-center justify-between border-b p-2"
+        className="dark:bg-surface-alt border-border/50 bg-surface z-modal fixed top-0 left-0 flex w-full items-center justify-between border-b p-2"
         ref={topMenuRef}>
         <nav aria-label="Breadcrumb" className="ml-4 inline-block">
           <ol role="list" className="flex items-center space-x-4">

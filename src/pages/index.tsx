@@ -1,9 +1,4 @@
-import {
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { clsx } from "clsx";
 import { M_PLUS_2, Montserrat } from "next/font/google";
 import {
@@ -21,8 +16,8 @@ import {
 } from "@heroicons/react/24/outline";
 
 // Type for XR Session Mode
-type XRSessionMode = 'immersive-vr' | 'immersive-ar' | 'inline';
-import { IconBrain } from '@tabler/icons-react';
+type XRSessionMode = "immersive-vr" | "immersive-ar" | "inline";
+import { IconBrain } from "@tabler/icons-react";
 
 import { MenuButton } from "@/components/menuButton";
 import { AssistantText } from "@/components/assistantText";
@@ -46,8 +41,8 @@ import { Message, Role } from "@/features/chat/messages";
 import { ChatContext } from "@/features/chat/chatContext";
 import { AlertContext } from "@/features/alert/alertContext";
 
-import { config, updateConfig } from '@/utils/config';
-import { isTauri } from '@/utils/isTauri';
+import { config, updateConfig } from "@/utils/config";
+import { isTauri } from "@/utils/isTauri";
 import { VrmStoreProvider } from "@/features/vrmStore/vrmStoreContext";
 import { AmicaLifeContext } from "@/features/amicaLife/amicaLifeContext";
 import { ChatModeText } from "@/components/chatModeText";
@@ -69,7 +64,6 @@ const montserrat = Montserrat({
   subsets: ["latin"],
 });
 
-
 export default function Home() {
   const { viewer } = useContext(ViewerContext);
   const { alert } = useContext(AlertContext);
@@ -83,7 +77,9 @@ export default function Home() {
   const [userMessage, setUserMessage] = useState("");
   const [thoughtMessage, setThoughtMessage] = useState("");
   const [shownMessage, setShownMessage] = useState<Role>("system");
-  const [subconciousLogs, setSubconciousLogs] = useState<TimestampedPrompt[]>([]);
+  const [subconciousLogs, setSubconciousLogs] = useState<TimestampedPrompt[]>(
+    [],
+  );
 
   // showContent exists to allow ssr
   // otherwise issues from usage of localStorage and window will occur
@@ -97,7 +93,7 @@ export default function Home() {
   const [showSubconciousText, setShowSubconciousText] = useState(false);
 
   // null indicates havent loaded config yet
-  const [muted, setMuted] = useState<boolean|null>(null);
+  const [muted, setMuted] = useState<boolean | null>(null);
   const [webcamEnabled, setWebcamEnabled] = useState(false);
 
   const [showStreamWindow, setShowStreamWindow] = useState(false);
@@ -105,19 +101,18 @@ export default function Home() {
 
   const [isVRHeadset] = useState(false);
 
-
   useEffect(() => {
     amicaLife.checkSettingOff(!showSettings);
   }, [showSettings, amicaLife]);
 
   useEffect(() => {
     if (muted === null) {
-      setMuted(config('tts_muted') === 'true');
+      setMuted(config("tts_muted") === "true");
     }
 
-    setShowArbiusIntroduction(config("show_arbius_introduction") === 'true');
+    setShowArbiusIntroduction(config("show_arbius_introduction") === "true");
 
-    if (config("bg_color") !== '') {
+    if (config("bg_color") !== "") {
       document.body.style.backgroundColor = config("bg_color");
     } else {
       document.body.style.backgroundImage = `url(${config("bg_url")})`;
@@ -147,60 +142,60 @@ export default function Home() {
   }, [viewer, videoRef, showStreamWindow]);
 
   function toggleTTSMute() {
-    updateConfig('tts_muted', config('tts_muted') === 'true' ? 'false' : 'true')
-    setMuted(config('tts_muted') === 'true')
+    updateConfig(
+      "tts_muted",
+      config("tts_muted") === "true" ? "false" : "true",
+    );
+    setMuted(config("tts_muted") === "true");
   }
 
   const toggleState = (
-    setFunc: React.Dispatch<React.SetStateAction<boolean>>, 
+    setFunc: React.Dispatch<React.SetStateAction<boolean>>,
     deps: React.Dispatch<React.SetStateAction<boolean>>[],
   ) => {
-    setFunc(prev => {
+    setFunc((prev) => {
       if (!prev) {
-        deps.forEach(dep => dep(false));
-      } 
+        deps.forEach((dep) => dep(false));
+      }
       return !prev;
     });
   };
-  
+
   const toggleChatLog = () => {
     toggleState(setShowChatLog, [setShowSubconciousText, setShowChatMode]);
   };
-  
+
   const toggleShowSubconciousText = () => {
     if (subconciousLogs.length !== 0) {
       toggleState(setShowSubconciousText, [setShowChatLog, setShowChatMode]);
     }
   };
-  
+
   const toggleChatMode = () => {
     toggleState(setShowChatMode, [setShowChatLog, setShowSubconciousText]);
   };
 
   const toggleXR = async (immersiveType: XRSessionMode) => {
-    console.log('Toggle XR', immersiveType);
+    console.log("Toggle XR", immersiveType);
 
-    if (! window.navigator.xr) {
+    if (!window.navigator.xr) {
       console.error("WebXR not supported");
       return;
     }
-    if (! await window.navigator.xr.isSessionSupported(immersiveType)) {
+    if (!(await window.navigator.xr.isSessionSupported(immersiveType))) {
       console.error("Session not supported");
       return;
     }
 
-    if (! viewer.isReady) {
+    if (!viewer.isReady) {
       console.error("Viewer not ready");
       return;
     }
 
     // TODO should hand tracking be required?
-    let optionalFeatures: string[] = [
-      'hand-tracking',
-      'local-floor',
-    ];
-    if (immersiveType === 'immersive-ar') {
-      optionalFeatures.push('dom-overlay');
+    let optionalFeatures: string[] = ["hand-tracking", "local-floor"];
+    if (immersiveType === "immersive-ar") {
+      optionalFeatures.push("dom-overlay");
     }
 
     const sessionInit = {
@@ -221,30 +216,37 @@ export default function Home() {
       // @ts-expect-error - WebXR types may not be fully available
       if (window.navigator.xr.offerSession !== undefined) {
         // @ts-expect-error - WebXR navigator types may not be fully available
-        const session = await navigator.xr?.offerSession(immersiveType, sessionInit);
+        const session = await navigator.xr?.offerSession(
+          immersiveType,
+          sessionInit,
+        );
         viewer.onSessionStarted(session, immersiveType);
       }
       return;
     }
 
     // @ts-expect-error - WebXR types may not be fully available
-    if (window.navigator.xr.offerSession !== undefined ) {
+    if (window.navigator.xr.offerSession !== undefined) {
       // @ts-expect-error - WebXR navigator types may not be fully available
-      const session = await navigator.xr?.offerSession(immersiveType, sessionInit);
+      const session = await navigator.xr?.offerSession(
+        immersiveType,
+        sessionInit,
+      );
       viewer.onSessionStarted(session, immersiveType);
       return;
     }
 
     try {
-      const session = await window.navigator.xr.requestSession(immersiveType, sessionInit);
+      const session = await window.navigator.xr.requestSession(
+        immersiveType,
+        sessionInit,
+      );
 
       viewer.onSessionStarted(session, immersiveType);
     } catch (err) {
       console.error(err);
     }
-
-  }
-
+  };
 
   useEffect(() => {
     bot.initialize(
@@ -262,18 +264,13 @@ export default function Home() {
 
     // TODO remove in future
     // this change was just to make naming cleaner
-    if (config("tts_backend") === 'openai') {
+    if (config("tts_backend") === "openai") {
       updateConfig("tts_backend", "openai_tts");
     }
   }, [bot, viewer]);
 
   useEffect(() => {
-    amicaLife.initialize(
-      viewer,
-      bot,
-      setSubconciousLogs,
-      chatSpeaking,
-    );
+    amicaLife.initialize(viewer, bot, setSubconciousLogs, chatSpeaking);
   }, [amicaLife, bot, viewer]);
 
   useEffect(() => {
@@ -285,55 +282,56 @@ export default function Home() {
   if (!showContent) return <></>;
 
   return (
-    <div className={clsx(
-      m_plus_2.variable,
-      montserrat.variable,
-    )}>
-      {showStreamWindow && 
+    <div className={clsx(m_plus_2.variable, montserrat.variable)}>
+      {showStreamWindow && (
+        // Elevated above VRM (z-[2]) while still below higher overlay UI elements.
+        <div className="z-floating fixed top-1/3 right-4 h-[150px] w-[200px]">
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            className="h-full w-full rounded-lg object-cover shadow-lg outline outline-2 outline-red-500"
+          />
+        </div>
+      )}
 
-      <div className="fixed top-1/3 right-4 w-[200px] h-[150px] z-0">
-        <video
-          ref={videoRef} 
-          autoPlay
-          muted
-          playsInline
-          className="w-full h-full object-cover rounded-lg shadow-lg outline outline-2 outline-red-500"
-        />
-      </div> }
-
-      { config("youtube_videoid") !== '' && (
-        <div className="fixed video-container w-full h-full z-0">
+      {config("youtube_videoid") !== "" && (
+        <div className="video-container z-background fixed h-full w-full">
           <iframe
-            className="w-full h-full"
+            className="h-full w-full"
             src={`https://www.youtube.com/embed/${config("youtube_videoid")}?&autoplay=1&mute=1&playsinline=1&loop=1&controls=0&disablekb=1&fs=0&playlist=${config("youtube_videoid")}`}
             frameBorder="0"></iframe>
         </div>
       )}
 
-      <Introduction open={config("show_introduction") === 'true'} />
-      <ArbiusIntroduction open={showArbiusIntroduction} close={() => setShowArbiusIntroduction(false)} />
+      <Introduction open={config("show_introduction") === "true"} />
+      <ArbiusIntroduction
+        open={showArbiusIntroduction}
+        close={() => setShowArbiusIntroduction(false)}
+      />
 
       <LoadingProgress />
 
-      { webcamEnabled && <EmbeddedWebcam setWebcamEnabled={setWebcamEnabled} /> }
-      { showDebug && <DebugPane onClickClose={() => setShowDebug(false) }/> }
-      { config("chatbot_backend") === "moshi" && <Moshi setAssistantText={setAssistantMessage}/>  }
+      {webcamEnabled && <EmbeddedWebcam setWebcamEnabled={setWebcamEnabled} />}
+      {showDebug && <DebugPane onClickClose={() => setShowDebug(false)} />}
+      {config("chatbot_backend") === "moshi" && (
+        <Moshi setAssistantText={setAssistantMessage} />
+      )}
 
       <VrmStoreProvider>
-        <VrmViewer chatMode={showChatMode}/>
+        <VrmViewer chatMode={showChatMode} />
         {showSettings && (
-          <Settings
-            onClickClose={() => setShowSettings(false)}
-          />
+          <Settings onClickClose={() => setShowSettings(false)} />
         )}
       </VrmStoreProvider>
-      
+
       <MessageInputContainer isChatProcessing={chatProcessing} />
 
       {/* main menu */}
-      <div className="absolute z-10 m-2">
-        <div className="grid grid-flow-col gap-[8px] place-content-end mt-2 bg-slate-800/40 rounded-md backdrop-blur-md shadow-sm">
-          <div className='flex flex-col justify-center items-center p-1 space-y-3'>
+      <div className="z-base absolute m-2">
+        <div className="mt-2 grid grid-flow-col place-content-end gap-[8px] rounded-md bg-slate-800/40 shadow-sm backdrop-blur-md">
+          <div className="flex flex-col items-center justify-center space-y-3 p-1">
             <MenuButton
               large={isVRHeadset}
               icon={WrenchScrewdriverIcon}
@@ -357,7 +355,7 @@ export default function Home() {
               />
             )}
 
-            { muted ? (
+            {muted ? (
               <MenuButton
                 large={isVRHeadset}
                 icon={SpeakerXMarkIcon}
@@ -373,7 +371,7 @@ export default function Home() {
               />
             )}
 
-            { webcamEnabled ? (
+            {webcamEnabled ? (
               <MenuButton
                 large={isVRHeadset}
                 icon={VideoCameraIcon}
@@ -393,7 +391,7 @@ export default function Home() {
               large={isVRHeadset}
               icon={ShareIcon}
               href="/share"
-              target={isTauri() ? '' : '_blank'}
+              target={isTauri() ? "" : "_blank"}
               label="share"
             />
             <MenuButton
@@ -403,7 +401,7 @@ export default function Home() {
               label="import"
             />
 
-            { showSubconciousText ? (
+            {showSubconciousText ? (
               <MenuButton
                 large={isVRHeadset}
                 icon={IconBrain}
@@ -463,55 +461,52 @@ export default function Home() {
             )} */}
 
             <div className="flex flex-row items-center space-x-2">
-                <VerticalSwitchBox
-                  value={showChatMode}
-                  label={""}
-                  onChange={toggleChatMode}
-                />
+              <VerticalSwitchBox
+                value={showChatMode}
+                label={""}
+                onChange={toggleChatMode}
+              />
             </div>
 
             <div className="flex flex-row items-center space-x-2">
-              { showStreamWindow ? (
+              {showStreamWindow ? (
                 <SignalIcon
-                  className="h-7 w-7 text-white opacity-100 hover:opacity-50 active:opacity-100 hover:cursor-pointer"
+                  className="h-7 w-7 text-white opacity-100 hover:cursor-pointer hover:opacity-50 active:opacity-100"
                   aria-hidden="true"
                   onClick={() => setShowStreamWindow(false)}
                 />
               ) : (
                 <SignalIcon
-                  className="h-7 w-7 text-white opacity-50 hover:opacity-100 active:opacity-100 hover:cursor-pointer"
+                  className="h-7 w-7 text-white opacity-50 hover:cursor-pointer hover:opacity-100 active:opacity-100"
                   aria-hidden="true"
                   onClick={() => setShowStreamWindow(true)}
                 />
               )}
             </div>
-            
           </div>
-        </div>    
+        </div>
       </div>
 
       {showChatLog && <ChatLog messages={chatLog} />}
 
       {/* Normal chat text */}
-      {!showSubconciousText && ! showChatLog && ! showChatMode && (
+      {!showSubconciousText && !showChatLog && !showChatMode && (
         <>
-          { shownMessage === 'assistant' && (
+          {shownMessage === "assistant" && (
             <AssistantText message={assistantMessage} />
           )}
-          { shownMessage === 'user' && (
-            <UserText message={userMessage} />
-          )}
+          {shownMessage === "user" && <UserText message={userMessage} />}
         </>
       )}
 
       {/* Thought text */}
-      {thoughtMessage !== "" && <ThoughtText message={thoughtMessage}/>}
+      {thoughtMessage !== "" && <ThoughtText message={thoughtMessage} />}
 
       {/* Chat mode text */}
-      {showChatMode && <ChatModeText messages={chatLog}/>}
+      {showChatMode && <ChatModeText messages={chatLog} />}
 
       {/* Subconcious stored prompt text */}
-      {showSubconciousText && <SubconciousText messages={subconciousLogs}/>}
+      {showSubconciousText && <SubconciousText messages={subconciousLogs} />}
 
       <AddToHomescreen />
 

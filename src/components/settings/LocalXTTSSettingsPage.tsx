@@ -301,7 +301,7 @@ export function LocalXTTSSettingsPage({
                   leave="transition ease-in duration-100"
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0">
-                  <Listbox.Options className="bg-surface-alt/95 shadow-subtle border-border/50 absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border py-1 text-base backdrop-blur focus:outline-none sm:text-sm">
+                  <Listbox.Options className="bg-surface-alt/95 shadow-subtle border-border/50 z-base absolute mt-1 max-h-60 w-full overflow-auto rounded-md border py-1 text-base backdrop-blur focus:outline-none sm:text-sm">
                     {["v1", "v2"].map((version) => (
                       <Listbox.Option
                         key={version}
@@ -370,7 +370,7 @@ export function LocalXTTSSettingsPage({
                   leave="transition ease-in duration-100"
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0">
-                  <Listbox.Options className="bg-surface-alt/95 shadow-subtle border-border/50 absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border py-1 text-base backdrop-blur focus:outline-none sm:text-sm">
+                  <Listbox.Options className="bg-surface-alt/95 shadow-subtle border-border/50 z-base absolute mt-1 max-h-60 w-full overflow-auto rounded-md border py-1 text-base backdrop-blur focus:outline-none sm:text-sm">
                     {voices.map((voice) => (
                       <Listbox.Option
                         key={voice}
@@ -438,7 +438,7 @@ export function LocalXTTSSettingsPage({
                   leave="transition ease-in duration-100"
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0">
-                  <Listbox.Options className="bg-surface-alt/95 shadow-subtle border-border/50 absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border py-1 text-base backdrop-blur focus:outline-none sm:text-sm">
+                  <Listbox.Options className="bg-surface-alt/95 shadow-subtle border-border/50 z-base absolute mt-1 max-h-60 w-full overflow-auto rounded-md border py-1 text-base backdrop-blur focus:outline-none sm:text-sm">
                     {rvcVoices.map((voice) => (
                       <Listbox.Option
                         key={voice}
@@ -535,7 +535,7 @@ export function LocalXTTSSettingsPage({
                   leave="transition ease-in duration-100"
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0">
-                  <Listbox.Options className="bg-surface-alt/95 shadow-subtle border-border/50 absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border py-1 text-base backdrop-blur focus:outline-none sm:text-sm">
+                  <Listbox.Options className="bg-surface-alt/95 shadow-subtle border-border/50 z-base absolute mt-1 max-h-60 w-full overflow-auto rounded-md border py-1 text-base backdrop-blur focus:outline-none sm:text-sm">
                     {Object.entries(languages).map(([label, code]) => (
                       <Listbox.Option
                         key={code}

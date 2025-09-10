@@ -6,6 +6,17 @@ export default {
   content: ["./src/**/*.{ts,tsx,js,jsx,html}"],
   theme: {
     extend: {
+      zIndex: {
+        // Layering scale (see docs/z-index-scale.md)
+        background: "0", // Background media layers
+        vrm: "2", // VRM / Three.js canvas
+        base: "10", // Core UI
+        floating: "20", // Floating panels, dropdowns, webcam preview
+        overlay: "40", // Intro overlays, dim surfaces
+        modal: "50", // Modal dialogs / settings
+        toast: "100", // Toast notifications
+        max: "1000", // Critical alerts (highest)
+      },
       colors: {
         // Semantic surface & text tokens powered by CSS variables
         surface: "hsl(var(--surface) / <alpha-value>)",

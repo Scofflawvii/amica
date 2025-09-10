@@ -20,7 +20,7 @@ export const ThoughtText = ({ message }: { message: string }) => {
   return (
     <div
       className={clsx(
-        "absolute top-4 right-3 z-40 -translate-y-4 opacity-70 transition-all duration-500 ease-in-out",
+        "z-overlay absolute top-4 right-3 -translate-y-4 opacity-70 transition-all duration-500 ease-in-out",
       )}
       style={{
         filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))",

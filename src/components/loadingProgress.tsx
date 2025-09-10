@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 type LoadingFile = {
   file: string;
   progress: number;
-}
+};
 
 export function LoadingProgress() {
   if (typeof window !== "undefined") {
-    if(! (window as any).chatvrm_loading_progress) {
+    if (!(window as any).chatvrm_loading_progress) {
       (window as any).chatvrm_loading_progress = {};
       (window as any).chatvrm_loading_progress_cnt = 0;
     }
@@ -22,10 +22,12 @@ export function LoadingProgress() {
         const progress = (window as any).chatvrm_loading_progress;
         const cnt = (window as any).chatvrm_loading_progress_cnt;
         if (progressCnt !== cnt) {
-          setFiles(Object.entries(progress).map(([k, v]) => ({
-            file: k as string,
-            progress: v as number,
-          })));
+          setFiles(
+            Object.entries(progress).map(([k, v]) => ({
+              file: k as string,
+              progress: v as number,
+            })),
+          );
           setProgressCnt(cnt);
         }
       }
@@ -33,15 +35,11 @@ export function LoadingProgress() {
   }, []);
 
   return (
-    <div className="absolute top-16 right-0 mt-4 pt-16 pr-2 w-30 text-white text-xs z-20 text-right">
-      {files.length > 0 && (
-        <div>
-          [loading files]
-        </div>
-      )}
+    <div className="z-floating absolute top-16 right-0 mt-4 w-30 pt-16 pr-2 text-right text-xs text-white">
+      {files.length > 0 && <div>[loading files]</div>}
       {files.map((row) => (
         <div key={row.file}>
-          {row.file}: {((row.progress * 100)|0)/100}%
+          {row.file}: {((row.progress * 100) | 0) / 100}%
         </div>
       ))}
     </div>

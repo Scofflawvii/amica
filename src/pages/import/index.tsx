@@ -15,9 +15,9 @@ export default function Import() {
   };
 
   return (
-    <div className="bg-surface/80 fixed inset-0 z-50 flex h-full w-full backdrop-blur-sm">
+    <div className="bg-surface/80 z-modal fixed inset-0 flex h-full w-full backdrop-blur-sm">
       <div className="p-10 md:p-20">
-        <div className="fixed top-0 left-0 z-20 max-h-full w-full text-left text-xs text-[hsl(var(--text))]">
+        <div className="z-floating fixed top-0 left-0 max-h-full w-full text-left text-xs text-[hsl(var(--text))]">
           <div className="bg-surface-alt/80 border-border/50 border-b p-2 backdrop-blur">
             <IconButton
               iconName="24/Close"

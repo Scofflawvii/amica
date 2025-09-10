@@ -66,8 +66,8 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
   }
 
   return (
-    <div className="bg-surface/95 fixed top-0 left-0 z-20 h-full w-full text-[hsl(var(--text))]">
-      <div className="fixed top-0 left-0 z-20 max-h-full w-full text-left text-xs">
+    <div className="bg-surface/95 z-floating fixed top-0 left-0 h-full w-full text-[hsl(var(--text))]">
+      <div className="z-floating fixed top-0 left-0 max-h-full w-full text-left text-xs">
         <div className="bg-surface-alt/70 border-border/50 border-b p-2 backdrop-blur">
           <IconButton
             iconName="24/Close"

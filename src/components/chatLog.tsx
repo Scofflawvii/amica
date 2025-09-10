@@ -104,7 +104,8 @@ export const ChatLog = ({ messages }: { messages: Message[] }) => {
 
   return (
     <>
-      <div className="absolute top-4 left-12 z-10">
+      {/* Use semantic z-index: base controls sit on floating layer for prominence above base UI. */}
+      <div className="z-floating absolute top-4 left-12">
         <IconButton
           iconName="24/ReloadLoop"
           label={t("Restart")}

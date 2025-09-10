@@ -4,6 +4,7 @@ import reactPlugin from "eslint-plugin-react";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
 import typescriptParser from "@typescript-eslint/parser";
 import typescriptPlugin from "@typescript-eslint/eslint-plugin";
+import amicaZIndex from "./eslint-plugin-amica-zindex.js";
 
 export default [
   {
@@ -89,6 +90,7 @@ export default [
       "@next/next": nextPlugin,
       react: reactPlugin,
       "react-hooks": reactHooksPlugin,
+      "amica-z": amicaZIndex,
     },
     rules: {
       // Next.js specific rules
@@ -107,6 +109,8 @@ export default [
       "no-useless-escape": "error",
       "no-empty": "error",
       "no-prototype-builtins": "error",
+      // Enforce semantic Tailwind z-index tokens
+      "amica-z/no-raw-z-index": "error",
     },
     settings: {
       react: {

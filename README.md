@@ -4,9 +4,7 @@
 
 <h2 align="center"><a href="https://amica.arbius.ai">Amica: Your friendly personal AI</a></h2>
 
-
 <h5 align="center"> If you like our project, please give us a star ⭐ on GitHub.</h2>
-
 
 <h5 align="center">
 
@@ -31,7 +29,6 @@ We just released Amica 1.2 with lots of new features. [Docs](https://docs.heyami
 [![Video Title](https://img.youtube.com/vi/3zCN2IlxHrU/0.jpg)](https://www.youtube.com/watch?v=3zCN2IlxHrU)
 
 You can import VRM files, adjust the voice to fit the character, and generate response text that includes emotional expressions.
-
 
 </p>
 
@@ -131,12 +128,45 @@ This project originated as a fork of ChatVRM by Pixiv:
 
 [https://pixiv.github.io/ChatVRM](https://pixiv.github.io/ChatVRM)
 
-## 🔒 License
-* The majority of this project is released under the MIT license as found in the [LICENSE](https://github.com/semperai/amica/blob/master/LICENSE) file.
-* Assets such as 3D models and images are released under their authors respective licenses.
+## 🧱 Z-Index Layering Scale
 
+Semantic layering ensures all UI sits above the VRM canvas without arbitrary z-index inflation. Use the semantic utilities instead of raw numbers when possible.
+
+| Token / Class  | Value | Usage                                                     |
+| -------------- | ----- | --------------------------------------------------------- |
+| `z-background` | 0     | Background media (YouTube iframe, decorative video/image) |
+| `z-vrm`        | 2     | VRM / Three.js canvas layer                               |
+| `z-base`       | 10    | Core UI (menus, chat controls, standard buttons)          |
+| `z-floating`   | 20    | Floating panes (webcam preview, dropdowns, popovers)      |
+| `z-overlay`    | 40    | Introduction overlays, dim scrims                         |
+| `z-modal`      | 50    | Settings / modal dialogs                                  |
+| `z-toast`      | 100   | Toast / transient notices                                 |
+| `z-max`        | 1000  | Critical alerts (topmost)                                 |
+
+Guidelines:
+
+1. Pick the lowest layer that still achieves visibility.
+2. Prefer semantic classes; avoid adding new numeric tiers casually.
+3. For new blocking UI, reuse `z-overlay` or `z-modal` unless a distinct interaction model demands otherwise.
+4. Reserve `z-max` for short‑lived critical alerts.
+
+Migration examples:
+
+```
+z-10  -> z-base
+z-20  -> z-floating
+z-[2] -> z-vrm (already in place for VRM canvas)
+```
+
+See `docs/z-index-scale.md` for deeper guidance.
+
+## 🔒 License
+
+- The majority of this project is released under the MIT license as found in the [LICENSE](https://github.com/semperai/amica/blob/master/LICENSE) file.
+- Assets such as 3D models and images are released under their authors respective licenses.
 
 ## ✨ Star History
+
 [![Star History](https://api.star-history.com/svg?repos=semperai/amica&type=Date)](https://star-history.com/#semperai/amica&Date)
 
 ## 🤗 Contributors
