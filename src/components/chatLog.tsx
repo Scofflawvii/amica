@@ -1,28 +1,22 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 import { clsx } from "clsx";
 import { useCallback, useContext, useEffect, useRef } from "react";
 import FlexTextarea from "@/components/flexTextarea/flexTextarea";
 import { Message } from "@/features/chat/messages";
 import { IconButton } from "@/components/iconButton";
-import {
-  ArrowPathIcon,
-} from '@heroicons/react/20/solid';
+import { ArrowPathIcon } from "@heroicons/react/20/solid";
 import { config } from "@/utils/config";
 import { ChatContext } from "@/features/chat/chatContext";
-import { saveAs } from 'file-saver';
+import { saveAs } from "file-saver";
 
-export const ChatLog = ({
-  messages,
-}: {
-  messages: Message[];
-}) => {
+export const ChatLog = ({ messages }: { messages: Message[] }) => {
   const { t } = useTranslation();
   const { chat: bot } = useContext(ChatContext);
   const chatScrollRef = useRef<HTMLDivElement>(null);
 
   const handleResumeButtonClick = (num: number, newMessage: string) => {
     bot.setMessageList(messages.slice(0, num));
-    bot.receiveMessageFromUser(newMessage,false);
+    bot.receiveMessageFromUser(newMessage, false);
   };
 
   const txtFileInputRef = useRef<HTMLInputElement>(null);
@@ -42,13 +36,15 @@ export const ChatLog = ({
       fileReader.onload = (e) => {
         const content = e.target?.result as string;
         const lines = content.split("\n");
-        const parsedChat = lines.map((line) => {
-          const match = line.match(/^(user|assistant)\s*:\s*(.*)$/);
-          if (match) {
-            return { role: match[1], content: match[2] };
-          }
-          return null;
-        }).filter(Boolean) as Message[];
+        const parsedChat = lines
+          .map((line) => {
+            const match = line.match(/^(user|assistant)\s*:\s*(.*)$/);
+            if (match) {
+              return { role: match[1], content: match[2] };
+            }
+            return null;
+          })
+          .filter(Boolean) as Message[];
 
         try {
           if (parsedChat.length > 0) {
@@ -58,9 +54,12 @@ export const ChatLog = ({
             if (lastMessage.role === "user") {
               bot.receiveMessageFromUser(lastMessage.content as string, false);
             } else {
-              bot.bubbleMessage(lastMessage.role, lastMessage.content as string);
+              bot.bubbleMessage(
+                lastMessage.role,
+                lastMessage.content as string,
+              );
             }
-          } 
+          }
           console.error("Please attach the correct file format.");
         } catch (e: any) {
           console.error(e.toString());
@@ -71,15 +70,22 @@ export const ChatLog = ({
 
       event.target.value = "";
     },
-    [bot]
+    [bot],
   );
 
   const exportMessagesToTxt = (messages: any[]) => {
     const blob = new Blob(
-      [messages.map((msg: { role: string; content: string; }) => `${msg.role} : ${msg.content}`).join('\n\n')],
-      { type: 'text/plain' }
+      [
+        messages
+          .map(
+            (msg: { role: string; content: string }) =>
+              `${msg.role} : ${msg.content}`,
+          )
+          .join("\n\n"),
+      ],
+      { type: "text/plain" },
     );
-    saveAs(blob, 'chat_log.txt');
+    saveAs(blob, "chat_log.txt");
   };
 
   useEffect(() => {
@@ -98,45 +104,42 @@ export const ChatLog = ({
 
   return (
     <>
-      <div className="absolute left-12 top-4 z-10">
+      <div className="absolute top-4 left-12 z-10">
         <IconButton
           iconName="24/ReloadLoop"
           label={t("Restart")}
           isProcessing={false}
-          className="bg-slate-600 hover:bg-slate-500 active:bg-slate-500 shadow-xl"
+          className="bg-slate-600 shadow-xl hover:bg-slate-500 active:bg-slate-500"
           onClick={() => {
             bot.setMessageList([]);
-          }}
-        ></IconButton>
+          }}></IconButton>
         <IconButton
           iconName="24/UploadAlt"
           label={t("Load Chat")}
           isProcessing={false}
-          className="bg-slate-600 hover:bg-slate-500 active:bg-slate-500 shadow-xl"
-          onClick={handleClickOpenTxtFile}
-        ></IconButton>
+          className="bg-slate-600 shadow-xl hover:bg-slate-500 active:bg-slate-500"
+          onClick={handleClickOpenTxtFile}></IconButton>
         <IconButton
           iconName="24/Save"
           label={t("Save")}
           isProcessing={false}
-          className="bg-slate-600 hover:bg-slate-500 active:bg-slate-500 shadow-xl"
-          onClick={() => exportMessagesToTxt(messages)}
-        ></IconButton>
+          className="bg-slate-600 shadow-xl hover:bg-slate-500 active:bg-slate-500"
+          onClick={() => exportMessagesToTxt(messages)}></IconButton>
       </div>
 
-      <div className="fixed w-col-span-6 max-w-full h-full pb-16">
-
-        <div className="max-h-full px-16 pt-20 pb-4 overflow-y-auto scroll-hidden">
+      <div className="w-col-span-6 fixed h-full max-w-full pb-16">
+        <div className="scroll-hidden max-h-full overflow-y-auto px-16 pt-20 pb-4">
           {messages.map((msg, i) => {
             return (
-              <div key={i} ref={messages.length - 1 === i ? chatScrollRef : null}>
+              <div
+                key={i}
+                ref={messages.length - 1 === i ? chatScrollRef : null}>
                 <Chat
                   role={msg.role}
                   message={(msg.content as string).replace(/\[(.*?)\]/g, "")}
                   num={i}
                   onClickResumeButton={handleResumeButtonClick}
                 />
-
               </div>
             );
           })}
@@ -157,7 +160,7 @@ function Chat({
   role,
   message,
   num,
-  onClickResumeButton
+  onClickResumeButton,
 }: {
   role: string;
   message: string;
@@ -168,40 +171,38 @@ function Chat({
   // const [textAreaValue, setTextAreaValue] = useState(message);
 
   const onClickButton = () => {
-    const newMessage = message
+    const newMessage = message;
     onClickResumeButton(num, newMessage);
   };
 
-
-
   return (
-    <div className={clsx(
-      'mx-auto max-w-sm my-8',
-      role === "assistant" ? "pr-10 sm:pr-20" : "pl-10 sm:pl-20",
-    )}>
+    <div
+      className={clsx(
+        "mx-auto my-8 max-w-sm",
+        role === "assistant" ? "pr-10 sm:pr-20" : "pl-10 sm:pl-20",
+      )}>
       <div
         className={clsx(
-          'px-8 py-2 rounded-t-lg font-bold tracking-wider flex justify-between shadow-inner backdrop-blur-lg',
+          "flex justify-between rounded-t-lg px-8 py-2 font-bold tracking-wider shadow-inner backdrop-blur-lg",
           role === "assistant" ? "bg-pink-600/80" : "bg-cyan-600/80",
-        )}
-      >
+        )}>
         <div className="text-bold text-white">
-          {role === "assistant" && config('name').toUpperCase()}
+          {role === "assistant" && config("name").toUpperCase()}
           {role === "user" && t("YOU")}
         </div>
-        <button
-          className="text-right"
-          onClick={onClickButton}
-        >
+        <button className="text-right" onClick={onClickButton}>
           {role === "user" && (
-            <div className="ml-16 p-1 rounded-full">
-              <ArrowPathIcon className="h-5 w-5 hover:animate-spin text-white" aria-hidden="true" />
+            <div className="ml-16 rounded-full p-1">
+              <ArrowPathIcon
+                className="h-5 w-5 text-white hover:animate-spin"
+                aria-hidden="true"
+              />
             </div>
           )}
         </button>
       </div>
-      <div className="px-4 py-2 bg-white/80 backdrop-blur-lg rounded-b-lg shadow-sm">
-        <div className='typography-16 font-M_PLUS_2 font-bold text-gray-800'>
+      <div className="card rounded-b-lg px-4 py-2">
+        <div className="typography-16 font-M_PLUS_2 font-bold text-gray-800">
           {role === "assistant" ? (
             <div>{message}</div>
           ) : (
@@ -214,4 +215,4 @@ function Chat({
       </div>
     </div>
   );
-};
+}

@@ -1,7 +1,7 @@
-import { useTranslation } from 'react-i18next';
-import { clsx } from 'clsx';
+import { useTranslation } from "react-i18next";
+import { clsx } from "clsx";
 
-import { thumbPrefix } from './common';
+import { thumbPrefix } from "./common";
 import { bgImages } from "@/paths";
 import { updateConfig } from "@/utils/config";
 import { TextButton } from "@/components/textButton";
@@ -21,8 +21,8 @@ export function BackgroundImgPage({
 
   return (
     <>
-      <div className="rounded-lg shadow-lg bg-white flex flex-wrap justify-center space-x-4 space-y-4 p-4">
-        { bgImages.map((url) =>
+      <div className="panel flex flex-wrap justify-center gap-x-4 gap-y-4 p-4">
+        {bgImages.map((url) => (
           <button
             key={url}
             onClick={() => {
@@ -34,28 +34,29 @@ export function BackgroundImgPage({
               setSettingsUpdated(true);
             }}
             className={clsx(
-              "mx-4 py-2 rounded-4 transition-all bg-gray-100 hover:bg-white active:bg-gray-100 rounded-xl",
-              bgUrl === url ? "opacity-100 shadow-md" : "opacity-60 hover:opacity-100",
-            )}
-            >
-              <img
-                src={`${thumbPrefix(url)}`}
-                alt={url}
-                width="160"
-                height="93"
-                className="m-0 rounded-md mx-4 p-0 shadow-sm shadow-black hover:shadow-md hover:shadow-black rounded-4 transition-all bg-gray-100 hover:bg-white active:bg-gray-100"
-                onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = url;
-                }}
-              />
+              "bg-surface-alt hover:bg-surface/80 active:bg-surface-alt/70 border-border/40 mx-4 rounded-xl border py-2 transition-all",
+              bgUrl === url
+                ? "shadow-subtle opacity-100"
+                : "opacity-70 hover:opacity-100",
+            )}>
+            <img
+              src={`${thumbPrefix(url)}`}
+              alt={url}
+              width="160"
+              height="93"
+              className="bg-surface/70 hover:bg-surface-alt/70 m-0 mx-4 rounded-md p-0 shadow-sm transition-all hover:shadow-md"
+              onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = url;
+              }}
+            />
           </button>
-        )}
+        ))}
       </div>
       <TextButton
-        className="rounded-t-none text-lg ml-4 px-8 shadow-lg bg-secondary hover:bg-secondary-hover active:bg-secondary-active"
-        onClick={handleClickOpenBgImgFile}
-      >
+        variant="secondary"
+        className="ml-4 rounded-t-none px-8 text-lg shadow-lg"
+        onClick={handleClickOpenBgImgFile}>
         {t("Load image")}
       </TextButton>
     </>

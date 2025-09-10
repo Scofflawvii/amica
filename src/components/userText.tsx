@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef } from "react";
 
 export const UserText = ({ message }: { message: string }) => {
@@ -17,17 +17,17 @@ export const UserText = ({ message }: { message: string }) => {
 
   return (
     <div className="fixed bottom-0 left-0 mb-20 w-full">
-      <div className="mx-auto max-w-4xl w-full px-4 md:px-16">
-        <div className="backdrop-blur-lg rounded-lg">
-          <div className="bg-white/70 rounded-lg backdrop-blur-lg shadow-lg">
-            <div className="px-8 pr-1 py-3 bg-rose/90 rounded-t-lg text-white font-bold tracking-wider">
-              <span className="p-4 bg-cyan-600/80 rounded-lg rounded-tl-none rounded-tr-none shadow-sm">
+      <div className="mx-auto w-full max-w-4xl px-4 md:px-16">
+        <div className="rounded-lg backdrop-blur-lg">
+          <div className="card">
+            <div className="bg-rose/90 rounded-t-lg px-8 py-3 pr-1 font-bold tracking-wider text-white">
+              <span className="rounded-lg rounded-tl-none rounded-tr-none bg-cyan-600/80 p-4 shadow-sm">
                 {t("YOU")}
               </span>
             </div>
 
-            <div className="px-8 py-4 max-h-32 overflow-y-auto">
-              <div className="min-h-8 max-h-full typography-16 font-bold text-gray-600">
+            <div className="max-h-32 overflow-y-auto px-8 py-4">
+              <div className="typography-16 max-h-full min-h-8 font-bold text-gray-600">
                 {message.replace(/\[([a-zA-Z]*?)\]/g, "")}
                 <div ref={scrollRef} />
               </div>

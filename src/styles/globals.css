@@ -1,10 +1,51 @@
 @import "tailwindcss";
 
+/* Theme design tokens via CSS variables (light default) */
+:root {
+  /* Surface (background) layers: use HSL for easy runtime tweaking */
+  --surface: 0 0% 100%; /* white */
+  --surface-alt: 270 20% 98%; /* subtle tinted panel */
+  --border: 270 15% 85%; /* light gray border */
+  --text: 270 25% 15%; /* near-black with slight hue */
+  --text-muted: 270 10% 45%;
+
+  /* Brand palette (approx from existing) */
+  --primary: 287 19% 48%; /* #856292 */
+  --primary-hover: 286 17% 54%; /* #8E76A1 */
+  --primary-press: 285 14% 60%; /* #988BB0 */
+
+  --secondary: 350 100% 68%; /* #FF617F */
+  --secondary-hover: 350 100% 75%;
+  --secondary-press: 350 100% 80%;
+}
+
+/* Dark mode overrides */
+.dark {
+  --surface: 260 21% 10%; /* deep gray indigo */
+  --surface-alt: 260 22% 15%;
+  --border: 260 12% 30%;
+  --text: 260 32% 92%;
+  --text-muted: 260 12% 60%;
+
+  --primary: 287 34% 62%;
+  --primary-hover: 287 40% 68%;
+  --primary-press: 287 45% 72%;
+
+  --secondary: 350 100% 72%;
+  --secondary-hover: 350 100% 78%;
+  --secondary-press: 350 100% 82%;
+}
+
 body {
   background-position: top center;
   background-attachment: fixed;
   background-size: cover;
   background-repeat: no-repeat;
+  color: hsl(var(--text));
+  background-color: hsl(var(--surface));
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 .scroll-hidden {
@@ -14,4 +55,65 @@ body {
 
 .scroll-hidden::-webkit-scrollbar {
   display: none;
+}
+
+/* Utility helpers */
+.panel {
+  border-radius: 0.75rem; /* xl */
+  background-color: hsl(var(--surface-alt) / 0.9);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.08);
+  border: 1px solid hsl(var(--border) / 0.6);
+}
+
+.card {
+  border-radius: 0.5rem; /* lg */
+  background-color: hsl(var(--surface-alt) / 0.8);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.08);
+  border: 1px solid hsl(var(--border) / 0.5);
+}
+
+.heading-gradient {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--primary)) 0%,
+    hsl(var(--secondary)) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Smooth color transitions for key elements */
+button,
+.card,
+.panel,
+input,
+textarea,
+select {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* Reusable form control base */
+.input-base {
+  background-color: hsl(var(--surface-alt) / 0.7);
+  color: hsl(var(--text));
+  border: 1px solid hsl(var(--border) / 0.5);
+  border-radius: 0.5rem;
+  padding: 0.375rem 0.75rem; /* py-1.5 px-3 */
+  font-size: 0.875rem; /* text-sm */
+  line-height: 1.25rem;
+}
+.input-base:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.4);
+  border-color: hsl(var(--primary));
+}
+.dark .input-base {
+  background-color: hsl(var(--surface-alt) / 0.55);
 }

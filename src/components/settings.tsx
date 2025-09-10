@@ -72,6 +72,7 @@ import { useVrmStoreContext } from "@/features/vrmStore/vrmStoreContext";
 import { OpenRouterSettings } from "./settings/OpenRouterSettingsPage";
 import { ExternalAPIPage } from "./settings/ExternalAPIPage";
 import { KokoroSettingsPage } from "./settings/KokoroSettingsPage";
+import { ThemeToggle } from "@/components/themeToggle";
 
 export const Settings = ({ onClickClose }: { onClickClose: () => void }) => {
   const { viewer } = useContext(ViewerContext);
@@ -1047,7 +1048,7 @@ export const Settings = ({ onClickClose }: { onClickClose: () => void }) => {
     <div className="fixed top-0 left-0 z-20 max-h-full w-full overflow-y-auto text-left text-xs text-black backdrop-blur">
       <div className="z-index-50 absolute top-0 left-0 h-full w-full bg-gray-700 opacity-10"></div>
       <div
-        className="fixed top-0 left-0 z-50 w-full bg-white p-2"
+        className="dark:bg-surface-alt border-border/50 fixed top-0 left-0 z-50 flex w-full items-center justify-between border-b bg-white p-2"
         ref={topMenuRef}>
         <nav aria-label="Breadcrumb" className="ml-4 inline-block">
           <ol role="list" className="flex items-center space-x-4">
@@ -1099,6 +1100,9 @@ export const Settings = ({ onClickClose }: { onClickClose: () => void }) => {
             ))}
           </ol>
         </nav>
+        <div className="mr-2">
+          <ThemeToggle />
+        </div>
       </div>
 
       <div className="h-screen overflow-auto opacity-95 backdrop-blur">
@@ -1106,6 +1110,7 @@ export const Settings = ({ onClickClose }: { onClickClose: () => void }) => {
           <div className="mt-12">
             <div className="inline-block pt-4 pr-4" ref={backButtonRef}>
               <TextButton
+                variant="primary"
                 className="ml-4 rounded-b-none px-8 text-lg shadow-sm"
                 onClick={() => {
                   if (breadcrumbs.length === 0) {
