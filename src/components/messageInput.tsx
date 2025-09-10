@@ -35,10 +35,11 @@ export default function MessageInput({
 }) {
   const transcriber = useTranscriber();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [whisperOpenAIOutput, setWhisperOpenAIOutput] = useState<any | null>(
-    null,
-  );
-  const [whisperCppOutput, setWhisperCppOutput] = useState<any | null>(null);
+  type TranscriptResult = { text: string } | string | null;
+  const [whisperOpenAIOutput, setWhisperOpenAIOutput] =
+    useState<TranscriptResult>(null);
+  const [whisperCppOutput, setWhisperCppOutput] =
+    useState<TranscriptResult>(null);
   const { chat: bot } = useContext(ChatContext);
   const { alert } = useContext(AlertContext);
   const { amicaLife } = useContext(AmicaLifeContext);
@@ -55,10 +56,11 @@ export default function MessageInput({
       console.debug("vad", "on_speech_end");
       console.timeEnd("performance_speech");
       console.time("performance_transcribe");
-      (window as any).chatvrm_latency_tracker = {
-        start: +Date.now(),
-        active: true,
-      };
+      (
+        window as unknown as {
+          chatvrm_latency_tracker?: { start: number; active: boolean };
+        }
+      ).chatvrm_latency_tracker = { start: Date.now(), active: true };
 
       try {
         switch (config("stt_backend")) {
@@ -90,9 +92,10 @@ export default function MessageInput({
               try {
                 const transcript = await openaiWhisper(file, prompt);
                 setWhisperOpenAIOutput(transcript);
-              } catch (e: any) {
-                console.error("whisper_openai error", e);
-                alert.error("whisper_openai error", e.toString());
+              } catch (e) {
+                const err = e instanceof Error ? e : new Error(String(e));
+                console.error("whisper_openai error", err);
+                alert.error("whisper_openai error", err.message);
               }
             })();
             break;
@@ -114,17 +117,19 @@ export default function MessageInput({
               try {
                 const transcript = await whispercpp(file, prompt);
                 setWhisperCppOutput(transcript);
-              } catch (e: any) {
-                console.error("whispercpp error", e);
-                alert.error("whispercpp error", e.toString());
+              } catch (e) {
+                const err = e instanceof Error ? e : new Error(String(e));
+                console.error("whispercpp error", err);
+                alert.error("whispercpp error", err.message);
               }
             })();
             break;
           }
         }
-      } catch (e: any) {
-        console.error("stt_backend error", e);
-        alert.error("STT backend error", e.toString());
+      } catch (e) {
+        const err = e instanceof Error ? e : new Error(String(e));
+        console.error("stt_backend error", err);
+        alert.error("STT backend error", err.message);
       }
     },
   });
@@ -206,19 +211,23 @@ export default function MessageInput({
     }
   }, [transcriber]);
 
+  const extractTranscript = (val: TranscriptResult): string => {
+    if (!val) return "";
+    if (typeof val === "string") return val;
+    return val.text;
+  };
+
   // for whisper_openai
   useEffect(() => {
     if (whisperOpenAIOutput) {
-      const output = whisperOpenAIOutput?.text;
-      handleTranscriptionResult(output);
+      handleTranscriptionResult(extractTranscript(whisperOpenAIOutput));
     }
   }, [whisperOpenAIOutput]);
 
   // for whispercpp
   useEffect(() => {
     if (whisperCppOutput) {
-      const output = whisperCppOutput?.text;
-      handleTranscriptionResult(output);
+      handleTranscriptionResult(extractTranscript(whisperCppOutput));
     }
   }, [whisperCppOutput]);
 

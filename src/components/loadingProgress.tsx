@@ -6,10 +6,18 @@ type LoadingFile = {
 };
 
 export function LoadingProgress() {
-  if (typeof window !== "undefined") {
-    if (!(window as any).chatvrm_loading_progress) {
-      (window as any).chatvrm_loading_progress = {};
-      (window as any).chatvrm_loading_progress_cnt = 0;
+  // Narrow window with declaration merging pattern
+  interface LoadingWindow extends Window {
+    chatvrm_loading_progress?: Record<string, number>;
+    chatvrm_loading_progress_cnt?: number;
+  }
+  const w =
+    typeof window !== "undefined" ? (window as LoadingWindow) : undefined;
+
+  if (w) {
+    if (!w.chatvrm_loading_progress) {
+      w.chatvrm_loading_progress = {};
+      w.chatvrm_loading_progress_cnt = 0;
     }
   }
 
@@ -18,9 +26,9 @@ export function LoadingProgress() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (typeof window !== "undefined") {
-        const progress = (window as any).chatvrm_loading_progress;
-        const cnt = (window as any).chatvrm_loading_progress_cnt;
+      if (w) {
+        const progress = w.chatvrm_loading_progress || {};
+        const cnt = w.chatvrm_loading_progress_cnt || 0;
         if (progressCnt !== cnt) {
           setFiles(
             Object.entries(progress).map(([k, v]) => ({

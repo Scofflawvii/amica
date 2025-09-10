@@ -61,8 +61,9 @@ export const ChatLog = ({ messages }: { messages: Message[] }) => {
             }
           }
           console.error("Please attach the correct file format.");
-        } catch (e: any) {
-          console.error(e.toString());
+        } catch (e) {
+          const err = e instanceof Error ? e : new Error(String(e));
+          console.error(err.message);
         }
       };
 
@@ -73,7 +74,7 @@ export const ChatLog = ({ messages }: { messages: Message[] }) => {
     [bot],
   );
 
-  const exportMessagesToTxt = (messages: any[]) => {
+  const exportMessagesToTxt = (messages: Message[]) => {
     const blob = new Blob(
       [
         messages

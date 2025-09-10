@@ -1,5 +1,5 @@
-import * as React from 'react';
-import clsx from 'clsx';
+import * as React from "react";
+import clsx from "clsx";
 
 export function MenuButton({
   icon,
@@ -10,13 +10,13 @@ export function MenuButton({
   target,
   disabled,
 }: {
-  icon: React.ComponentType<any>,
-  onClick?: () => void,
-  large: boolean,
-  label: string,
-  href?: string,
-  target?: string,
-  disabled?: boolean,
+  icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+  onClick?: () => void;
+  large: boolean;
+  label: string;
+  href?: string;
+  target?: string;
+  disabled?: boolean;
 }) {
   const Icon = icon; // Capitalize to use as component
 
@@ -28,20 +28,18 @@ export function MenuButton({
 
   return (
     <div className="flex flex-row items-center space-x-2">
-      <button
-        disabled={disabled}
-        onClick={onClick}
-      >
+      <button disabled={disabled} onClick={onClick}>
         <Icon
           className={clsx(
-            large ? 'h-14 w-14' : 'h-7 w-7',
-            'text-white',
-            disabled && 'cursor-not-allowed opacity-20',
-            !disabled && 'opacity-50 hover:opacity-100 active:opacity-100 hover:cursor-pointer',
-         )}
-          aria-hidden="true"
+            large ? "h-14 w-14" : "h-7 w-7",
+            "text-white",
+            disabled && "cursor-not-allowed opacity-20",
+            !disabled &&
+              "opacity-50 hover:cursor-pointer hover:opacity-100 active:opacity-100",
+          )}
+          aria-hidden={true}
         />
-        <span className="text-white hidden">{label}</span>
+        <span className="hidden text-white">{label}</span>
       </button>
     </div>
   );
