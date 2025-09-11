@@ -18,9 +18,8 @@ const chatbotBackends = [
 ];
 
 function idToTitle(id: string): string {
-  return chatbotBackends[
-    chatbotBackends.findIndex((engine) => engine.key === id)
-  ].label;
+  const found = chatbotBackends.find((engine) => engine.key === id);
+  return found ? found.label : id;
 }
 
 export function ChatbotBackendPage({
@@ -67,7 +66,7 @@ export function ChatbotBackendPage({
             <select
               className="input-base mt-2 block w-full pr-10 pl-3"
               value={chatbotBackend}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
                 setChatbotBackend(event.target.value);
                 updateConfig("chatbot_backend", event.target.value);
                 setSettingsUpdated(true);

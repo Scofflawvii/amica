@@ -11,8 +11,8 @@ const visionEngines = [
 ];
 
 function idToTitle(id: string): string {
-  return visionEngines[visionEngines.findIndex((engine) => engine.key === id)]
-    .label;
+  const found = visionEngines.find((engine) => engine.key === id);
+  return found ? found.label : id;
 }
 
 export function VisionBackendPage({
@@ -45,7 +45,7 @@ export function VisionBackendPage({
             <select
               className="input-base mt-2 block w-full pr-10"
               value={visionBackend}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
                 setVisionBackend(event.target.value);
                 updateConfig("vision_backend", event.target.value);
                 setSettingsUpdated(true);

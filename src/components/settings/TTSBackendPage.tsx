@@ -15,7 +15,8 @@ const ttsEngines = [
 ];
 
 function idToTitle(id: string): string {
-  return ttsEngines[ttsEngines.findIndex((engine) => engine.key === id)].label;
+  const found = ttsEngines.find((engine) => engine.key === id);
+  return found ? found.label : id;
 }
 
 export function TTSBackendPage({
@@ -48,7 +49,7 @@ export function TTSBackendPage({
             <select
               className="input-base mt-2 block w-full pr-10 pl-3"
               value={ttsBackend}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
                 setTTSBackend(event.target.value);
                 updateConfig("tts_backend", event.target.value);
                 setSettingsUpdated(true);

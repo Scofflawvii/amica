@@ -11,7 +11,8 @@ const sttEngines = [
 ];
 
 function idToTitle(id: string): string {
-  return sttEngines[sttEngines.findIndex((engine) => engine.key === id)].label;
+  const found = sttEngines.find((engine) => engine.key === id);
+  return found ? found.label : id;
 }
 
 export function STTBackendPage({
@@ -41,7 +42,7 @@ export function STTBackendPage({
             <select
               className="input-base mt-2 block w-full py-1.5 pr-10 pl-3"
               value={sttBackend}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
                 setSTTBackend(event.target.value);
                 updateConfig("stt_backend", event.target.value);
                 setSettingsUpdated(true);

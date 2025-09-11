@@ -18,18 +18,18 @@ export function Alert() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (alert.notifications.length > 0) {
-        setShownNotification(alert.notifications[0]);
-        setShownNotificationType(alert.notifications[0].type);
-
-        setTimeout(() => {
-          setShownNotification(null);
-        }, 8000);
-
-        alert.notifications.shift();
-      }
+      if (alert.notifications.length === 0) return;
+      const next = alert.notifications[0];
+      if (!next) return; // defensive (noUncheckedIndexedAccess)
+      setShownNotification(next);
+      setShownNotificationType(next.type);
+      setTimeout(() => {
+        setShownNotification(null);
+      }, 8000);
+      alert.notifications.shift();
     }, 1000);
     return () => clearInterval(interval);
+     
   }, []);
 
   return (

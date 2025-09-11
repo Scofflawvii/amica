@@ -39,28 +39,27 @@ export const ChatLog = ({ messages }: { messages: Message[] }) => {
         const parsedChat = lines
           .map((line) => {
             const match = line.match(/^(user|assistant)\s*:\s*(.*)$/);
-            if (match) {
-              return { role: match[1], content: match[2] };
-            }
-            return null;
+            return match ? { role: match[1], content: match[2] } : null;
           })
-          .filter(Boolean) as Message[];
+          .filter((v): v is Message => Boolean(v));
 
         try {
-          if (parsedChat.length > 0) {
-            const lastMessage = parsedChat[parsedChat.length - 1];
-            bot.setMessageList(parsedChat.slice(0, parsedChat.length - 1));
-
-            if (lastMessage.role === "user") {
-              bot.receiveMessageFromUser(lastMessage.content as string, false);
-            } else {
-              bot.bubbleMessage(
-                lastMessage.role,
-                lastMessage.content as string,
-              );
-            }
+          if (parsedChat.length === 0) {
+            console.error("Please attach the correct file format.");
+            return;
           }
-          console.error("Please attach the correct file format.");
+          const lastMessage = parsedChat[parsedChat.length - 1];
+          if (!lastMessage) {
+            console.error("No last message parsed.");
+            return;
+          }
+          bot.setMessageList(parsedChat.slice(0, -1));
+          const content = lastMessage.content ?? ""; // fallback for safety
+          if (lastMessage.role === "user") {
+            bot.receiveMessageFromUser(content, false);
+          } else {
+            bot.bubbleMessage(lastMessage.role, content);
+          }
         } catch (e) {
           const err = e instanceof Error ? e : new Error(String(e));
           console.error(err.message);
