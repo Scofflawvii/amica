@@ -12,7 +12,7 @@ Legend:
 
 ## Quick Win Starter Set (Suggested First 5)
 
-1. (P0 S) Enable stricter TypeScript flags (`strict`, `noUncheckedIndexedAccess`) — track any `any` cleanups. **WIP** (initial: 0 new flags added earlier, now added `noUncheckedIndexedAccess`; tsc errors: ~90+, sample `any` annotations found: 76 lines scanned).
+1. (P0 S) Enable stricter TypeScript flags (`strict`, `noUncheckedIndexedAccess`) — track any `any` cleanups. **WIP** (added `noUncheckedIndexedAccess`; current tsc error lines: 86 (was ~102 after flag enable). Breakdown: possibly undefined 29, assignability 15, index type 2, other 40. Concentrated remaining: VRM/animation/blob/number utilities (44). Sample `any` annotations snapshot: 76 lines; cleanup batches 1–2 reduced general app errors; batch 3 targeting VRM & utilities next).
 2. (P0 S) Introduce structured logger wrapper (levels + JSON in prod) & replace ad-hoc `console.*` in new code.
 3. (P1 S) Add bundle analyzer + size thresholds in CI (warn > baseline + % delta).
 4. (P1 M) Add accessibility smoke tests (axe + Playwright) for core views (chat, settings, viewer, overlays).
