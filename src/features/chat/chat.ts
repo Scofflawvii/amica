@@ -4,9 +4,11 @@ type Viewer = {
   model?: any;
   resetCameraLerp?: () => void;
   startRecording?: () => void;
-  stopRecording?: (cb: (b: Blob) => void) => void;
+  // Accept callback param that may receive Blob or null (runtime may yield null)
+  stopRecording?: (cb: (b: Blob | null) => void) => void;
 };
-type Alert = { error: (title: string, msg?: string) => void };
+// Align with concrete Alert class where error(title,message) expects both params
+type Alert = { error: (title: string, message: string) => void };
 type AmicaLife = { receiveMessageFromUser?: (m: string) => void } & Record<
   string,
   any
@@ -29,6 +31,7 @@ import { getLlavaCppChatResponse } from "./llamaCppChat";
 import { getOllamaVisionChatResponse } from "./ollamaChat";
 import { AsyncQueue } from "./asyncQueue";
 import { SpeechPipeline } from "./speechPipeline";
+import { ChatObserver } from "./chatObserver";
 import { StreamController } from "./streamController";
 import {
   getOrLoadTTSBackend,
@@ -83,6 +86,7 @@ export class Chat {
   private assistantBuffer = "";
   private assistantFlushScheduled = false;
   private speechPipeline?: SpeechPipeline;
+  private observers: ChatObserver[] = [];
   /** Expose current state for tests / UI */
   public getState() {
     return this.state;
@@ -102,13 +106,20 @@ export class Chat {
     this.currentStreamIdx = 0;
     this.lastAwake = 0;
     const noop = () => {};
-    this.setChatLog = noop as any;
-    this.setUserMessage = noop as any;
-    this.setAssistantMessage = noop as any;
-    this.setShownMessage = noop as any;
-    this.setChatProcessing = noop as any;
-    this.setChatSpeaking = noop as any;
-    this.setThoughtMessage = noop as any;
+    // Map legacy setters to observer notifications so existing code keeps working
+    this.setChatLog = (log: any[]) => this.notify((o) => o.onChatLog?.(log));
+    this.setUserMessage = (m: string) =>
+      this.notify((o) => o.onUserMessage?.(m));
+    this.setAssistantMessage = (m: string) =>
+      this.notify((o) => o.onAssistantMessage?.(m));
+    this.setShownMessage = (r: Role) =>
+      this.notify((o) => o.onShownMessage?.(r));
+    this.setChatProcessing = (p: boolean) =>
+      this.notify((o) => o.onProcessingChange?.(p));
+    this.setChatSpeaking = (s: boolean) =>
+      this.notify((o) => o.onSpeakingChange?.(s));
+    this.setThoughtMessage = (t: string) =>
+      this.notify((o) => o.onThoughtMessage?.(t));
   }
 
   public initialize(
@@ -122,18 +133,22 @@ export class Chat {
     setShownMessage: (role: Role) => void,
     setChatProcessing: (processing: boolean) => void,
     setChatSpeaking: (speaking: boolean) => void,
-    options?: { enableSSE?: boolean },
+    options?: { enableSSE?: boolean; observer?: ChatObserver },
   ) {
     this.amicaLife = amicaLife;
     this.viewer = viewer;
     this.alert = alert;
-    this.setChatLog = setChatLog;
-    this.setUserMessage = setUserMessage;
-    this.setAssistantMessage = setAssistantMessage;
-    this.setShownMessage = setShownMessage;
-    this.setThoughtMessage = setThoughtMessage;
-    this.setChatProcessing = setChatProcessing;
-    this.setChatSpeaking = setChatSpeaking;
+    const legacyObserver: ChatObserver = {
+      onChatLog: setChatLog,
+      onUserMessage: setUserMessage,
+      onAssistantMessage: setAssistantMessage,
+      onShownMessage: setShownMessage,
+      onThoughtMessage: setThoughtMessage,
+      onProcessingChange: setChatProcessing,
+      onSpeakingChange: setChatSpeaking,
+    };
+    this.addObserver(legacyObserver);
+    if (options?.observer) this.addObserver(options.observer);
     // Initialize background speech pipeline
     this.speechPipeline = new SpeechPipeline(this as any);
     this.speechPipeline.start();
@@ -192,9 +207,22 @@ export class Chat {
     /* moved to SpeechPipeline */
   }
 
+  // Observer management
+  public addObserver(obs: ChatObserver) {
+    this.observers.push(obs);
+  }
+  public removeObserver(obs: ChatObserver) {
+    this.observers = this.observers.filter((o) => o !== obs);
+  }
+  private notify(fn: (o: ChatObserver) => void) {
+    for (const o of this.observers) fn(o);
+  }
+
   private appendAssistantBuffered(text: string, flushNow = false) {
     if (!text) return;
     this.assistantBuffer += text;
+    // Notify delta immediately for streaming UI / metrics
+    this.notify((o) => o.onAssistantDelta?.(text));
     if (flushNow) {
       this.flushAssistantBuffer();
       return;
@@ -213,6 +241,7 @@ export class Chat {
     this.assistantBuffer = "";
     this.assistantFlushScheduled = false;
     this.setAssistantMessage!(this.currentAssistantMessage);
+    this.notify((o) => o.onAssistantFlush?.(this.currentAssistantMessage));
     this.setChatLog!([
       ...this.messageList,
       { role: "assistant", content: this.currentAssistantMessage },
@@ -290,6 +319,7 @@ export class Chat {
 
   public async interrupt() {
     this.currentStreamIdx++;
+    this.notify((o) => o.onInterrupt?.());
     this.streamController?.abortActive();
     this.ttsJobs.clear();
     this.speakJobs.clear();
@@ -523,7 +553,9 @@ export class Chat {
   // Internal + used by StreamController (exposed via indirection for type-safety)
   private transition(next: ChatState) {
     if (this.state === next) return;
+    const prev = this.state;
     this.state = next;
+    this.notify((o) => o.onStateChange?.(next, prev));
     if (next === ChatState.Processing) this.setChatProcessing!(true);
     if (next === ChatState.Idle) this.setChatProcessing!(false);
   }

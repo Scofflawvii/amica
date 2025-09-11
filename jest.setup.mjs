@@ -1,3 +1,4 @@
+/* eslint-env jest, node */
 import '@testing-library/jest-dom'
 // Shared polyfills for node test environment
 if (typeof global.ReadableStream === 'undefined') {
@@ -11,4 +12,9 @@ if (typeof global.TextEncoder === 'undefined') {
 	const { TextEncoder, TextDecoder } = require('util');
 	global.TextEncoder = TextEncoder;
 	global.TextDecoder = TextDecoder;
+}
+
+// Minimal fetch mock to avoid backend network attempts during unit tests
+if (typeof global.fetch === 'undefined') {
+	global.fetch = async () => { throw new Error('fetch mocked'); };
 }

@@ -158,6 +158,14 @@ export default [
     },
   },
   {
+    files: ["src/features/chat/__tests__/chat.observer*.spec.ts"],
+    rules: {
+      "no-undef": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
+    },
+  },
+  {
     files: ["**/*.d.ts"],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",

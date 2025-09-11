@@ -23,7 +23,7 @@ export class ChatStreamSession {
   private aborted = false;
 
   constructor(
-    private streamIdx: number,
+    public streamIdx: number,
     stream: ReadableStream<Uint8Array>,
     private cb: ChatSessionCallbacks,
   ) {

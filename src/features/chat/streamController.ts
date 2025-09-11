@@ -14,13 +14,17 @@ export class StreamController {
   }
 
   abortActive() {
-    if (this.activeSession) this.activeSession.abort();
+    if (this.activeSession) {
+      const idx = this.activeSession.streamIdx;
+      this.activeSession.abort();
+      (this.chat as any).notify?.((o: any) => o.onSessionEnd?.(idx, "aborted"));
+    }
   }
 
   async run(stream: ReadableStream<Uint8Array>) {
     this.chat.currentStreamIdx++;
     const idx = this.chat.currentStreamIdx;
-    // enter processing state
+    (this.chat as any).notify?.((o: any) => o.onSessionStart?.(idx));
     this.chat.transitionPublic("processing");
     this.activeSession = new ChatStreamSession(idx, stream, {
       enqueueScreenplay: (sc) =>
@@ -32,9 +36,9 @@ export class StreamController {
       isCurrent: (i) => i === this.chat.currentStreamIdx,
     });
     const result = await this.activeSession.process();
-    // If still flagged as processing (not speaking) transition idle
     if (this.chat.getState() === "processing")
       this.chat.transitionPublic("idle");
+    (this.chat as any).notify?.((o: any) => o.onSessionEnd?.(idx, "completed"));
     return result;
   }
 }
