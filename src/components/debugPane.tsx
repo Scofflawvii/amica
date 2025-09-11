@@ -95,8 +95,8 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
   return (
     <>
       <div className="z-max fixed inset-0 text-[hsl(var(--text))]">
-        {/* Content panel sits beside the left sidebar (assumed ~80px). On small screens it uses full width. */}
-        <div className="z-max bg-surface fixed inset-y-0 right-0 left-0 text-left text-xs md:left-20">
+        {/* Content panel sits beside the left sidebar (assumed ~7rem). On small screens it uses full width. */}
+        <div className="z-max bg-surface fixed inset-y-0 right-0 left-0 text-left text-xs md:left-28">
           <div className="bg-surface-alt border-border/50 border-b p-2">
             <IconButton
               iconName="24/Close"
