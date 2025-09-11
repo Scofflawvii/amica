@@ -1,32 +1,41 @@
 import { Message, Role, Screenplay, Talk } from "./messages";
-import { Viewer } from "@/features/vrmViewer/viewer";
-import { Alert } from "@/features/alert/alert";
-import { AmicaLife } from "@/features/amicaLife/amicaLife";
+// Avoid eager importing heavy classes so tests can import Chat without pulling three.js.
+type Viewer = {
+  model?: any;
+  resetCameraLerp?: () => void;
+  startRecording?: () => void;
+  stopRecording?: (cb: (b: Blob) => void) => void;
+};
+type Alert = { error: (title: string, msg?: string) => void };
+type AmicaLife = { receiveMessageFromUser?: (m: string) => void } & Record<
+  string,
+  any
+>;
 import { config, updateConfig } from "@/utils/config";
 import { cleanTalk } from "@/utils/cleanTalk";
 import { wait } from "@/utils/wait";
 import isDev from "@/utils/isDev";
 import { perfMark } from "@/utils/perf";
+import { logger } from "@/utils/logger";
 import {
   isCharacterIdle,
   characterIdleTime,
   resetIdleTimer,
 } from "@/utils/isIdle";
-import { loadVRMAnimation } from "@/lib/VRMAnimation/loadVRMAnimation";
 import { getEchoChatResponseStream } from "./echoChat";
 // Removed direct backend imports; resolution now via registry in getChatResponseStream.
 import { getOpenAiVisionChatResponse } from "./openAiChat";
 import { getLlavaCppChatResponse } from "./llamaCppChat";
 import { getOllamaVisionChatResponse } from "./ollamaChat";
 import { AsyncQueue } from "./asyncQueue";
+import { SpeechPipeline } from "./speechPipeline";
+import { StreamController } from "./streamController";
 import {
   getOrLoadTTSBackend,
   snapshotConfig,
   getOrLoadLLMBackend,
 } from "./registries";
-import { rvc } from "@/features/rvc/rvc";
 import { ChatStreamSession } from "./chatSession";
-import { handleUserInput } from "../externalAPI/externalAPI";
 
 type Speak = {
   audioBuffer: ArrayBuffer | null;
@@ -69,12 +78,15 @@ export class Chat {
   public messageList: Message[];
   public currentStreamIdx: number;
   private eventSource: EventSource | null = null;
-  private activeSession?: ChatStreamSession;
+  private streamController?: StreamController;
   private state: ChatState = ChatState.Idle;
   private assistantBuffer = "";
   private assistantFlushScheduled = false;
-  private ttsLoopStarted = false;
-  private speakLoopStarted = false;
+  private speechPipeline?: SpeechPipeline;
+  /** Expose current state for tests / UI */
+  public getState() {
+    return this.state;
+  }
   constructor() {
     this.initialized = false;
     this.stream = null;
@@ -110,6 +122,7 @@ export class Chat {
     setShownMessage: (role: Role) => void,
     setChatProcessing: (processing: boolean) => void,
     setChatSpeaking: (speaking: boolean) => void,
+    options?: { enableSSE?: boolean },
   ) {
     this.amicaLife = amicaLife;
     this.viewer = viewer;
@@ -121,11 +134,13 @@ export class Chat {
     this.setThoughtMessage = setThoughtMessage;
     this.setChatProcessing = setChatProcessing;
     this.setChatSpeaking = setChatSpeaking;
-    this.processTtsJobs();
-    this.processSpeakJobs();
+    // Initialize background speech pipeline
+    this.speechPipeline = new SpeechPipeline(this as any);
+    this.speechPipeline.start();
+    this.streamController = new StreamController(this as any);
     this.updateAwake();
     this.initialized = true;
-    this.initSSE();
+    if (options?.enableSSE !== false) this.initSSE();
   }
 
   public setMessageList(messages: Message[]) {
@@ -140,6 +155,7 @@ export class Chat {
 
   public async handleRvc(audio: ArrayBuffer) {
     const blob = new Blob([audio], { type: "audio/wav" });
+    const { rvc } = await import("@/features/rvc/rvc");
     const voice = await rvc(
       blob,
       config("rvc_model_name"),
@@ -168,66 +184,12 @@ export class Chat {
     resetIdleTimer();
   }
 
+  // Backwards compatibility no-ops (previous public methods referenced in older code)
   public async processTtsJobs() {
-    if (this.ttsLoopStarted) return;
-    this.ttsLoopStarted = true;
-    (async () => {
-      for (;;) {
-        const job = await this.ttsJobs.dequeue().catch(() => undefined);
-        if (!job) continue;
-        if (job.streamIdx !== this.currentStreamIdx) continue;
-        try {
-          const audioBuffer = await this.fetchAudio(job.screenplay.talk);
-          this.speakJobs.enqueue({
-            audioBuffer,
-            screenplay: job.screenplay,
-            streamIdx: job.streamIdx,
-          });
-        } catch (e) {
-          console.error("TTS job failure", e);
-        }
-      }
-    })();
+    /* moved to SpeechPipeline */
   }
-
   public async processSpeakJobs() {
-    if (this.speakLoopStarted) return;
-    this.speakLoopStarted = true;
-    (async () => {
-      for (;;) {
-        const speak = await this.speakJobs.dequeue().catch(() => undefined);
-        if (!speak) continue;
-        if (speak.streamIdx !== this.currentStreamIdx) continue;
-
-        const lt = (window as any).chatvrm_latency_tracker;
-        if (lt?.active) {
-          const ms = Date.now() - lt.start;
-          console.log("performance_latency", ms);
-          lt.active = false;
-        }
-
-        this.appendAssistantBuffered(speak.screenplay.text, true);
-
-        if (speak.audioBuffer) {
-          perfMark("tts:play:start");
-          this.transition(ChatState.Speaking);
-          try {
-            this.setChatSpeaking!(true);
-            await this.viewer!.model?.speak(
-              speak.audioBuffer,
-              speak.screenplay,
-            );
-          } catch (e) {
-            console.error("speak error", e);
-          } finally {
-            this.setChatSpeaking!(false);
-            this.transition(ChatState.Idle);
-            perfMark("tts:play:done");
-            if (this.isAwake()) this.updateAwake();
-          }
-        }
-      }
-    })();
+    /* moved to SpeechPipeline */
   }
 
   private appendAssistantBuffered(text: string, flushNow = false) {
@@ -328,7 +290,7 @@ export class Chat {
 
   public async interrupt() {
     this.currentStreamIdx++;
-    if (this.activeSession) this.activeSession.abort();
+    this.streamController?.abortActive();
     this.ttsJobs.clear();
     this.speakJobs.clear();
     this.assistantBuffer = "";
@@ -347,8 +309,9 @@ export class Chat {
     console.timeEnd("performance_interrupting");
     await wait(0);
     if (!amicaLife) {
+      const { handleUserInput } = await import("../externalAPI/externalAPI");
       await handleUserInput(message);
-      this.amicaLife?.receiveMessageFromUser(message);
+      this.amicaLife?.receiveMessageFromUser?.(message);
       if (!/\[.*?\]/.test(message)) message = `[neutral] ${message}`;
       this.updateAwake();
       this.bubbleMessage("user", message);
@@ -382,16 +345,19 @@ export class Chat {
             break;
           }
           case "animation": {
+            const { loadVRMAnimation } = await import(
+              "@/lib/VRMAnimation/loadVRMAnimation"
+            );
             const animation = await loadVRMAnimation(`/animations/${data}`);
             if (!animation) throw new Error("Loading animation failed");
-            this.viewer?.model?.playAnimation(animation, data);
-            requestAnimationFrame(() => this.viewer?.resetCameraLerp());
+            this.viewer?.model?.playAnimation?.(animation, data);
+            requestAnimationFrame(() => this.viewer?.resetCameraLerp?.());
             break;
           }
           case "playback": {
-            this.viewer?.startRecording();
+            this.viewer?.startRecording?.();
             setTimeout(() => {
-              this.viewer?.stopRecording((videoBlob) => {
+              this.viewer?.stopRecording?.((videoBlob) => {
                 const url = URL.createObjectURL(videoBlob!);
                 const a = document.createElement("a");
                 a.href = url;
@@ -409,10 +375,10 @@ export class Chat {
             break;
           }
           default:
-            console.warn("Unknown message type", type);
+            logger.warn("Unknown message type", type);
         }
       } catch (e) {
-        console.error("Error parsing SSE message", e);
+        logger.error("Error parsing SSE message", e);
       }
     };
     this.eventSource.addEventListener("end", () => {
@@ -438,28 +404,20 @@ export class Chat {
     } catch (e: any) {
       const msg = e.toString();
       this.alert?.error("Failed to get chat response", msg);
+      logger.error("Failed to get chat response", msg);
       return msg;
     }
     if (!stream) {
       const msg = "Null stream";
       this.alert?.error("Null stream", msg);
+      logger.warn("Null chat stream");
       return msg;
     }
     return await this.handleChatResponseStream(stream);
   }
 
   public async handleChatResponseStream(stream: ReadableStream<Uint8Array>) {
-    this.currentStreamIdx++;
-    const idx = this.currentStreamIdx;
-    this.activeSession = new ChatStreamSession(idx, stream, {
-      enqueueScreenplay: (sc) =>
-        this.ttsJobs.enqueue({ screenplay: sc, streamIdx: idx }),
-      thought: (thinking, text) => this.thoughtBubbleMessage(thinking, text),
-      setProcessing: (p) => this.setChatProcessing!(p),
-      appendError: (msg) => this.bubbleMessage("assistant", msg),
-      isCurrent: (i) => i === this.currentStreamIdx,
-    });
-    return await this.activeSession.process();
+    return this.streamController!.run(stream);
   }
 
   async fetchAudio(talk: Talk): Promise<ArrayBuffer | null> {
@@ -476,7 +434,7 @@ export class Chat {
     const backend = snapshot.tts_backend;
     const handler = await getOrLoadTTSBackend(backend);
     if (!handler) {
-      console.warn("Unknown tts backend", backend);
+      logger.warn("Unknown tts backend", backend);
       return null;
     }
     perfMark(`tts:${backend}:start`);
@@ -486,7 +444,7 @@ export class Chat {
         snapshot,
       });
     } catch (e: any) {
-      console.error(e.toString());
+      logger.error("TTS handler failed", e.toString());
       this.alert?.error("Failed to get TTS response", e.toString());
       return null;
     } finally {
@@ -545,7 +503,7 @@ export class Chat {
         ];
         res = await getOpenAiVisionChatResponse(messages);
       } else {
-        console.warn("vision_backend not supported", visionBackend);
+        logger.warn("vision_backend not supported", visionBackend);
         return;
       }
       await this.makeAndHandleStream([
@@ -558,13 +516,30 @@ export class Chat {
       ]);
     } catch (e: any) {
       this.alert?.error("Failed to get vision response", e.toString());
+      logger.error("Failed to get vision response", e.toString());
     }
   }
 
+  // Internal + used by StreamController (exposed via indirection for type-safety)
   private transition(next: ChatState) {
     if (this.state === next) return;
     this.state = next;
     if (next === ChatState.Processing) this.setChatProcessing!(true);
     if (next === ChatState.Idle) this.setChatProcessing!(false);
+  }
+
+  // Bridge for StreamController (string input to avoid enum import cycle there)
+  public transitionPublic(next: string) {
+    switch (next) {
+      case "processing":
+        this.transition(ChatState.Processing);
+        break;
+      case "idle":
+        this.transition(ChatState.Idle);
+        break;
+      case "speaking":
+        this.transition(ChatState.Speaking);
+        break;
+    }
   }
 }

@@ -13,6 +13,9 @@ const config = {
  
   testEnvironment: 'jest-environment-jsdom',
   setupFilesAfterEnv: ['./jest.setup.mjs'],
+  moduleNameMapper: {
+    '^three/examples/jsm/loaders/GLTFLoader.js$': '<rootDir>/__mocks__/GLTFLoaderMock.js'
+  },
 }
  
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

@@ -1,0 +1,1 @@
+Need to finish replacing console.* with logger in chat.ts (partial patch attempts failed due to index mismatch). Remaining console.warn/error lines at: lines ~190, 224, 419, 422, 447, 451, 491, 501, 560, 572 in original snapshot.
