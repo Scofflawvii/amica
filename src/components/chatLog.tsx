@@ -3,6 +3,7 @@ import { clsx } from "clsx";
 import { useCallback, useContext, useEffect, useRef } from "react";
 import FlexTextarea from "@/components/flexTextarea/flexTextarea";
 import { Message } from "@/features/chat/messages";
+import { logger } from "@/utils/logger";
 import { IconButton } from "@/components/iconButton";
 import { ArrowPathIcon } from "@heroicons/react/20/solid";
 import { config } from "@/utils/config";
@@ -45,12 +46,12 @@ export const ChatLog = ({ messages }: { messages: Message[] }) => {
 
         try {
           if (parsedChat.length === 0) {
-            console.error("Please attach the correct file format.");
+            logger.error("Please attach the correct file format.");
             return;
           }
           const lastMessage = parsedChat[parsedChat.length - 1];
           if (!lastMessage) {
-            console.error("No last message parsed.");
+            logger.error("No last message parsed.");
             return;
           }
           bot.setMessageList(parsedChat.slice(0, -1));
@@ -62,7 +63,7 @@ export const ChatLog = ({ messages }: { messages: Message[] }) => {
           }
         } catch (e) {
           const err = e instanceof Error ? e : new Error(String(e));
-          console.error(err.message);
+          logger.error("chatLog export error", err);
         }
       };
 

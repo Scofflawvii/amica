@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 // Lightweight performance mark helpers (safe in SSR)
 export const perfMark = (name: string) => {
   if (typeof performance !== "undefined" && performance.mark) {
@@ -47,7 +48,7 @@ export const logPerfSummaryOnce = (() => {
       "tts:play:done",
     ];
     const have = marks.filter((m) => performance.getEntriesByName(m).length);
-    if (have.length === 0) return;
+
     logged = true;
     const measures: Record<string, number> = {};
     const measureIf = (label: string, a: string, b: string) => {
@@ -79,6 +80,7 @@ export const logPerfSummaryOnce = (() => {
     measureIf("stt:transcribe", "stt:transcribe:start", "stt:transcribe:done");
     measureIf("tts:play", "tts:play:start", "tts:play:done");
 
-    console.table(measures);
+    // Log a single structured line; in dev it will pretty-print, in prod it's JSON
+    logger.info("perf summary", { measures });
   };
 })();

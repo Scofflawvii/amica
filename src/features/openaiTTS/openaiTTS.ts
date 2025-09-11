@@ -1,8 +1,7 @@
-import { config } from '@/utils/config';
+import { config } from "@/utils/config";
+import { logger } from "@/utils/logger";
 
-export async function openaiTTS(
-  message: string,
-) {
+export async function openaiTTS(message: string) {
   const apiKey = config("openai_tts_apikey");
   if (!apiKey) {
     throw new Error("Invalid OpenAI TTS API Key");
@@ -18,18 +17,21 @@ export async function openaiTTS(
       }),
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
       },
     });
-    if (! res.ok) {
-      console.error(res);
+    if (!res.ok) {
+      logger.error("openaiTTS: bad response", {
+        status: res.status,
+        statusText: res.statusText,
+      });
       throw new Error("OpenAI TTS API Error");
     }
     const data = (await res.arrayBuffer()) as any;
 
     return { audio: data };
   } catch (e) {
-    console.error('ERROR', e);
+    logger.error("openaiTTS: error", e);
     throw new Error("OpenAI TTS API Error");
   }
 }

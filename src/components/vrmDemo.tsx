@@ -1,6 +1,7 @@
 import { useContext, useCallback, useEffect, useState } from "react";
 import { ViewerContext } from "@/features/vrmViewer/viewerContext";
 import { buildUrl } from "@/utils/buildUrl";
+import { logger } from "@/utils/logger";
 
 export default function VrmDemo({
   vrmUrl,
@@ -30,10 +31,13 @@ export default function VrmDemo({
         (async () => {
           try {
             await viewer.loadVrm(buildUrl(vrmUrl), setLoadingProgress);
-            console.log("vrm loaded");
+            logger.info("vrm loaded", { url: vrmUrl });
             // viewer.animateToEntry(); // This method may not exist, commenting out
-          } catch {
-            console.log("vrm load failed");
+          } catch (e) {
+            logger.warn("vrm load failed", {
+              url: vrmUrl,
+              error: e instanceof Error ? e.message : String(e),
+            });
           }
         })();
       }
