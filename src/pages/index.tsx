@@ -44,8 +44,14 @@ const DebugPane = dynamic(
   () => import("@/components/debugPane").then((m) => m.DebugPane),
   { ssr: false, loading: () => null },
 );
-import { EmbeddedWebcam } from "@/components/embeddedWebcam";
-import { Moshi } from "@/features/moshi/components/Moshi";
+const EmbeddedWebcam = dynamic(
+  () => import("@/components/embeddedWebcam").then((m) => m.EmbeddedWebcam),
+  { ssr: false, loading: () => null },
+);
+const Moshi = dynamic(
+  () => import("@/features/moshi/components/Moshi").then((m) => m.Moshi),
+  { ssr: false, loading: () => null },
+);
 
 import { ViewerContext } from "@/features/vrmViewer/viewerContext";
 import { Message, Role } from "@/features/chat/messages";
