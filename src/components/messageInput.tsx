@@ -19,6 +19,7 @@ import { config } from "@/utils/config";
 import { WaveFile } from "wavefile";
 import { AmicaLifeContext } from "@/features/amicaLife/amicaLifeContext";
 import { AudioControlsContext } from "@/features/moshi/components/audioControlsContext";
+import { perfMark } from "@/utils/perf";
 
 export default function MessageInput({
   userMessage,
@@ -50,10 +51,12 @@ export default function MessageInput({
     startOnLoad: false,
     onSpeechStart: () => {
       console.debug("vad", "on_speech_start");
+      perfMark("stt:vad:start");
       console.time("performance_speech");
     },
     onSpeechEnd: (audio: Float32Array) => {
       console.debug("vad", "on_speech_end");
+      perfMark("stt:vad:end");
       console.timeEnd("performance_speech");
       console.time("performance_transcribe");
       (
@@ -73,6 +76,7 @@ export default function MessageInput({
             // Convert Float32Array to regular array for compatibility
             const audioArray = Array.from(audio);
             buffer.copyToChannel(new Float32Array(audioArray), 0, 0);
+            perfMark("stt:transcribe:start");
             transcriber.start(buffer);
             break;
           }
@@ -92,6 +96,7 @@ export default function MessageInput({
               try {
                 const transcript = await openaiWhisper(file, prompt);
                 setWhisperOpenAIOutput(transcript);
+                perfMark("stt:transcribe:done");
               } catch (e) {
                 const err = e instanceof Error ? e : new Error(String(e));
                 console.error("whisper_openai error", err);
@@ -117,6 +122,7 @@ export default function MessageInput({
               try {
                 const transcript = await whispercpp(file, prompt);
                 setWhisperCppOutput(transcript);
+                perfMark("stt:transcribe:done");
               } catch (e) {
                 const err = e instanceof Error ? e : new Error(String(e));
                 console.error("whispercpp error", err);
@@ -189,6 +195,7 @@ export default function MessageInput({
       setUserMessage(text);
     }
     console.timeEnd("performance_transcribe");
+    perfMark("stt:transcribe:done");
   }
 
   function handleInputChange(

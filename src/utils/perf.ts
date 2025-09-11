@@ -32,6 +32,19 @@ export const logPerfSummaryOnce = (() => {
       "chat:init:done",
       "amicaLife:init:start",
       "amicaLife:init:done",
+      // chat stream lifecycle
+      "chat:stream:start",
+      "chat:stream:firstToken",
+      "chat:stream:firstSentence",
+      "chat:stream:done",
+      // stt lifecycle
+      "stt:vad:start",
+      "stt:vad:end",
+      "stt:transcribe:start",
+      "stt:transcribe:done",
+      // tts playback
+      "tts:play:start",
+      "tts:play:done",
     ];
     const have = marks.filter((m) => performance.getEntriesByName(m).length);
     if (have.length === 0) return;
@@ -51,7 +64,21 @@ export const logPerfSummaryOnce = (() => {
     measureIf("vrm:loadVrm", "vrm:loadVrm:start", "vrm:loadVrm:done");
     measureIf("chat:init", "chat:init:start", "chat:init:done");
     measureIf("amicaLife:init", "amicaLife:init:start", "amicaLife:init:done");
-     
+    measureIf(
+      "chat:stream:firstTokenLatency",
+      "chat:stream:start",
+      "chat:stream:firstToken",
+    );
+    measureIf(
+      "chat:stream:firstSentenceLatency",
+      "chat:stream:start",
+      "chat:stream:firstSentence",
+    );
+    measureIf("chat:stream:total", "chat:stream:start", "chat:stream:done");
+    measureIf("stt:vad", "stt:vad:start", "stt:vad:end");
+    measureIf("stt:transcribe", "stt:transcribe:start", "stt:transcribe:done");
+    measureIf("tts:play", "tts:play:start", "tts:play:done");
+
     console.table(measures);
   };
 })();

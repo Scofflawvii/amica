@@ -4,9 +4,7 @@ import { Viewer } from "@/features/vrmViewer/viewer";
 import { Alert } from "@/features/alert/alert";
 
 import { getEchoChatResponseStream } from "./echoChat";
-import {
-  getArbiusChatResponseStream,
-} from "./arbiusChat";
+import { getArbiusChatResponseStream } from "./arbiusChat";
 import {
   getOpenAiChatResponseStream,
   getOpenAiVisionChatResponse,
@@ -38,12 +36,17 @@ import { config, updateConfig } from "@/utils/config";
 import { cleanTalk } from "@/utils/cleanTalk";
 import { processResponse } from "@/utils/processResponse";
 import { wait } from "@/utils/wait";
-import isDev from '@/utils/isDev';
+import isDev from "@/utils/isDev";
+import { perfMark } from "@/utils/perf";
 
-import { isCharacterIdle, characterIdleTime, resetIdleTimer } from "@/utils/isIdle";
-import { getOpenRouterChatResponseStream } from './openRouterChat';
-import { handleUserInput } from '../externalAPI/externalAPI';
-import { loadVRMAnimation } from '@/lib/VRMAnimation/loadVRMAnimation';
+import {
+  isCharacterIdle,
+  characterIdleTime,
+  resetIdleTimer,
+} from "@/utils/isIdle";
+import { getOpenRouterChatResponseStream } from "./openRouterChat";
+import { handleUserInput } from "../externalAPI/externalAPI";
+import { loadVRMAnimation } from "@/lib/VRMAnimation/loadVRMAnimation";
 
 type Speak = {
   audioBuffer: ArrayBuffer | null;
@@ -95,7 +98,7 @@ export class Chat {
 
   public currentStreamIdx: number;
 
-  private eventSource: EventSource | null = null
+  private eventSource: EventSource | null = null;
 
   constructor() {
     this.initialized = false;
@@ -249,9 +252,11 @@ export class Chat {
         this.bubbleMessage("assistant", speak.screenplay.text);
 
         if (speak.audioBuffer) {
+          perfMark("tts:play:start");
           this.setChatSpeaking!(true);
           await this.viewer!.model?.speak(speak.audioBuffer, speak.screenplay);
           this.setChatSpeaking!(false);
+          perfMark("tts:play:done");
           this.isAwake() ? this.updateAwake() : null;
         }
       } while (this.speakJobs.size() > 0);
@@ -260,7 +265,7 @@ export class Chat {
   }
 
   public thoughtBubbleMessage(isThinking: boolean, thought: string) {
-    // if not thinking, we should clear the thought bubble 
+    // if not thinking, we should clear the thought bubble
     if (!isThinking) {
       this.thoughtMessage = "";
       this.setThoughtMessage!("");
@@ -324,7 +329,6 @@ export class Chat {
         this.currentAssistantMessage = text;
         this.setAssistantMessage!(this.currentAssistantMessage);
         this.setUserMessage!("");
-
       } else {
         this.currentAssistantMessage += text;
         this.setUserMessage!("");
@@ -373,6 +377,7 @@ export class Chat {
 
   // this happens either from text or from voice / whisper completion
   public async receiveMessageFromUser(message: string, amicaLife: boolean) {
+    perfMark("chat:user:send:start");
     if (message === null || message === "") {
       return;
     }
@@ -408,17 +413,18 @@ export class Chat {
     ];
     // console.debug('messages', messages);
 
+    perfMark("chat:stream:start");
     await this.makeAndHandleStream(messages);
   }
 
   public initSSE() {
     if (!isDev || config("external_api_enabled") !== "true") {
       return;
-    }  
+    }
     // Close existing SSE connection if it exists
     this.closeSSE();
 
-    this.eventSource = new EventSource('/api/amicaHandler');
+    this.eventSource = new EventSource("/api/amicaHandler");
 
     // Listen for incoming messages from the server
     this.eventSource.onmessage = async (event) => {
@@ -433,33 +439,37 @@ export class Chat {
 
         // Handle the message based on its type
         switch (type) {
-          case 'normal': {
-            console.log('Normal message received:', data);
+          case "normal": {
+            console.log("Normal message received:", data);
             const messages: Message[] = [
               { role: "system", content: config("system_prompt") },
               ...this.messageList!,
-              { role: "user", content: data},
+              { role: "user", content: data },
             ];
             let stream = await getEchoChatResponseStream(messages);
             this.streams.push(stream);
             this.handleChatResponseStream();
             break;
           }
-          
-          case 'animation': {
-            console.log('Animation data received:', data);
+
+          case "animation": {
+            console.log("Animation data received:", data);
             const animation = await loadVRMAnimation(`/animations/${data}`);
             if (!animation) {
               throw new Error("Loading animation failed");
             }
-            this.viewer?.model?.playAnimation(animation,data);
-            requestAnimationFrame(() => { this.viewer?.resetCameraLerp(); });
+            this.viewer?.model?.playAnimation(animation, data);
+            requestAnimationFrame(() => {
+              this.viewer?.resetCameraLerp();
+            });
             break;
           }
 
-          case 'playback': {
-            console.log('Playback flag received:', data);
-            const playbackAnimation = await loadVRMAnimation(`/animations/${data}`);
+          case "playback": {
+            console.log("Playback flag received:", data);
+            const playbackAnimation = await loadVRMAnimation(
+              `/animations/${data}`,
+            );
             this.viewer?.startRecording();
             // Automatically stop recording after 10 seconds
             setTimeout(() => {
@@ -483,28 +493,27 @@ export class Chat {
             break;
           }
 
-          case 'systemPrompt': {
-            console.log('System Prompt data received:', data);
-            updateConfig("system_prompt",data);
+          case "systemPrompt": {
+            console.log("System Prompt data received:", data);
+            updateConfig("system_prompt", data);
             break;
           }
 
           default:
-            console.warn('Unknown message type:', type);
+            console.warn("Unknown message type:", type);
         }
       } catch (error) {
-        console.error('Error parsing SSE message:', error);
+        console.error("Error parsing SSE message:", error);
       }
     };
 
-
-    this.eventSource.addEventListener('end', () => {
-      console.log('SSE session ended');
+    this.eventSource.addEventListener("end", () => {
+      console.log("SSE session ended");
       this.eventSource?.close();
     });
 
     this.eventSource.onerror = (error) => {
-      console.error('Error in SSE connection:', error);
+      console.error("Error in SSE connection:", error);
       this.eventSource?.close();
       setTimeout(this.initSSE, 500);
     };
@@ -512,11 +521,11 @@ export class Chat {
 
   public closeSSE() {
     if (this.eventSource) {
-        console.log("Closing existing SSE connection...");
-        this.eventSource.close();
-        this.eventSource = null;
+      console.log("Closing existing SSE connection...");
+      this.eventSource.close();
+      this.eventSource = null;
     }
-}
+  }
 
   public async makeAndHandleStream(messages: Message[]) {
     try {
@@ -574,6 +583,7 @@ export class Chat {
         if (!firstTokenEncountered) {
           console.timeEnd("performance_time_to_first_token");
           firstTokenEncountered = true;
+          perfMark("chat:stream:firstToken");
         }
         if (done) break;
 
@@ -599,14 +609,15 @@ export class Chat {
                 screenplay: aiTalks[0],
                 streamIdx: streamIdx,
               });
-            } 
+            }
 
             // thought bubble
             this.thoughtBubbleMessage(isThinking, aiTalks[0].text);
-            
+
             if (!firstSentenceEncountered) {
               console.timeEnd("performance_time_to_first_sentence");
               firstSentenceEncountered = true;
+              perfMark("chat:stream:firstSentence");
             }
 
             return false; // normal processing
@@ -635,6 +646,7 @@ export class Chat {
       if (streamIdx === this.currentStreamIdx) {
         this.setChatProcessing!(false);
       }
+      perfMark("chat:stream:done");
     }
 
     return aiTextLog;
@@ -651,9 +663,11 @@ export class Chat {
     }
 
     const rvcEnabled = config("rvc_enabled") === "true";
+    const backend = config("tts_backend");
 
     try {
-      switch (config("tts_backend")) {
+      perfMark(`tts:${backend}:start`);
+      switch (backend) {
         case "none": {
           return null;
         }
@@ -708,6 +722,7 @@ export class Chat {
       this.alert?.error("Failed to get TTS response", e.toString());
     }
 
+    perfMark(`tts:${backend}:done`);
     return null;
   }
 
@@ -717,11 +732,16 @@ export class Chat {
 
     // Extract the system prompt and convo messages
     const systemPrompt = messages.find((msg) => msg.role === "system")!;
-    const conversationMessages = messages.filter((msg) => msg.role !== "system");
+    const conversationMessages = messages.filter(
+      (msg) => msg.role !== "system",
+    );
 
     if (config("reasoning_engine_enabled") === "true") {
-      return getReasoingEngineChatResponseStream(systemPrompt, conversationMessages)
-    } 
+      return getReasoingEngineChatResponseStream(
+        systemPrompt,
+        conversationMessages,
+      );
+    }
 
     switch (chatbotBackend) {
       case "arbius_llm":
@@ -736,7 +756,7 @@ export class Chat {
         return getOllamaChatResponseStream(messages);
       case "koboldai":
         return getKoboldAiChatResponseStream(messages);
-      case 'openrouter':
+      case "openrouter":
         return getOpenRouterChatResponseStream(messages);
     }
 
@@ -775,7 +795,7 @@ export class Chat {
       } else if (visionBackend === "vision_openai") {
         const messages: Message[] = [
           { role: "user", content: config("vision_system_prompt") },
-          ...this.messageList! as any[],
+          ...(this.messageList! as any[]),
           {
             role: "user",
             content: [
