@@ -1,10 +1,10 @@
-import * as THREE from 'three';
-import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import * as THREE from "three";
+import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 interface TransparencyStats {
   meshName: string;
   materialName: string;
-  transparencyType: 'transparent' | 'alphaTest' | 'none';
+  transparencyType: "transparent" | "alphaTest" | "none";
   alphaValue: number;
   textureAlpha: boolean;
   blendMode: string;
@@ -20,7 +20,9 @@ class TransparencyOptimizer {
     gltf.scene.traverse((node) => {
       if ((node as THREE.Mesh).isMesh) {
         const mesh = node as THREE.Mesh;
-        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        const materials = Array.isArray(mesh.material)
+          ? mesh.material
+          : [mesh.material];
 
         materials.forEach((material) => {
           this.analyzeMaterialTransparency(mesh.name, material);
@@ -31,22 +33,26 @@ class TransparencyOptimizer {
     return this.stats;
   }
 
-  private analyzeMaterialTransparency(meshName: string, material: THREE.Material): void {
-    let transparencyType: 'transparent' | 'alphaTest' | 'none' = 'none';
+  private analyzeMaterialTransparency(
+    meshName: string,
+    material: THREE.Material,
+  ): void {
+    let transparencyType: "transparent" | "alphaTest" | "none" = "none";
     let alphaValue = 1;
     let textureAlpha = false;
-    let blendMode = 'normal';
+    let blendMode = "normal";
 
-    if (material instanceof THREE.MeshBasicMaterial || 
-        material instanceof THREE.MeshStandardMaterial || 
-        material instanceof THREE.MeshPhysicalMaterial) {
-      
+    if (
+      material instanceof THREE.MeshBasicMaterial ||
+      material instanceof THREE.MeshStandardMaterial ||
+      material instanceof THREE.MeshPhysicalMaterial
+    ) {
       // Check for transparency settings
       if (material.transparent) {
-        transparencyType = 'transparent';
+        transparencyType = "transparent";
         alphaValue = material.opacity;
       } else if (material.alphaTest > 0) {
-        transparencyType = 'alphaTest';
+        transparencyType = "alphaTest";
         alphaValue = material.alphaTest;
       }
 
@@ -59,45 +65,56 @@ class TransparencyOptimizer {
       }
 
       // Get blend mode
-      blendMode = material.blending === THREE.NormalBlending ? 'normal' :
-                  material.blending === THREE.AdditiveBlending ? 'additive' :
-                  material.blending === THREE.MultiplyBlending ? 'multiply' : 'custom';
+      blendMode =
+        material.blending === THREE.NormalBlending
+          ? "normal"
+          : material.blending === THREE.AdditiveBlending
+            ? "additive"
+            : material.blending === THREE.MultiplyBlending
+              ? "multiply"
+              : "custom";
     }
 
     this.stats.push({
       meshName,
-      materialName: material.name || 'Unnamed Material',
+      materialName: material.name || "Unnamed Material",
       transparencyType,
       alphaValue,
       textureAlpha,
       blendMode,
-      renderOrder: (material as any).renderOrder || 0
+      renderOrder: (material as any).renderOrder || 0,
     });
   }
 
-  public optimizeTransparency(gltf: GLTF, options: {
-    disableTransparency?: boolean;
-    minAlphaThreshold?: number;
-    convertToAlphaTest?: boolean;
-    alphaTestThreshold?: number;
-  } = {}): void {
+  public optimizeTransparency(
+    gltf: GLTF,
+    options: {
+      disableTransparency?: boolean;
+      minAlphaThreshold?: number;
+      convertToAlphaTest?: boolean;
+      alphaTestThreshold?: number;
+    } = {},
+  ): void {
     const {
       disableTransparency = false,
       minAlphaThreshold = 0.9,
       convertToAlphaTest = true,
-      alphaTestThreshold = 0.5
+      alphaTestThreshold = 0.5,
     } = options;
 
     gltf.scene.traverse((node) => {
       if ((node as THREE.Mesh).isMesh) {
         const mesh = node as THREE.Mesh;
-        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        const materials = Array.isArray(mesh.material)
+          ? mesh.material
+          : [mesh.material];
 
         materials.forEach((material) => {
-          if (material instanceof THREE.MeshBasicMaterial || 
-              material instanceof THREE.MeshStandardMaterial || 
-              material instanceof THREE.MeshPhysicalMaterial) {
-
+          if (
+            material instanceof THREE.MeshBasicMaterial ||
+            material instanceof THREE.MeshStandardMaterial ||
+            material instanceof THREE.MeshPhysicalMaterial
+          ) {
             // Handle fully opaque materials with transparency enabled
             if (material.transparent && material.opacity >= minAlphaThreshold) {
               material.transparent = false;
@@ -105,7 +122,11 @@ class TransparencyOptimizer {
             }
 
             // Convert transparent materials to alphaTest if possible
-            if (convertToAlphaTest && material.transparent && !material.alphaTest) {
+            if (
+              convertToAlphaTest &&
+              material.transparent &&
+              !material.alphaTest
+            ) {
               material.transparent = false;
               material.alphaTest = alphaTestThreshold;
               material.needsUpdate = true;
@@ -128,28 +149,40 @@ class TransparencyOptimizer {
     const issues: string[] = [];
 
     // Check for performance issues with transparency
-    this.stats.forEach(stat => {
-      if (stat.transparencyType === 'transparent') {
-        issues.push(`Mesh "${stat.meshName}" uses full transparency which may impact performance.`);
-        
+    this.stats.forEach((stat) => {
+      if (stat.transparencyType === "transparent") {
+        issues.push(
+          `Mesh "${stat.meshName}" uses full transparency which may impact performance.`,
+        );
+
         if (stat.alphaValue >= 0.9) {
-          issues.push(`  - Material "${stat.materialName}" is nearly opaque (${stat.alphaValue}). Consider disabling transparency.`);
+          issues.push(
+            `  - Material "${stat.materialName}" is nearly opaque (${stat.alphaValue}). Consider disabling transparency.`,
+          );
         }
 
-        if (stat.blendMode !== 'normal') {
-          issues.push(`  - Uses custom blend mode "${stat.blendMode}" which may be expensive.`);
+        if (stat.blendMode !== "normal") {
+          issues.push(
+            `  - Uses custom blend mode "${stat.blendMode}" which may be expensive.`,
+          );
         }
       }
 
       if (stat.textureAlpha) {
-        issues.push(`  - Uses alpha texture which may require special handling for proper sorting.`);
+        issues.push(
+          `  - Uses alpha texture which may require special handling for proper sorting.`,
+        );
       }
     });
 
     // Check for sorting issues
-    const transparentMaterials = this.stats.filter(s => s.transparencyType === 'transparent');
+    const transparentMaterials = this.stats.filter(
+      (s) => s.transparencyType === "transparent",
+    );
     if (transparentMaterials.length > 1) {
-      issues.push(`Multiple transparent materials found (${transparentMaterials.length}). May cause sorting issues.`);
+      issues.push(
+        `Multiple transparent materials found (${transparentMaterials.length}). May cause sorting issues.`,
+      );
     }
 
     return issues;
@@ -157,36 +190,40 @@ class TransparencyOptimizer {
 }
 
 // Helper function to quickly check and optimize transparency
-export async function checkAndOptimizeTransparency(gltf: GLTF, autoFix: boolean = false): Promise<void> {
+export async function checkAndOptimizeTransparency(
+  gltf: GLTF,
+  autoFix: boolean = false,
+): Promise<void> {
   const optimizer = new TransparencyOptimizer();
-  
+
   // Analyze current transparency usage
   const stats = optimizer.analyzeTransparency(gltf);
-  
+
   // Log transparency information
-  console.group('Transparency Analysis');
-  console.log('Transparent materials found:', stats.filter(s => s.transparencyType === 'transparent').length);
-  console.log('AlphaTest materials found:', stats.filter(s => s.transparencyType === 'alphaTest').length);
-  
+  const { logger } = await import("@/utils/logger");
+  logger.info("Transparency Analysis", {
+    transparentCount: stats.filter((s) => s.transparencyType === "transparent")
+      .length,
+    alphaTestCount: stats.filter((s) => s.transparencyType === "alphaTest")
+      .length,
+  });
+
   // Log any issues
   const issues = optimizer.logTransparencyIssues();
   if (issues.length > 0) {
-    console.log('\nPotential Issues:');
-    issues.forEach(issue => console.log(issue));
+    logger.warn("Transparency Issues", { issues });
   }
-  
+
   // Auto-fix if requested
   if (autoFix) {
     optimizer.optimizeTransparency(gltf, {
       disableTransparency: false,
       minAlphaThreshold: 0.9,
       convertToAlphaTest: true,
-      alphaTestThreshold: 0.5
+      alphaTestThreshold: 0.5,
     });
-    console.log('\nOptimizations applied automatically.');
+    logger.info("Transparency optimizations applied");
   }
-  
-  console.groupEnd();
 }
 
 export { TransparencyOptimizer, type TransparencyStats };

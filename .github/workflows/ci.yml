@@ -36,6 +36,5 @@ jobs:
       - name: Bundle size check (shared)
         env:
           BUNDLE_CHECK_SCOPE: shared
-          # Set BUNDLE_MAX_KB to enable a hard cap, e.g. 900
-          # BUNDLE_MAX_KB: 900
+          BUNDLE_MAX_KB: '2400'
         run: node scripts/check_bundle_size.mjs

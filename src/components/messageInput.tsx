@@ -20,6 +20,7 @@ import { WaveFile } from "wavefile";
 import { AmicaLifeContext } from "@/features/amicaLife/amicaLifeContext";
 import { AudioControlsContext } from "@/features/moshi/components/audioControlsContext";
 import { perfMark } from "@/utils/perf";
+import { logger } from "@/utils/logger";
 
 export default function MessageInput({
   userMessage,
@@ -50,12 +51,12 @@ export default function MessageInput({
   const vad = useMicVAD({
     startOnLoad: false,
     onSpeechStart: () => {
-      console.debug("vad", "on_speech_start");
+      logger.debug("vad on_speech_start");
       perfMark("stt:vad:start");
       console.time("performance_speech");
     },
     onSpeechEnd: (audio: Float32Array) => {
-      console.debug("vad", "on_speech_end");
+      logger.debug("vad on_speech_end");
       perfMark("stt:vad:end");
       console.timeEnd("performance_speech");
       console.time("performance_transcribe");
@@ -68,7 +69,7 @@ export default function MessageInput({
       try {
         switch (config("stt_backend")) {
           case "whisper_browser": {
-            console.debug("whisper_browser attempt");
+            logger.debug("whisper_browser attempt");
             // since VAD sample rate is same as whisper we do nothing here
             // both are 16000
             const audioCtx = new AudioContext();
@@ -81,7 +82,7 @@ export default function MessageInput({
             break;
           }
           case "whisper_openai": {
-            console.debug("whisper_openai attempt");
+            logger.debug("whisper_openai attempt");
             const wav = new WaveFile();
             wav.fromScratch(1, 16000, "32f", Array.from(audio));
             const wavBuffer = wav.toBuffer();
@@ -99,14 +100,14 @@ export default function MessageInput({
                 perfMark("stt:transcribe:done");
               } catch (e) {
                 const err = e instanceof Error ? e : new Error(String(e));
-                console.error("whisper_openai error", err);
+                logger.error("whisper_openai error", err);
                 alert.error("whisper_openai error", err.message);
               }
             })();
             break;
           }
           case "whispercpp": {
-            console.debug("whispercpp attempt");
+            logger.debug("whispercpp attempt");
             const wav = new WaveFile();
             wav.fromScratch(1, 16000, "32f", Array.from(audio));
             wav.toBitDepth("16");
@@ -125,7 +126,7 @@ export default function MessageInput({
                 perfMark("stt:transcribe:done");
               } catch (e) {
                 const err = e instanceof Error ? e : new Error(String(e));
-                console.error("whispercpp error", err);
+                logger.error("whispercpp error", err);
                 alert.error("whispercpp error", err.message);
               }
             })();
@@ -134,14 +135,14 @@ export default function MessageInput({
         }
       } catch (e) {
         const err = e instanceof Error ? e : new Error(String(e));
-        console.error("stt_backend error", err);
+        logger.error("stt_backend error", err);
         alert.error("STT backend error", err.message);
       }
     },
   });
 
   if (vad.errored) {
-    console.error("vad error", vad.errored);
+    logger.error("vad error", vad.errored);
   }
 
   function handleTranscriptionResult(preprocessed: string) {
