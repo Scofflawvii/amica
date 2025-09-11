@@ -6,6 +6,7 @@
   "scripts": {
   "dev": "npm run generate:paths && npm run build:workers && next dev",
   "build": "npm run generate:paths && npm run build:workers && next build",
+  "postbuild": "node scripts/check_bundle_size.mjs",
   "analyze": "ANALYZE=true npm run build",
     "build:workers": "npm run build:worker:generateMeshBVH",
     "build:worker:generateMeshBVH": "esbuild src/workers/bvh/generateMeshBVH.worker.js --bundle --minify --sourcemap --outfile=public/generateMeshBVH.worker.js",
