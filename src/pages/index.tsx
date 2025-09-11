@@ -26,13 +26,24 @@ import { AddToHomescreen } from "@/components/addToHomescreen";
 import { Alert } from "@/components/alert";
 import { UserText } from "@/components/userText";
 import { ChatLog } from "@/components/chatLog";
-import VrmViewer from "@/components/vrmViewer";
+import dynamic from "next/dynamic";
 import { MessageInputContainer } from "@/components/messageInputContainer";
 import { Introduction } from "@/components/introduction";
 import { ArbiusIntroduction } from "@/components/arbiusIntroduction";
 import { LoadingProgress } from "@/components/loadingProgress";
-import { DebugPane } from "@/components/debugPane";
-import { Settings } from "@/components/settings";
+// Heavy components dynamically imported to trim main bundle
+const VrmViewer = dynamic(() => import("@/components/vrmViewer"), {
+  ssr: false,
+  loading: () => <div className="z-vrm fixed inset-0" />,
+});
+const Settings = dynamic(
+  () => import("@/components/settings").then((m) => m.Settings),
+  { ssr: false, loading: () => <div className="z-modal" /> },
+);
+const DebugPane = dynamic(
+  () => import("@/components/debugPane").then((m) => m.DebugPane),
+  { ssr: false, loading: () => null },
+);
 import { EmbeddedWebcam } from "@/components/embeddedWebcam";
 import { Moshi } from "@/features/moshi/components/Moshi";
 
