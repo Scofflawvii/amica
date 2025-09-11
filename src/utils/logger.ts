@@ -38,8 +38,22 @@ const isProd = (() => {
   }
 })();
 
-const envLevel = (() => {
+function computeInitialLevel(): Level {
   try {
+    // URL override (?log=debug)
+    if (typeof window !== "undefined") {
+      const qp = new URLSearchParams(window.location.search);
+      const qlvl = qp.get("log");
+      if (qlvl && qlvl.toLowerCase() in levelOrder)
+        return qlvl.toLowerCase() as Level;
+      // Local storage override
+      const slvl =
+        window.localStorage?.getItem("LOG_LEVEL") ??
+        window.localStorage?.getItem("log_level");
+      if (slvl && slvl.toLowerCase() in levelOrder)
+        return slvl.toLowerCase() as Level;
+    }
+    // Env vars (build/runtime)
     const lvl =
       (process as any)?.env?.NEXT_PUBLIC_LOG_LEVEL ??
       (process as any)?.env?.LOG_LEVEL;
@@ -50,10 +64,28 @@ const envLevel = (() => {
     /* noop */
   }
   return isProd ? ("info" as Level) : ("debug" as Level);
-})();
+}
+
+let currentLevel: Level = computeInitialLevel();
+
+export function setLogLevel(level: Level) {
+  if (!(level in levelOrder)) return;
+  currentLevel = level;
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage?.setItem("LOG_LEVEL", level);
+    } catch {
+      /* noop */
+    }
+  }
+}
+
+export function getLogLevel(): Level {
+  return currentLevel;
+}
 
 function shouldLog(level: Level): boolean {
-  return levelOrder[level] >= levelOrder[envLevel];
+  return levelOrder[level] >= levelOrder[currentLevel];
 }
 
 function toErrorLike(

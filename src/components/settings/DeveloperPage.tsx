@@ -4,6 +4,7 @@ import { BasicPage, FormRow } from "./common";
 import { SwitchBox } from "@/components/switchBox";
 import { updateConfig } from "@/utils/config";
 import { debug } from "@/utils/debug";
+import { getLogLevel, setLogLevel } from "@/utils/logger";
 
 const mtoonDebugModes = [
   { key: "none", label: "None" },
@@ -81,6 +82,23 @@ export function DeveloperPage({
                 setSettingsUpdated(true);
               }}
             />
+          </FormRow>
+        </li>
+        <li className="py-4">
+          <FormRow label={t("Structured Log Level")}>
+            <select
+              defaultValue={getLogLevel()}
+              className="input-base mt-2 block w-full pr-10 pl-3"
+              onChange={(e) => {
+                const lvl = e.target.value as any;
+                setLogLevel(lvl);
+                setSettingsUpdated(true);
+              }}>
+              <option value="debug">debug</option>
+              <option value="info">info</option>
+              <option value="warn">warn</option>
+              <option value="error">error</option>
+            </select>
           </FormRow>
         </li>
         <li className="py-4">
