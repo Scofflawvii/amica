@@ -6,7 +6,7 @@ function makeTalk(message: string): Talk {
   return {
     style: "talk",
     message,
-  }
+  };
 }
 
 describe("Cleaning Talk Tests", () => {
@@ -29,5 +29,24 @@ describe("Cleaning Talk Tests", () => {
   test("should remove smiley start of sentence", () => {
     const t = makeTalk(":D");
     expect(cleanTalk(t).message).toBe("");
+  });
+  test("should remove multiple emoji + collapse spaces", () => {
+    const t = makeTalk("Hi 😀😀   there 🚀 friend");
+    expect(cleanTalk(t).message).toBe("Hi there friend");
+  });
+  test("should remove flags", () => {
+    const t = makeTalk("Hello 🇺🇸 friend");
+    expect(cleanTalk(t).message).toBe("Hello friend");
+  });
+  test("should remove pictographs", () => {
+    const t = makeTalk("Check this out ✨ star");
+    expect(cleanTalk(t).message).toBe(
+      "Check this out  star".replace(/ {2}/g, " "),
+    );
+  });
+  test("should not mutate style", () => {
+    const t = makeTalk("Hello :) world");
+    const cleaned = cleanTalk(t);
+    expect(cleaned.style).toBe("talk");
   });
 });
