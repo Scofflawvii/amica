@@ -50,6 +50,7 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
   const [typeWarnEnabled, setTypeWarnEnabled] = useState(true);
   const [typeErrorEnabled, setTypeErrorEnabled] = useState(true);
   const [showPerf, setShowPerf] = useState(true);
+  const [leftOffset, setLeftOffset] = useState(0);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -60,6 +61,32 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
       behavior: "auto",
       block: "center",
     });
+  }, []);
+
+  // Auto-detect sidebar bounds to avoid overlap; update on resize
+  useEffect(() => {
+    const measure = () => {
+      if (typeof document === "undefined") return;
+      const el = document.getElementById("amica-sidebar");
+      if (!el) {
+        setLeftOffset(0);
+        return;
+      }
+      const r = el.getBoundingClientRect();
+      const margin = 12; // breathing room beside sidebar
+      const next = Math.max(
+        0,
+        Math.min(window.innerWidth - 120, r.right + margin),
+      );
+      setLeftOffset(next);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    const id = window.setInterval(measure, 1000);
+    return () => {
+      window.removeEventListener("resize", measure);
+      window.clearInterval(id);
+    };
   }, []);
 
   // Shape of a captured console log item (mirrors error handler injection logic)
@@ -96,7 +123,9 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
     <>
       <div className="z-max fixed inset-0 text-[hsl(var(--text))]">
         {/* Content panel sits beside the left sidebar (assumed ~7rem). On small screens it uses full width. */}
-        <div className="z-max bg-surface fixed inset-y-0 right-0 left-0 text-left text-xs md:left-28">
+        <div
+          className="z-max bg-surface fixed inset-y-0 right-0 text-left text-xs"
+          style={{ left: leftOffset }}>
           <div className="bg-surface-alt border-border/50 border-b p-2">
             <IconButton
               iconName="24/Close"

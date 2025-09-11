@@ -355,7 +355,9 @@ export default function Home() {
             }}
           />
         )}
-        <div className="z-base pointer-events-auto absolute m-2">
+        <div
+          id="amica-sidebar"
+          className="z-base pointer-events-auto absolute m-2">
           <div className="mt-2 grid grid-flow-col place-content-end gap-[8px] rounded-md bg-slate-800/40 shadow-sm backdrop-blur-md">
             <div className="flex flex-col items-center justify-center space-y-3 p-1">
               <MenuButton

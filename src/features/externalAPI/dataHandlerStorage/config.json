@@ -38,7 +38,7 @@
   "animation_url": "/animations/idle_loop.vrma",
   "animation_procedural": "false",
   "voice_url": "",
-  "chatbot_backend": "ollama",
+  "chatbot_backend": "echo",
   "arbius_llm_model_id": "default",
   "openai_apikey": "default",
   "openai_url": "https://i-love-amica.com",
