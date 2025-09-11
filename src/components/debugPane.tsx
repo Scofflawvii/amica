@@ -68,16 +68,16 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
     const measure = () => {
       if (typeof document === "undefined") return;
       const el = document.getElementById("amica-sidebar");
+      const width = typeof window !== "undefined" ? window.innerWidth : 0;
       if (!el) {
         setLeftOffset(0);
         return;
       }
       const r = el.getBoundingClientRect();
       const margin = 12; // breathing room beside sidebar
-      const next = Math.max(
-        0,
-        Math.min(window.innerWidth - 120, r.right + margin),
-      );
+      // Clamp to right screen bound with a minimum panel width of 320px
+      const maxLeft = Math.max(0, width - 320);
+      const next = Math.max(0, Math.min(maxLeft, r.right + margin));
       setLeftOffset(next);
     };
     measure();
@@ -121,8 +121,8 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
 
   return (
     <>
-      <div className="z-max fixed inset-0 text-[hsl(var(--text))]">
-        {/* Content panel sits beside the left sidebar (assumed ~7rem). On small screens it uses full width. */}
+      <div className="z-max bg-surface fixed inset-0 text-[hsl(var(--text))]">
+        {/* Content panel sits beside the left sidebar; full height, scrolls internally */}
         <div
           className="z-max bg-surface fixed inset-y-0 right-0 text-left text-xs"
           style={{ left: leftOffset }}>
@@ -139,7 +139,6 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
               className="bg-primary hover:bg-primary-hover active:bg-primary-active ml-4"
               onClick={onClickCopy}
             />
-
             <div className="text-muted ml-2 inline-block items-center">
               <span className="px-1">
                 <span className="text-muted text-xs">llm: </span>
