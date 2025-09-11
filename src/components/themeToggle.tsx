@@ -36,17 +36,23 @@ export function ThemeToggle() {
       };
       try {
         media.addEventListener("change", handler);
-      } catch (_) {
+      } catch {
         // Safari <14 fallback
-        // @ts-ignore
-        media.addListener(handler);
+        (
+          media as MediaQueryList & {
+            addListener?: (cb: (e: MediaQueryListEvent) => void) => void;
+          }
+        ).addListener?.(handler);
       }
       return () => {
         try {
           media.removeEventListener("change", handler);
-        } catch (_) {
-          // @ts-ignore
-          media.removeListener(handler);
+        } catch {
+          (
+            media as MediaQueryList & {
+              removeListener?: (cb: (e: MediaQueryListEvent) => void) => void;
+            }
+          ).removeListener?.(handler);
         }
       };
     }

@@ -1,14 +1,9 @@
 import { useTranslation } from "react-i18next";
 
-import { BasicPage, FormRow, basename } from "./common";
-import { updateConfig } from "@/utils/config";
+import { BasicPage, FormRow } from "./common";
 import { langs } from "@/i18n/langs";
 
-export function LanguagePage({
-  setSettingsUpdated,
-}: {
-  setSettingsUpdated: (updated: boolean) => void;
-}) {
+export function LanguagePage() {
   const { t, i18n } = useTranslation();
   const currLang = i18n.resolvedLanguage;
 
@@ -22,7 +17,7 @@ export function LanguagePage({
             <select
               value={currLang}
               className="input-base mt-2 block w-full pr-10 pl-3"
-              onChange={async (event: React.ChangeEvent<any>) => {
+              onChange={async (event: React.ChangeEvent<HTMLSelectElement>) => {
                 event.preventDefault();
                 i18n.changeLanguage(event.target.value);
               }}>

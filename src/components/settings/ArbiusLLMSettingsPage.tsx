@@ -34,7 +34,7 @@ export function ArbiusLLMSettingsPage({
           <FormRow label="Arbius Model">
             <TextInput
               value={arbiusLLMModelId}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setArbiusLLMModelId(event.target.value);
                 updateConfig("arbius_llm_model_id", event.target.value);
                 setSettingsUpdated(true);

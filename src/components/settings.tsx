@@ -643,7 +643,7 @@ export const Settings = ({ onClickClose }: { onClickClose: () => void }) => {
         );
 
       case "language":
-        return <LanguagePage setSettingsUpdated={setSettingsUpdated} />;
+        return <LanguagePage />;
 
       case "tts":
         return (

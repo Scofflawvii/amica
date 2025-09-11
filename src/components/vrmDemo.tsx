@@ -32,7 +32,7 @@ export default function VrmDemo({
             await viewer.loadVrm(buildUrl(vrmUrl), setLoadingProgress);
             console.log("vrm loaded");
             // viewer.animateToEntry(); // This method may not exist, commenting out
-          } catch (e) {
+          } catch {
             console.log("vrm load failed");
           }
         })();

@@ -26,7 +26,6 @@ export const SubconciousText = ({
               <Chat
                 timeStamp={msg.timestamp}
                 prompt={msg.prompt.replace(/\[(.*?)\]/g, "")}
-                num={i}
               />
             </div>
           );
@@ -36,15 +35,7 @@ export const SubconciousText = ({
   );
 };
 
-function Chat({
-  timeStamp,
-  prompt,
-  num,
-}: {
-  timeStamp: string;
-  prompt: string;
-  num: number;
-}) {
+function Chat({ timeStamp, prompt }: { timeStamp: string; prompt: string }) {
   const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
 
