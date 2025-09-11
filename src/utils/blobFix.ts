@@ -250,7 +250,10 @@ class WebmBase<T> {
   source?: Uint8Array;
   data?: T;
 
-  constructor(private name = "Unknown", private type = "Unknown") {}
+  constructor(
+    private name = "Unknown",
+    private type = "Unknown",
+  ) {}
 
   updateBySource() {}
 
@@ -276,7 +279,7 @@ class WebmUint extends WebmBase<string> {
     // use hex representation of a number instead of number value
     this.data = "";
     for (let i = 0; i < this.source!.length; i++) {
-      const hex = this.source![i].toString(16);
+      const hex = (this.source![i] ?? 0).toString(16);
       this.data += padHex(hex);
     }
   }
@@ -317,7 +320,7 @@ class WebmFloat extends WebmBase<number> {
     const byteArray = this.source!.reverse();
     const floatArrayType = this.getFloatArrayType();
     const floatArray = new floatArrayType(byteArray.buffer as ArrayBuffer);
-    this.data! = floatArray[0];
+    this.data! = floatArray[0] ?? 0;
   }
   updateByData() {
     const floatArrayType = this.getFloatArrayType();
@@ -348,7 +351,7 @@ class WebmContainer extends WebmBase<ContainerData[]> {
   }
 
   readByte() {
-    return this.source![this.offset++];
+    return this.source![this.offset++] ?? 0;
   }
   readUint() {
     const firstByte = this.readByte();
@@ -421,13 +424,14 @@ class WebmContainer extends WebmBase<ContainerData[]> {
   writeSections(draft = false) {
     this.offset = 0;
     for (let i = 0; i < this.data.length; i++) {
-      const section = this.data[i],
-        content = section.data.source,
-        contentLength = content!.length;
+      const section = this.data[i];
+      if (!section) continue;
+      const content = section.data?.source;
+      const contentLength = content?.length ?? 0;
       this.writeUint(section.id, draft);
       this.writeUint(contentLength, draft);
-      if (!draft) {
-        this.source!.set(content!, this.offset);
+      if (!draft && content) {
+        this.source!.set(content, this.offset);
       }
       this.offset += contentLength;
     }
@@ -445,7 +449,7 @@ class WebmContainer extends WebmBase<ContainerData[]> {
   getSectionById(id: number) {
     for (let i = 0; i < this.data.length; i++) {
       const section = this.data[i];
-      if (section.id === id) {
+      if (section && section.id === id) {
         return section.data;
       }
     }
@@ -473,9 +477,7 @@ class WebmFile extends WebmContainer {
       return false;
     }
 
-    const timeScaleSection = infoSection.getSectionById(
-      0xad7b1,
-    ) as WebmFloat;
+    const timeScaleSection = infoSection.getSectionById(0xad7b1) as WebmFloat;
     if (!timeScaleSection) {
       return false;
     }

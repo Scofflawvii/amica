@@ -13,7 +13,6 @@ const hasPerf = typeof performance !== "undefined" && !!performance.mark;
 
 // Reset potential prior state (logPerfSummaryOnce caches a flag internally, so we require fresh module in some tests)
 function reloadPerfModule() {
-   
   jest.resetModules();
   const mod = require("../src/utils/perf");
   return mod as typeof import("../src/utils/perf");
@@ -51,7 +50,7 @@ describe("perf utilities", () => {
     });
     logPerfSummaryOnce();
     expect(tableSpy).toHaveBeenCalledTimes(1);
-    const firstArg = tableSpy.mock.calls[0][0];
+    const firstArg = (tableSpy.mock.calls[0] ?? [])[0] ?? {};
     // Should include latency keys (may have numeric values)
     expect(Object.keys(firstArg)).toEqual(
       expect.arrayContaining([

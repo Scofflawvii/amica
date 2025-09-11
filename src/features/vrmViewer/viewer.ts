@@ -1206,8 +1206,10 @@ export class Viewer {
             break; // if one isnt found then they all wont be found
           }
           const mesh = jointMeshes[i];
-          mesh.position.setFromMatrixPosition(joint.matrix);
-          mesh.quaternion.setFromRotationMatrix(joint.matrix);
+          if (mesh) {
+            mesh.position.setFromMatrixPosition(joint.matrix);
+            mesh.quaternion.setFromRotationMatrix(joint.matrix);
+          }
           ++i;
         }
       }
@@ -1266,17 +1268,21 @@ export class Viewer {
       // check which object is closer
       // TODO clean this up
       if (this.intersectsModel.length > 0 && this.intersectsRoom.length > 0) {
-        if (
-          this.intersectsModel[0].distance < this.intersectsRoom[0].distance
-        ) {
-          handleAmicaIntersection(this.intersectsModel[0].point);
-        } else {
-          this.createBallAtPoint(this.intersectsRoom[0].point, 1);
+        const m0 = this.intersectsModel[0];
+        const r0 = this.intersectsRoom[0];
+        if (m0 && r0) {
+          if (m0.distance < r0.distance) {
+            handleAmicaIntersection(m0.point);
+          } else {
+            this.createBallAtPoint(r0.point, 1);
+          }
         }
       } else if (this.intersectsModel.length > 0) {
-        handleAmicaIntersection(this.intersectsModel[0].point);
+        const m0 = this.intersectsModel[0];
+        if (m0) handleAmicaIntersection(m0.point);
       } else if (this.intersectsRoom.length > 0) {
-        this.createBallAtPoint(this.intersectsRoom[0].point, 1);
+        const r0 = this.intersectsRoom[0];
+        if (r0) this.createBallAtPoint(r0.point, 1);
       }
     };
 

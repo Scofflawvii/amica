@@ -122,7 +122,9 @@ export function useTranscriber(): Transcriber {
 
           audio = new Float32Array(left.length);
           for (let i = 0; i < audioData.length; ++i) {
-              audio[i] = SCALING_FACTOR * (left[i] + right[i]) / 2;
+            const l = left[i] ?? 0;
+            const r = right[i] ?? 0;
+            audio[i] = (SCALING_FACTOR * (l + r)) / 2;
           }
         } else {
           // If the audio is not stereo, we can just use the first channel:
@@ -145,12 +147,7 @@ export function useTranscriber(): Transcriber {
       start: postRequest,
       output: transcript,
     };
-  }, [
-    isBusy,
-    isModelLoading,
-    postRequest,
-    transcript,
-  ]);
+  }, [isBusy, isModelLoading, postRequest, transcript]);
 
   return transcriber;
 }

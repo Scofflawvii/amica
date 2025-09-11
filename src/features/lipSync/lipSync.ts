@@ -19,7 +19,8 @@ export class LipSync {
 
     let volume = 0.0;
     for (let i = 0; i < TIME_DOMAIN_DATA_LENGTH; i++) {
-      volume = Math.max(volume, Math.abs(this.timeDomainData[i]));
+      const v = this.timeDomainData[i] ?? 0;
+      volume = Math.max(volume, Math.abs(v));
     }
 
     // cook

@@ -1,7 +1,7 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 import { VRM } from "@pixiv/three-vrm";
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
-import { mixamoVRMRigMap } from './mixamoVRMRigMap';
+import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
+import { mixamoVRMRigMap } from "./mixamoVRMRigMap";
 
 /**
  * Load Mixamo animation, convert for three-vrm use, and return it.
@@ -13,10 +13,10 @@ import { mixamoVRMRigMap } from './mixamoVRMRigMap';
 export function loadMixamoAnimation(url: string, vrm: VRM) {
   const loader = new FBXLoader(); // A loader which loads FBX
   return loader.loadAsync(url).then((asset) => {
-    const clip = THREE.AnimationClip.findByName(asset.animations, 'mixamo.com'); // extract the AnimationClip
+    const clip = THREE.AnimationClip.findByName(asset.animations, "mixamo.com"); // extract the AnimationClip
 
     if (!clip) {
-      throw new Error('Animation clip not found');
+      throw new Error("Animation clip not found");
     }
 
     const tracks: THREE.VectorKeyframeTrack[] = []; // KeyframeTracks compatible with VRM will be added here
@@ -35,10 +35,11 @@ export function loadMixamoAnimation(url: string, vrm: VRM) {
 
     clip.tracks.forEach((track) => {
       // Convert each tracks for VRM use, and push to `tracks`
-      const trackSplitted = track.name.split('.');
-      const mixamoRigName: string = trackSplitted[0];
+      const trackSplitted = track.name.split(".");
+      const mixamoRigName: string = trackSplitted[0] ?? "";
       const vrmBoneName = (mixamoVRMRigMap as any)[mixamoRigName];
-      const vrmNodeName = vrm.humanoid?.getNormalizedBoneNode(vrmBoneName)?.name;
+      const vrmNodeName =
+        vrm.humanoid?.getNormalizedBoneNode(vrmBoneName)?.name;
       const mixamoRigNode = asset.getObjectByName(mixamoRigName);
 
       if (vrmNodeName != null) {
@@ -71,18 +72,28 @@ export function loadMixamoAnimation(url: string, vrm: VRM) {
             new THREE.QuaternionKeyframeTrack(
               `${vrmNodeName}.${propertyName}`,
               track.times,
-              track.values.map((v, i) => (vrm.meta?.metaVersion === '0' && i % 2 === 0 ? - v : v)),
+              track.values.map((v, i) =>
+                vrm.meta?.metaVersion === "0" && i % 2 === 0 ? -v : v,
+              ),
             ),
           );
-
         } else if (track instanceof THREE.VectorKeyframeTrack) {
-          const value = track.values.map((v, i) => (vrm.meta?.metaVersion === '0' && i % 3 !== 1 ? - v : v) * hipsPositionScale);
-          tracks.push(new THREE.VectorKeyframeTrack(`${vrmNodeName}.${propertyName}`, track.times, value));
-
+          const value = track.values.map(
+            (v, i) =>
+              (vrm.meta?.metaVersion === "0" && i % 3 !== 1 ? -v : v) *
+              hipsPositionScale,
+          );
+          tracks.push(
+            new THREE.VectorKeyframeTrack(
+              `${vrmNodeName}.${propertyName}`,
+              track.times,
+              value,
+            ),
+          );
         }
       }
     });
 
-    return new THREE.AnimationClip('vrmAnimation', clip.duration, tracks);
+    return new THREE.AnimationClip("vrmAnimation", clip.duration, tracks);
   });
 }

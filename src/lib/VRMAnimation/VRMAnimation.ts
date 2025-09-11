@@ -65,29 +65,23 @@ export class VRMAnimation {
         }
 
         for (let i = 0; i < origTrack.values.length; i += 4) {
-          const quaternion = new THREE.Quaternion(
-            origTrack.values[i],
-            origTrack.values[i + 1],
-            origTrack.values[i + 2],
-            origTrack.values[i + 3]
-          );
+          const x = origTrack.values[i] ?? 0;
+          const y = origTrack.values[i + 1] ?? 0;
+          const z = origTrack.values[i + 2] ?? 0;
+          const w = origTrack.values[i + 3] ?? 1;
+          const quaternion = new THREE.Quaternion(x, y, z, w);
           if (prevQuaternion.dot(quaternion) < 0 && metaVersionZero) {
             sign *= -1;
             opposite *= -1;
           }
-          newValues.push(
-            sign * origTrack.values[i],
-            opposite * origTrack.values[i + 1],
-            sign * origTrack.values[i + 2],
-            opposite * origTrack.values[i + 3]
-          );
+          newValues.push(sign * x, opposite * y, sign * z, opposite * w);
           prevQuaternion = quaternion;
         }
         const track = origTrack.clone();
         track.values = new Float32Array(newValues);
         track.name = `${nodeName}.quaternion`;
 
-          /*
+        /*
           const track = new THREE.VectorKeyframeTrack(
           `${nodeName}.quaternion`,
           origTrack.times,
@@ -111,7 +105,7 @@ export class VRMAnimation {
 
         const track = origTrack.clone();
         track.values = track.values.map(
-          (v, i) => (metaVersion === "0" && i % 3 !== 1 ? -v : v) * scale
+          (v, i) => (metaVersion === "0" && i % 3 !== 1 ? -v : v) * scale,
         );
         track.name = `${nodeName}.position`;
         tracks.push(track);
@@ -122,7 +116,7 @@ export class VRMAnimation {
   }
 
   public createExpressionTracks(
-    expressionManager: VRMExpressionManager
+    expressionManager: VRMExpressionManager,
   ): THREE.KeyframeTrack[] {
     const tracks: THREE.KeyframeTrack[] = [];
 

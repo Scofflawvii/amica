@@ -176,7 +176,7 @@ registerTTSBackend("none", async () => null);
 registerTTSBackend("elevenlabs", async (talk, ctx) => {
   const voice = await elevenlabs(
     talk.message,
-    ctx.snapshot["elevenlabs_voiceid"],
+    ctx.snapshot["elevenlabs_voiceid"] ?? "",
     talk.style,
   );
   return voice.audio && ctx.snapshot["rvc_enabled"] === "true"
@@ -186,7 +186,7 @@ registerTTSBackend("elevenlabs", async (talk, ctx) => {
 registerTTSBackend("speecht5", async (talk, ctx) => {
   const voice = await speecht5(
     talk.message,
-    ctx.snapshot["speecht5_speaker_embedding_url"],
+    ctx.snapshot["speecht5_speaker_embedding_url"] ?? "",
   );
   return voice.audio && ctx.snapshot["rvc_enabled"] === "true"
     ? ctx.rvcTransform(voice.audio)

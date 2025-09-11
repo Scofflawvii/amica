@@ -26,11 +26,16 @@ export async function handleNews(): Promise<string> {
 }
 
 function getRandomArticle(items: string[]) {
-  const randomItem = items[Math.floor(Math.random() * items.length)];
+  const randomItem = items[Math.floor(Math.random() * items.length)] ?? "";
 
   const extractContent = (item: string, tag: string) => {
-    const start = item.indexOf(`<${tag}>`) + `<${tag}>`.length;
-    const end = item.indexOf(`</${tag}>`, start);
+    const open = `<${tag}>`;
+    const close = `</${tag}>`;
+    const startIdx = item.indexOf(open);
+    if (startIdx === -1) return "";
+    const start = startIdx + open.length;
+    const end = item.indexOf(close, start);
+    if (end === -1) return "";
     return item.substring(start, end);
   };
 

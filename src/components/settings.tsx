@@ -1218,7 +1218,7 @@ export const Settings = ({ onClickClose }: { onClickClose: () => void }) => {
                   }
 
                   const prevPage = breadcrumbs[breadcrumbs.length - 2];
-                  setPage(prevPage.key);
+                  if (prevPage) setPage(prevPage.key);
                   setBreadcrumbs(breadcrumbs.slice(0, -1));
                 }}>
                 <ArrowUturnLeftIcon

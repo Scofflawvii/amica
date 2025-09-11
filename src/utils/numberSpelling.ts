@@ -1,52 +1,52 @@
 export function convertNumberToWordsEN(value: number): string {
-  value = Math.floor(value)
+  value = Math.floor(value);
   const ones = [
-    '',
-    'one',
-    'two',
-    'three',
-    'four',
-    'five',
-    'six',
-    'seven',
-    'eight',
-    'nine',
-    'ten',
-    'eleven',
-    'twelve',
-    'thirteen',
-    'fourteen',
-    'fifteen',
-    'sixteen',
-    'seventeen',
-    'eighteen',
-    'nineteen'
+    "",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+    "thirteen",
+    "fourteen",
+    "fifteen",
+    "sixteen",
+    "seventeen",
+    "eighteen",
+    "nineteen",
   ];
 
   const tens = [
-    '',
-    '',
-    'twenty',
-    'thirty',
-    'forty',
-    'fifty',
-    'sixty',
-    'seventy',
-    'eighty',
-    'ninety'
+    "",
+    "",
+    "twenty",
+    "thirty",
+    "forty",
+    "fifty",
+    "sixty",
+    "seventy",
+    "eighty",
+    "ninety",
   ];
 
   let numString = value.toString();
-  let negative = '';
+  let negative = "";
 
   if (value < 0) {
-    negative = 'negative ';
+    negative = "negative ";
     value = Math.abs(value);
     numString = value.toString();
   }
 
   if (value === 0) {
-    return 'zero';
+    return "zero";
   }
 
   //the case of 1 - 20
@@ -57,51 +57,53 @@ export function convertNumberToWordsEN(value: number): string {
   if (numString.length === 2) {
     return (
       negative +
-      tens[Number(numString[0])] + ' ' +
-      ones[Number(numString[1])]
+      tens[Number(numString[0] ?? "0")] +
+      " " +
+      ones[Number(numString[1] ?? "0")]
     );
   }
 
   //100 and more
   if (numString.length == 3) {
-    if (numString[1] === '0' && numString[2] === '0') {
-      return (
-        negative +
-        ones[Number(numString[0])] + ' hundred'
-      );
+    if (numString[1] === "0" && numString[2] === "0") {
+      return negative + ones[Number(numString[0] ?? "0")] + " hundred";
     } else {
       return (
         negative +
-        ones[Number(numString[0])] +
-        ' hundred and ' +
-        convertNumberToWordsEN(+(numString[1] + numString[2]))
+        ones[Number(numString[0] ?? "0")] +
+        " hundred and " +
+        convertNumberToWordsEN(
+          +(String(numString[1] ?? "0") + String(numString[2] ?? "0")),
+        )
       );
     }
   }
 
   if (numString.length === 4) {
-    let end = +(numString[1] + numString[2] + numString[3])
+    let end = +(
+      String(numString[1] ?? "0") +
+      String(numString[2] ?? "0") +
+      String(numString[3] ?? "0")
+    );
     if (end === 0) {
-      return (
-        negative +
-        ones[Number(numString[0])] + ' thousand'
-      );
+      return negative + ones[Number(numString[0] ?? "0")] + " thousand";
     }
     if (end < 100) {
       return (
         negative +
-        ones[Number(numString[0])] +
-        ' thousand and ' +
+        ones[Number(numString[0] ?? "0")] +
+        " thousand and " +
         convertNumberToWordsEN(end)
       );
     }
 
     return (
       negative +
-      ones[Number(numString[0])] + ' thousand ' +
+      ones[Number(numString[0] ?? "0")] +
+      " thousand " +
       convertNumberToWordsEN(end)
     );
   }
 
-  return '';
+  return "";
 }

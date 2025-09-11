@@ -14,11 +14,7 @@ import { config } from "@/utils/config";
 import isDev from "@/utils/isDev";
 import { handleSubconscious } from "../externalAPI/externalAPI";
 
-export const idleEvents = [
-  "VRMA",
-  "Subconcious",
-  "IdleTextPrompts",
-] as const;
+export const idleEvents = ["VRMA", "Subconcious", "IdleTextPrompts"] as const;
 
 export const basedPrompt = {
   idleTextPrompt: [
@@ -45,7 +41,7 @@ export const MAX_STORAGE_TOKENS = 3000;
 export type TimestampedPrompt = {
   prompt: string;
   timestamp: string;
-}
+};
 
 // Placeholder for storing compressed subconscious prompts
 export let storedSubconcious: TimestampedPrompt[] = [];
@@ -55,13 +51,14 @@ let previousAnimation = "";
 // Handles the VRM animation event.
 
 async function handleVRMAnimationEvent(viewer: Viewer, amicaLife: AmicaLife) {
-  let randomAnimation;
+  let randomAnimation: string;
   do {
-    randomAnimation = animationList[Math.floor(Math.random() * animationList.length)];
-  } while (basename(randomAnimation) === previousAnimation);
+    randomAnimation =
+      animationList[Math.floor(Math.random() * animationList.length)] ?? "";
+  } while (basename(randomAnimation) === previousAnimation && randomAnimation);
 
   // Store the current animation as the previous one for the next call
-  previousAnimation = basename(randomAnimation);
+  previousAnimation = basename(randomAnimation) ?? "";
   // removed for staging logs.
   //console.log("Handling idle event (animation):", previousAnimation);
 
@@ -71,8 +68,13 @@ async function handleVRMAnimationEvent(viewer: Viewer, amicaLife: AmicaLife) {
       if (!animation) {
         throw new Error("Loading animation failed");
       }
-      const duration = await viewer.model!.playAnimation(animation, previousAnimation);
-      requestAnimationFrame(() => { viewer.resetCameraLerp(); });
+      const duration = await viewer.model!.playAnimation(
+        animation,
+        previousAnimation,
+      );
+      requestAnimationFrame(() => {
+        viewer.resetCameraLerp();
+      });
 
       // Set timeout for the duration of the animation
       setTimeout(() => {
@@ -92,11 +94,11 @@ async function handleTextEvent(chat: Chat, amicaLife: AmicaLife) {
   const randomIndex = Math.floor(
     Math.random() * basedPrompt.idleTextPrompt.length,
   );
-  const randomTextPrompt = basedPrompt.idleTextPrompt[randomIndex];
+  const randomTextPrompt = basedPrompt.idleTextPrompt[randomIndex] ?? "";
   // removed for staging logs.
   //console.log("Handling idle event (text):", randomTextPrompt);
   try {
-    await chat.receiveMessageFromUser?.(randomTextPrompt, true);
+    await chat.receiveMessageFromUser?.(String(randomTextPrompt), true);
     amicaLife.eventProcessing = false;
     console.timeEnd(`processing_event IdleTextPrompts`);
   } catch (error) {
@@ -205,8 +207,8 @@ export async function handleSubconsciousEvent(
       } catch (error) {
         console.error("Error handling external API:", error);
       }
-    // External API Off or Isn't development case
-    } else { 
+      // External API Off or Isn't development case
+    } else {
       storedSubconcious.push(timestampedPrompt);
       let totalStorageTokens = storedSubconcious.reduce(
         (totalTokens, prompt) => totalTokens + prompt.prompt.length,
@@ -217,7 +219,7 @@ export async function handleSubconsciousEvent(
         totalStorageTokens -= removed!.prompt.length;
       }
     }
-    
+
     console.log("Stored subconcious prompts:", storedSubconcious);
     amicaLife.setSubconciousLogs!(storedSubconcious);
 

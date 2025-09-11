@@ -78,7 +78,8 @@ describe("Chat perf marks", () => {
     }
     const missing: string[] = [];
     target.forEach((n) => {
-      if ((performance as any).getEntriesByName(n).length <= beforeCounts[n])
+      const before = beforeCounts[n] ?? 0;
+      if ((performance as any).getEntriesByName(n).length <= before)
         missing.push(n);
     });
     expect(missing).toEqual([]);

@@ -25,8 +25,10 @@ export function CoquiLocalSettingsPage({
     async function fetchVoiceList() {
       try {
         const data = await coquiLocalVoiceIdList();
-        if (data && data.list) {
-          setVoiceList(data.list);
+        if (data && Array.isArray(data.list)) {
+          setVoiceList(
+            data.list.filter((v): v is string => typeof v === "string"),
+          );
         }
       } catch (error) {
         console.error("Error fetching voice list:", error);

@@ -16,7 +16,8 @@ const markTime = (name: string): number | undefined => {
   if (typeof performance === "undefined") return undefined;
   const entries = performance.getEntriesByName(name, "mark");
   if (!entries.length) return undefined;
-  return entries[entries.length - 1].startTime;
+  const last = entries[entries.length - 1];
+  return (last as PerformanceMark).startTime;
 };
 
 // Utility: get (or compute) measure between two marks
@@ -28,7 +29,8 @@ const measureBetween = (
   if (typeof performance === "undefined") return null;
   // Prefer existing measure
   const existing = performance.getEntriesByName(label, "measure");
-  if (existing.length) return existing[existing.length - 1].duration;
+  if (existing.length)
+    return (existing[existing.length - 1] as PerformanceMeasure).duration;
   const a = markTime(start);
   const b = markTime(end);
   if (a === undefined || b === undefined) return null;
@@ -92,13 +94,16 @@ export const PerfMetrics: React.FC = () => {
 
   const ttsBackendCounts = useMemo(() => {
     if (typeof performance === "undefined") return [] as string[];
-    const markNames = performance.getEntriesByType("mark").map((m) => m.name);
+    const markNames = performance
+      .getEntriesByType("mark")
+      .map((m) => (m as PerformanceMark).name);
     const backendStarts = markNames.filter(
       (n) => n.startsWith("tts:") && n.endsWith(":start"),
     );
     const counts: Record<string, number> = {};
     backendStarts.forEach((n) => {
       const backend = n.split(":")[1];
+      if (!backend) return;
       counts[backend] = (counts[backend] || 0) + 1;
     });
     return Object.entries(counts).map(([k, v]) => `${k}×${v}`);

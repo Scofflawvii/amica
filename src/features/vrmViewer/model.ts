@@ -314,7 +314,7 @@ export class Model {
 
   private async modifyAnimationPosition(
     clip: THREE.AnimationClip,
-    weight: { [key: string]: number },
+    weight: { x: number; y: number; z: number },
   ) {
     const { vrm } = this;
     if (vrm == null) {
@@ -357,9 +357,12 @@ export class Model {
         if (track.name.endsWith(".position") && track.name.includes("Hips")) {
           const values = (track as THREE.VectorKeyframeTrack).values;
           for (let i = 0; i < values.length; i += 3) {
-            values[i] -= offsetHipsPosition.x / weight.x;
-            values[i + 1] += offsetHipsPosition.y * weight.y;
-            values[i + 2] += offsetHipsPosition.z * weight.z;
+            const vx = values[i] ?? 0;
+            const vy = values[i + 1] ?? 0;
+            const vz = values[i + 2] ?? 0;
+            values[i] = vx - offsetHipsPosition.x / weight.x;
+            values[i + 1] = vy + offsetHipsPosition.y * weight.y;
+            values[i + 2] = vz + offsetHipsPosition.z * weight.z;
           }
         }
       }
@@ -383,7 +386,7 @@ export class Model {
         : animation.createAnimationClip(vrm);
 
     // modify the initial position of the VRMA animation to be sync with idle animation
-    let weight: { [key: string]: number } = { x: 1, y: 1, z: 1 };
+    let weight: { x: number; y: number; z: number } = { x: 1, y: 1, z: 1 };
 
     if (!(name === "idle_loop.vrma" || name === "greeting.vrma")) {
       if (name === "dance.vrma") {

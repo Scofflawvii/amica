@@ -2,6 +2,11 @@ import CopyPlugin from "copy-webpack-plugin";
 import withPWAFunction from "@ducanh2912/next-pwa";
 import { withSentryConfig } from "@sentry/nextjs";
 import bundleAnalyzer from "@next/bundle-analyzer";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const withPWA = withPWAFunction({
   dest: "public",
@@ -16,6 +21,8 @@ const output = process.env.NEXT_OUTPUT || undefined;
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output,
+  // Explicitly set tracing root to avoid monorepo/lockfile auto-detection warnings in tests/CI
+  outputFileTracingRoot: __dirname,
   reactStrictMode: false,
   assetPrefix: process.env.BASE_PATH || "",
   basePath: process.env.BASE_PATH || "",
