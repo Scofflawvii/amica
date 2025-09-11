@@ -115,18 +115,44 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
     );
   };
 
-  function onClickCopy() {
-    navigator.clipboard.writeText(JSON.stringify(getLogs()));
-  }
+  const onClickCopy = () => {
+    try {
+      const visible = getLogs()
+        .slice(-TOTAL_ITEMS_TO_SHOW)
+        .filter((log) => {
+          if (log.type === "debug" && !typeDebugEnabled) return false;
+          if ((log.type === "info" || log.type === "log") && !typeInfoEnabled)
+            return false;
+          if (log.type === "warn" && !typeWarnEnabled) return false;
+          if (log.type === "error" && !typeErrorEnabled) return false;
+          return true;
+        });
+      const text = visible
+        .map((log) => {
+          const ts = ((log.ts / 1000) | 0).toString();
+          const args = [...log.arguments]
+            .map((v) => (typeof v === "object" ? JSON.stringify(v) : String(v)))
+            .join(" ");
+          return `${ts}\t${log.type}\t${args}`;
+        })
+        .join("\n");
+      // Clipboard API may be unavailable in some contexts
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        void navigator.clipboard.writeText(text);
+      }
+    } catch {
+      /* ignore copy errors */
+    }
+  };
 
   return (
     <>
-      <div className="z-max bg-surface fixed inset-0 text-[hsl(var(--text))]">
-        {/* Content panel sits beside the left sidebar; full height, scrolls internally */}
+      <div className="z-max fixed inset-0 bg-[hsl(var(--surface))] text-[hsl(var(--text))]">
+        {/* Fixed panel that sits to the right of the sidebar; full-height and opaque */}
         <div
-          className="z-max bg-surface fixed inset-y-0 right-0 text-left text-xs"
-          style={{ left: leftOffset }}>
-          <div className="bg-surface-alt border-border/50 border-b p-2">
+          className="z-max fixed inset-y-0 bg-[hsl(var(--surface))] text-left text-xs"
+          style={{ left: leftOffset, right: 0 }}>
+          <div className="border-border/50 border-b bg-[hsl(var(--surface-alt))] p-2">
             <IconButton
               iconName="24/Close"
               isProcessing={false}
@@ -160,9 +186,9 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
               </span>
             </div>
           </div>
-          <div className="bg-surface-alt border-border/30 border-b p-2">
+          <div className="border-border/30 border-b bg-[hsl(var(--surface-alt))] p-2">
             <span className="ml-2">
-              <span className="bg-surface-alt text-muted ring-border/40 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
+              <span className="text-muted ring-border/40 mx-1 inline-flex items-center rounded-md bg-[hsl(var(--surface-alt))] px-2 py-1 text-xs font-medium ring-1 ring-inset">
                 debug
                 <SwitchToggle
                   enabled={typeDebugEnabled}
@@ -197,7 +223,7 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
             </span>
           </div>
           {showPerf && <PerfMetrics />}
-          <div className="relative inline-block max-h-[calc(100vh-140px)] w-full overflow-y-scroll px-2 md:px-8">
+          <div className="relative block max-h-[calc(100vh-140px)] w-full overflow-x-hidden overflow-y-scroll px-2">
             {getLogs()
               .slice(-TOTAL_ITEMS_TO_SHOW)
               .filter((log) => {
@@ -216,10 +242,12 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
                   key={log.ts + idx}
                   className={clsx(
                     "my-0.5 rounded",
-                    log.type === "error" ? "bg-danger/20" : "bg-surface-alt",
+                    log.type === "error"
+                      ? "bg-danger/20"
+                      : "bg-[hsl(var(--surface-alt))]",
                   )}>
                   {log.type === "debug" && (
-                    <span className="bg-surface-alt text-muted ring-border/40 inline-flex w-12 items-center rounded-md px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
+                    <span className="text-muted ring-border/40 inline-flex w-12 items-center rounded-md bg-[hsl(var(--surface-alt))] px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
                       debug
                     </span>
                   )}

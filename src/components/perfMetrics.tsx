@@ -127,7 +127,7 @@ export const PerfMetrics: React.FC = () => {
   };
 
   return (
-    <div className="border-border/40 bg-surface-alt my-2 rounded-md border p-2 font-mono text-xs">
+    <div className="border-border/40 my-2 rounded-md border bg-[hsl(var(--surface-alt))] p-2 font-mono text-xs">
       <div className="mb-1 flex items-center gap-2">
         <span className="font-semibold tracking-wide">Performance Metrics</span>
         <button
@@ -166,7 +166,7 @@ export const PerfMetrics: React.FC = () => {
         {ttsBackendCounts.map((v) => (
           <span
             key={v}
-            className="bg-surface-alt ring-border/20 rounded px-1 py-0.5 ring-1">
+            className="ring-border/20 rounded bg-[hsl(var(--surface-alt))] px-1 py-0.5 ring-1">
             {v}
           </span>
         ))}
