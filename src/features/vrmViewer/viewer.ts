@@ -535,6 +535,17 @@ export class Viewer {
 
       const guiMesh = new HTMLMesh(gui.domElement);
       this.guiMesh = guiMesh;
+      // Ensure GUI panel is opaque for readability
+      try {
+        const el = (gui as any).domElement as HTMLElement | undefined;
+        if (el) {
+          el.style.background = "#000";
+          el.style.color = "#fff";
+        }
+      } catch (_e) {
+        // no-op
+        void 0;
+      }
 
       guiMesh.position.x = 0;
       guiMesh.position.y = 0;
@@ -557,6 +568,9 @@ export class Viewer {
         statsDom.style.position = "absolute";
         statsDom.style.top = "0px";
         statsDom.style.left = window.innerWidth - 80 + "px";
+        // Opaque background for debug overlay
+        statsDom.style.background = "#000";
+        statsDom.style.color = "#fff";
         document.body.appendChild(statsDom);
       } else {
         vlog.warn(
@@ -1608,8 +1622,8 @@ export class Viewer {
     const w = this.fpsCanvas.width;
     const h = this.fpsCanvas.height;
     ctx.clearRect(0, 0, w, h);
-    // Background with slight alpha
-    ctx.fillStyle = "rgba(0,0,0,0.4)";
+    // Opaque background for readability
+    ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, w, h);
     // Text
     ctx.fillStyle = "#0f0";
