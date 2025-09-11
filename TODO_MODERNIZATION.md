@@ -12,7 +12,7 @@ Legend:
 
 ## Quick Win Starter Set (Suggested First 5)
 
-1. (P0 S) Enable stricter TypeScript flags (`strict`, `noUncheckedIndexedAccess`) — track any `any` cleanups.
+1. (P0 S) Enable stricter TypeScript flags (`strict`, `noUncheckedIndexedAccess`) — track any `any` cleanups. **WIP** (initial: 0 new flags added earlier, now added `noUncheckedIndexedAccess`; tsc errors: ~90+, sample `any` annotations found: 76 lines scanned).
 2. (P0 S) Introduce structured logger wrapper (levels + JSON in prod) & replace ad-hoc `console.*` in new code.
 3. (P1 S) Add bundle analyzer + size thresholds in CI (warn > baseline + % delta).
 4. (P1 M) Add accessibility smoke tests (axe + Playwright) for core views (chat, settings, viewer, overlays).
