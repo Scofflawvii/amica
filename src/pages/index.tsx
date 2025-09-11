@@ -56,6 +56,7 @@ const Moshi = dynamic(
 import { ViewerContext } from "@/features/vrmViewer/viewerContext";
 import { Message, Role } from "@/features/chat/messages";
 import { ChatContext } from "@/features/chat/chatContext";
+import { useChatUIState } from "@/features/chat/chatUIState";
 import { AlertContext } from "@/features/alert/alertContext";
 
 import { config, updateConfig } from "@/utils/config";
@@ -89,13 +90,15 @@ export default function Home() {
   const { chat: bot } = useContext(ChatContext);
   const { amicaLife: amicaLife } = useContext(AmicaLifeContext);
 
-  const [chatSpeaking, setChatSpeaking] = useState(false);
-  const [chatProcessing, setChatProcessing] = useState(false);
-  const [chatLog, setChatLog] = useState<Message[]>([]);
-  const [assistantMessage, setAssistantMessage] = useState("");
-  const [userMessage, setUserMessage] = useState("");
-  const [thoughtMessage, setThoughtMessage] = useState("");
-  const [shownMessage, setShownMessage] = useState<Role>("system");
+  const {
+    chatLog,
+    assistantMessage,
+    userMessage,
+    thoughtMessage,
+    shownMessage,
+    processing: chatProcessing,
+    speaking: chatSpeaking,
+  } = useChatUIState();
   const [subconciousLogs, setSubconciousLogs] = useState<TimestampedPrompt[]>(
     [],
   );
@@ -269,18 +272,7 @@ export default function Home() {
 
   useEffect(() => {
     perfMark("chat:init:start");
-    bot.initialize(
-      amicaLife,
-      viewer,
-      alert,
-      setChatLog,
-      setUserMessage,
-      setAssistantMessage,
-      setThoughtMessage,
-      setShownMessage,
-      setChatProcessing,
-      setChatSpeaking,
-    );
+    bot.initializeWithObserver(amicaLife, viewer, alert);
     perfMark("chat:init:done");
 
     // TODO remove in future
@@ -353,7 +345,11 @@ export default function Home() {
         )}
         {showDebug && <DebugPane onClickClose={() => setShowDebug(false)} />}
         {config("chatbot_backend") === "moshi" && (
-          <Moshi setAssistantText={setAssistantMessage} />
+          <Moshi
+            setAssistantText={() => {
+              /* observer managed */
+            }}
+          />
         )}
         <div className="z-base pointer-events-auto absolute m-2">
           <div className="mt-2 grid grid-flow-col place-content-end gap-[8px] rounded-md bg-slate-800/40 shadow-sm backdrop-blur-md">

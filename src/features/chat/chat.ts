@@ -158,6 +158,37 @@ export class Chat {
     if (options?.enableSSE !== false) this.initSSE();
   }
 
+  /**
+   * New initialization path for observer-driven UI. Avoids needing to pass legacy
+   * setter callbacks – instead caller provides a single observer (or array via
+   * successive addObserver calls). Backwards compatible: leaves legacy public
+   * initialize untouched so existing code / tests remain valid.
+   */
+  public initializeWithObserver(
+    amicaLife: AmicaLife,
+    viewer: Viewer,
+    alert: Alert,
+    observer?: ChatObserver,
+    options?: { enableSSE?: boolean },
+  ) {
+    if (this.initialized) return; // idempotent safeguard
+    const noop = () => {};
+    // Reuse original initialize supplying no-op legacy setters so internal logic works.
+    this.initialize(
+      amicaLife,
+      viewer,
+      alert,
+      noop,
+      noop,
+      noop,
+      noop,
+      noop,
+      noop,
+      noop,
+      { enableSSE: options?.enableSSE, observer },
+    );
+  }
+
   public setMessageList(messages: Message[]) {
     this.messageList = messages;
     this.currentAssistantMessage = "";

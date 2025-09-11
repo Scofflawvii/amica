@@ -12,6 +12,7 @@ import { AlertContext } from "@/features/alert/alertContext";
 import { AmicaLifeContext } from "@/features/amicaLife/amicaLifeContext";
 import { Viewer } from "@/features/vrmViewer/viewer";
 import { Chat } from "@/features/chat/chat";
+import { ChatUIStateProvider } from "@/features/chat/chatUIState";
 import { Alert } from "@/features/alert/alert";
 import { AmicaLife } from "@/features/amicaLife/amicaLife";
 
@@ -38,11 +39,13 @@ export default function App({ Component, pageProps }: AppProps) {
       ) : null}
       <ViewerContext.Provider value={{ viewer }}>
         <ChatContext.Provider value={{ chat }}>
-          <AlertContext.Provider value={{ alert }}>
-            <AmicaLifeContext.Provider value={{ amicaLife }}>
-              <Component {...pageProps} />
-            </AmicaLifeContext.Provider>
-          </AlertContext.Provider>
+          <ChatUIStateProvider chat={chat}>
+            <AlertContext.Provider value={{ alert }}>
+              <AmicaLifeContext.Provider value={{ amicaLife }}>
+                <Component {...pageProps} />
+              </AmicaLifeContext.Provider>
+            </AlertContext.Provider>
+          </ChatUIStateProvider>
         </ChatContext.Provider>
       </ViewerContext.Provider>
     </>
