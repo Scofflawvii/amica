@@ -1,5 +1,77 @@
 # Fork Change Summary (Inclusive Range Starting at e5555d6e0e4b310eacba92c04c9af80a5e8398f8 → HEAD)
 
+## TL;DR
+
+Massive modernization pass:
+
+- Re-architected Chat with observer pattern, sessions, unified state, and consolidated LLM streaming.
+- Added extensive performance instrumentation, lazy/dynamic loading, adaptive rendering & debug metrics panel.
+- Introduced full semantic theming (tokens, dark mode, status variants) + enforced semantic z-index scale.
+- Stabilized VRM viewer with fallbacks, LKG reverts, safer initialization & WebGL-first defaults.
+- Greatly expanded automated test surface (chat pipeline, perf, TTS, vision, sanitization, registries, queues).
+- Tooling upgrades: ESLint 9 flat config, custom z-index rule, Husky/lint-staged, Prettier & EditorConfig, CI refresh.
+- Documentation & guides for theming, z-index, observer migration; README deprecations & modern usage examples.
+- Deprecated legacy multi-callback Chat.initialize (one-time warning) → migrate to initializeWithObserver.
+
+## CHANGELOG-Friendly Summary
+
+### Added
+
+- Chat observer architecture (ChatObserver, ChatStreamSession, AsyncQueue, ChatUIStateProvider).
+- Performance metrics aggregation panel and perf utilities (marks/measures across chat/STT/TTS).
+- Semantic theming system (tokens, variants, dark mode sync) and z-index scale with ESLint enforcement.
+- New tests: observer (standard & extended), session, async queue, registries, perf, TTS, vision, standalone askLLM.
+- Migration & guidance docs: chat observer migration, design tokens & theming, z-index scale.
+
+### Changed
+
+- askLLM / askVisionLLM refactored to reuse unified streaming pipeline (optional Chat integration).
+- State handling centralized via ChatState + transitionPublic; removed scattered boolean toggles.
+- Large UI surfaces (Settings, Viewer, Webcam, DebugPane) now lazy/dynamic loaded.
+- VRM viewer refactored with adaptive pixel ratio, safer camera defaults, disposal patterns.
+- Inputs, alerts, buttons, overlays migrated to semantic tokens & gradients.
+
+### Fixed
+
+- Multiple white/black screen and layering issues (welcome overlays, debug pane, introduction overlays).
+- Stable WebGL default & LKG reverts to resolve regressions in rendering pipeline.
+- STT/TTS edge handling, CleanTalk whitespace normalization, stats.js compatibility guards.
+
+### Performance
+
+- Deferred heavy viewer setup (requestIdleCallback), adaptive rendering, conditional GUI/stats.
+- Dynamic imports reduce initial bundle; token streaming optimized via ordered AsyncQueue.
+- Extensive perf instrumentation across chat, STT, TTS, viewer lifecycle.
+
+### Deprecated
+
+- Legacy Chat.initialize multi-callback signature (emit one-time console warning) → use initializeWithObserver.
+- Direct UI setter callbacks (setChatProcessing, setChatSpeaking, etc.) now internal bridge only.
+
+### Tooling
+
+- ESLint 9 flat config migration; custom eslint-plugin-amica-zindex.
+- Husky + lint-staged workflow; Prettier / EditorConfig updates; CI workflow modernization.
+- Patch files for @eslint/eslintrc and @pixiv/three-vrm compatibility.
+
+### Documentation
+
+- README deprecation + modern usage examples.
+- New guides: observer migration, design tokens & theming, semantic z-index scale.
+- Clarified assistant event ordering contract (delta → flush → log → shown) for render optimization.
+
+### Testing
+
+- Broad expansion to cover new architecture pieces and performance / streaming edge cases.
+
+### Migration Notes
+
+- Replace all legacy Chat.initialize usage with initializeWithObserver and subscribe via a single ChatObserver.
+- Remove ad-hoc z-index numbers in favor of semantic classes enforced by lint rule.
+- Migrate custom streaming loops to chat.makeAndHandleStream or askLLM.
+
+---
+
 Base (inclusive) commit: e5555d6 ("Update dependencies")
 Head commit: 4b44ac1 (docs(chat): add chat observer migration & LLM helper guide)
 Date generated: 2025-09-11
