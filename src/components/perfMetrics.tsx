@@ -38,7 +38,7 @@ const measureBetween = (
 };
 
 // Collect counts for dynamic patterns (e.g. tts backend invocations)
-const countMarks = (prefix: string): number => {
+const _countMarks = (prefix: string): number => {
   if (typeof performance === "undefined") return 0;
   return performance
     .getEntriesByType("mark")

@@ -4,9 +4,9 @@ import { buildUrl } from "@/utils/buildUrl";
 
 export default function VrmDemo({
   vrmUrl,
-  onScreenShot,
-  onLoaded,
-  onError,
+  onScreenShot: _onScreenShot,
+  onLoaded: _onLoaded,
+  onError: _onError,
 }: {
   vrmUrl: string;
   onScreenShot?: (blob: Blob | null) => void;

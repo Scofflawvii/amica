@@ -203,4 +203,17 @@ export default [
         process.env.NODE_ENV === "production" ? "off" : "warn",
     },
   },
+  // Place a final override so it takes precedence over TS config above
+  {
+    files: [
+      "**/__tests__/**/*.{js,jsx,ts,tsx}",
+      "**/*.{spec,test}.{js,jsx,ts,tsx}",
+    ],
+    rules: {
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
+    },
+  },
 ];

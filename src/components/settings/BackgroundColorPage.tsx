@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 
 import { BasicPage, FormRow, ResetToDefaultButton } from "./common";
-import { TextInput } from "@/components/textInput";
+// import { TextInput } from "@/components/textInput"; // unused
 import { SwitchBox } from "@/components/switchBox";
 import { config, updateConfig, defaultConfig } from "@/utils/config";
 

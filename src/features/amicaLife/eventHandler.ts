@@ -172,7 +172,7 @@ export async function handleSubconsciousEvent(
     const thirdStepPrompt = decipherEmotion.startsWith("Error:")
       ? convoLog
       : decipherEmotion;
-    const emotionDecided = await askLLM(
+    const _emotionDecided = await askLLM(
       `Based on your mini-diary, respond with dialougue that sounds like a normal person speaking about their mind, experience or feelings. Make sure to incorporate the specified emotion tags in your response. Here is the list of emotion tags that you have to include in the result : ${emotions
         .map((emotion) => `[${emotion}]`)
         .join(", ")}:`,
@@ -233,8 +233,6 @@ export async function handleSubconsciousEvent(
 // Handles news event
 
 export async function handleNewsEvent(chat: Chat, amicaLife: AmicaLife) {
-  console.log("Function Calling: News");
-
   try {
     const news = await functionCalling("news");
     if (!news) {

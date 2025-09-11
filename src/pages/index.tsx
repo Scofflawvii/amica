@@ -54,7 +54,7 @@ const Moshi = dynamic(
 );
 
 import { ViewerContext } from "@/features/vrmViewer/viewerContext";
-import { Message, Role } from "@/features/chat/messages";
+// Message and Role types are unused here; remove to reduce lint noise
 import { ChatContext } from "@/features/chat/chatContext";
 import { useChatUIState } from "@/features/chat/chatUIState";
 import { AlertContext } from "@/features/alert/alertContext";
