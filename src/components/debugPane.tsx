@@ -94,9 +94,9 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
 
   return (
     <>
-      <div className="bg-surface/95 z-max fixed top-0 left-0 h-full w-full text-[hsl(var(--text))]">
+      <div className="bg-surface z-max fixed top-0 left-0 h-full w-full text-[hsl(var(--text))]">
         <div className="z-floating fixed top-0 left-0 max-h-full w-full text-left text-xs">
-          <div className="bg-surface-alt/70 border-border/50 border-b p-2 backdrop-blur">
+          <div className="bg-surface-alt border-border/50 border-b p-2">
             <IconButton
               iconName="24/Close"
               isProcessing={false}
@@ -131,9 +131,9 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
               </span>
             </div>
           </div>
-          <div className="bg-surface-alt/60 border-border/30 border-b p-2">
+          <div className="bg-surface-alt border-border/30 border-b p-2">
             <span className="ml-2">
-              <span className="bg-surface-alt/60 text-muted ring-border/40 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
+              <span className="bg-surface-alt text-muted ring-border/40 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
                 debug
                 <SwitchToggle
                   enabled={typeDebugEnabled}
@@ -187,10 +187,10 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
                   key={log.ts + idx}
                   className={clsx(
                     "my-0.5 rounded",
-                    log.type === "error" ? "bg-danger/10" : "bg-surface-alt/40",
+                    log.type === "error" ? "bg-danger/20" : "bg-surface-alt",
                   )}>
                   {log.type === "debug" && (
-                    <span className="bg-surface-alt/60 text-muted ring-border/40 inline-flex w-12 items-center rounded-md px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
+                    <span className="bg-surface-alt text-muted ring-border/40 inline-flex w-12 items-center rounded-md px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
                       debug
                     </span>
                   )}
