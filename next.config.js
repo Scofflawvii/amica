@@ -1,6 +1,7 @@
 import CopyPlugin from "copy-webpack-plugin";
 import withPWAFunction from "@ducanh2912/next-pwa";
 import { withSentryConfig } from "@sentry/nextjs";
+import bundleAnalyzer from "@next/bundle-analyzer";
 
 const withPWA = withPWAFunction({
   dest: "public",
@@ -84,7 +85,10 @@ const nextConfig = {
   },
 };
 
-const configWithPWA = withPWA(nextConfig);
+const withAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
+const configWithPWA = withAnalyzer(withPWA(nextConfig));
 
 // Injected content via Sentry wizard below
 

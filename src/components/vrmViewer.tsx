@@ -1,4 +1,3 @@
-import * as THREE from "three";
 import { useContext, useCallback, useState } from "react";
 import { ViewerContext } from "@/features/vrmViewer/viewerContext";
 import { buildUrl } from "@/utils/buildUrl";
@@ -6,11 +5,11 @@ import { config } from "@/utils/config";
 import { useVrmStoreContext } from "@/features/vrmStore/vrmStoreContext";
 import isTauri from "@/utils/isTauri";
 import { invoke } from "@tauri-apps/api/core";
-import { ChatContext } from "@/features/chat/chatContext";
+// ChatContext import removed (was unused here after refactor)
 import clsx from "clsx";
+import { perfMark, logPerfSummaryOnce } from "@/utils/perf";
 
 export default function VrmViewer({ chatMode }: { chatMode: boolean }) {
-  const { chat: bot } = useContext(ChatContext);
   const { viewer } = useContext(ViewerContext);
   const { getCurrentVrm, vrmList, vrmListAddFile, isLoadingVrmList } =
     useVrmStoreContext();
@@ -30,17 +29,21 @@ export default function VrmViewer({ chatMode }: { chatMode: boolean }) {
       if (isVrmLocal && isLoadingVrmList) return;
 
       const runSetup = async () => {
+        perfMark("vrm:setup:start");
         await viewer.setup(canvas);
+        perfMark("vrm:setup:afterViewerSetup");
         try {
           const currentVrm = getCurrentVrm();
           if (!currentVrm) {
             setIsLoading(true);
             return false;
           }
+          perfMark("vrm:loadVrm:start");
           await viewer.loadVrm(buildUrl(currentVrm.url), (progress) => {
             // keep lightweight; progress already logged elsewhere if needed
             setLoadingProgress(String(progress));
           });
+          perfMark("vrm:loadVrm:done");
           return true;
         } catch (e) {
           console.error("vrm loading error", e);
@@ -52,13 +55,17 @@ export default function VrmViewer({ chatMode }: { chatMode: boolean }) {
       };
 
       // Defer heavy WebGL init until idle to unblock first paint
-      if (typeof (window as any).requestIdleCallback === "function") {
-        (window as any).requestIdleCallback(() => {
+      const win = window as unknown as {
+        requestIdleCallback?: (cb: IdleRequestCallback) => void;
+      };
+      if (typeof win.requestIdleCallback === "function") {
+        win.requestIdleCallback(() => {
           runSetup().then((loaded) => {
             if (loaded) {
               setLoadingError(false);
               setIsLoading(false);
               if (isTauri()) invoke("close_splashscreen");
+              logPerfSummaryOnce();
             }
           });
         });
@@ -69,6 +76,7 @@ export default function VrmViewer({ chatMode }: { chatMode: boolean }) {
               setLoadingError(false);
               setIsLoading(false);
               if (isTauri()) invoke("close_splashscreen");
+              logPerfSummaryOnce();
             }
           });
         }, 0);

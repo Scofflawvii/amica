@@ -69,6 +69,7 @@ import { handleChatLogs } from "@/features/externalAPI/externalAPI";
 import { VerticalSwitchBox } from "@/components/switchBox";
 import { ThoughtText } from "@/components/thoughtText";
 import { GuiLayer } from "@/components/GuiLayer";
+import { perfMark, logPerfSummaryOnce } from "@/utils/perf";
 
 const m_plus_2 = M_PLUS_2({
   variable: "--font-m-plus-2",
@@ -267,6 +268,7 @@ export default function Home() {
   };
 
   useEffect(() => {
+    perfMark("chat:init:start");
     bot.initialize(
       amicaLife,
       viewer,
@@ -279,6 +281,7 @@ export default function Home() {
       setChatProcessing,
       setChatSpeaking,
     );
+    perfMark("chat:init:done");
 
     // TODO remove in future
     // this change was just to make naming cleaner
@@ -288,8 +291,15 @@ export default function Home() {
   }, [bot, viewer]);
 
   useEffect(() => {
+    perfMark("amicaLife:init:start");
     amicaLife.initialize(viewer, bot, setSubconciousLogs, chatSpeaking);
-  }, [amicaLife, bot, viewer]);
+    perfMark("amicaLife:init:done");
+    // Attempt summary after core inits (VRM may add later data)
+    logPerfSummaryOnce();
+  }, [amicaLife, bot, viewer, chatSpeaking]);
+
+  // suppress unused warning if toggleXR not yet wired into UI
+  void toggleXR;
 
   useEffect(() => {
     handleChatLogs(chatLog);

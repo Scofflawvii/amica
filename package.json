@@ -6,6 +6,7 @@
   "scripts": {
   "dev": "npm run generate:paths && npm run build:workers && next dev",
   "build": "npm run generate:paths && npm run build:workers && next build",
+  "analyze": "ANALYZE=true npm run build",
     "build:workers": "npm run build:worker:generateMeshBVH",
     "build:worker:generateMeshBVH": "esbuild src/workers/bvh/generateMeshBVH.worker.js --bundle --minify --sourcemap --outfile=public/generateMeshBVH.worker.js",
     "start": "npm run generate:paths && next start",
@@ -115,6 +116,7 @@
     "tailwindcss": "^4.1.13",
   "typescript": "^5.6.3",
   "webpack": "^5.101.3",
+  "@next/bundle-analyzer": "^15.0.0",
   "husky": "^9.1.7",
   "lint-staged": "^15.2.10"
   },
