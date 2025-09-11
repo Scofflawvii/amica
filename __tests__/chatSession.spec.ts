@@ -55,7 +55,7 @@ describe("ChatStreamSession", () => {
     const cb: ChatSessionCallbacks = {
       enqueueScreenplay: (sc) => enqueue.push(sc),
       thought: jest.fn(),
-      setProcessing: jest.fn(),
+      setProcessingState: jest.fn(),
       appendError: jest.fn(),
       isCurrent: () => true,
     };
@@ -73,7 +73,7 @@ describe("ChatStreamSession", () => {
     const cb: ChatSessionCallbacks = {
       enqueueScreenplay: (sc) => enqueue.push(sc),
       thought: jest.fn(),
-      setProcessing: jest.fn(),
+      setProcessingState: jest.fn(),
       appendError: jest.fn(),
       isCurrent: () => true,
     };

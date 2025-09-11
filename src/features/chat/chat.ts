@@ -47,12 +47,13 @@ type Speak = {
 };
 type TTSJob = { screenplay: Screenplay; streamIdx: number };
 
-enum ChatState {
+export enum ChatState {
   Idle = "idle",
   Processing = "processing",
   Speaking = "speaking",
   Thinking = "thinking",
 }
+export type ChatStateString = `${ChatState}`;
 
 type VisionBackend = "vision_llamacpp" | "vision_ollama" | "vision_openai";
 
@@ -138,6 +139,13 @@ export class Chat {
     this.amicaLife = amicaLife;
     this.viewer = viewer;
     this.alert = alert;
+    if (!(globalThis as any).__amica_init_warned) {
+      (globalThis as any).__amica_init_warned = true;
+      // One-time deprecation notice
+      console.warn(
+        "Chat.initialize legacy setter signature is deprecated; migrate to initializeWithObserver()",
+      );
+    }
     const legacyObserver: ChatObserver = {
       onChatLog: setChatLog,
       onUserMessage: setUserMessage,
@@ -271,13 +279,14 @@ export class Chat {
     this.currentAssistantMessage += this.assistantBuffer;
     this.assistantBuffer = "";
     this.assistantFlushScheduled = false;
-    this.setAssistantMessage!(this.currentAssistantMessage);
-    this.notify((o) => o.onAssistantFlush?.(this.currentAssistantMessage));
+    // Ordering contract: delta(s) already emitted. Now flush -> chat log -> shown message.
+    this.setAssistantMessage!(this.currentAssistantMessage); // emits onAssistantMessage
+    this.notify((o) => o.onAssistantFlush?.(this.currentAssistantMessage)); // flush aggregate
     this.setChatLog!([
       ...this.messageList,
       { role: "assistant", content: this.currentAssistantMessage },
-    ]);
-    this.setShownMessage!("assistant");
+    ]); // log reflects full assistant message
+    this.setShownMessage!("assistant"); // UI focus swap
   }
 
   public thoughtBubbleMessage(isThinking: boolean, thought: string) {

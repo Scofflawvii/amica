@@ -1,6 +1,7 @@
 import { perfMark } from "@/utils/perf";
 import { logger } from "@/utils/logger";
 import { Screenplay, Talk } from "./messages";
+import { ChatState } from "./chat";
 
 // Minimal Chat-like surface we depend on (structural typing)
 export interface ChatSpeechHost {
@@ -15,15 +16,11 @@ export interface ChatSpeechHost {
   setChatSpeaking?: (b: boolean) => void;
   isAwake(): boolean;
   updateAwake(): void;
-  transition(next: any): void; // internal enum from Chat
-  getState(): any;
+  transitionPublic(next: string): void;
+  getState(): ChatState | string;
 }
 
-enum LocalState {
-  Idle = "idle",
-  Speaking = "speaking",
-  Processing = "processing",
-}
+// All state transitions flow through Chat.transitionPublic for consistency.
 
 /**
  * Handles the background loops that transform screenplay -> audio (TTS) -> speak.
@@ -88,7 +85,7 @@ export class SpeechPipeline {
 
         if (speak.audioBuffer) {
           perfMark("tts:play:start");
-          this.host.transition(LocalState.Speaking);
+          this.host.transitionPublic("speaking");
           try {
             this.host.setChatSpeaking?.(true);
             await this.host.viewer?.model?.speak?.(
@@ -99,7 +96,7 @@ export class SpeechPipeline {
             logger.error("speak error", e);
           } finally {
             this.host.setChatSpeaking?.(false);
-            this.host.transition(LocalState.Idle);
+            this.host.transitionPublic("idle");
             perfMark("tts:play:done");
             if (this.host.isAwake()) this.host.updateAwake();
           }

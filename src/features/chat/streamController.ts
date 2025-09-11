@@ -31,9 +31,10 @@ export class StreamController {
         this.chat.ttsJobs.enqueue({ screenplay: sc, streamIdx: idx }),
       thought: (thinking, text) =>
         this.chat.thoughtBubbleMessage(thinking, text),
-      setProcessing: (p) => this.chat.setChatProcessing?.(p),
       appendError: (msg) => this.chat.bubbleMessage("assistant", msg),
       isCurrent: (i) => i === this.chat.currentStreamIdx,
+      setProcessingState: (flag) =>
+        this.chat.transitionPublic(flag ? "processing" : "idle"),
     });
     const result = await this.activeSession.process();
     if (this.chat.getState() === "processing")

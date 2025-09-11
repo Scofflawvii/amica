@@ -5,7 +5,7 @@ import { perfMark } from "@/utils/perf";
 export interface ChatSessionCallbacks {
   enqueueScreenplay(screenplay: Screenplay): void;
   thought(isThinking: boolean, text: string): void;
-  setProcessing(p: boolean): void;
+  setProcessingState(p: boolean): void;
   appendError(msg: string): void;
   isCurrent(streamIdx: number): boolean;
 }
@@ -40,7 +40,7 @@ export class ChatStreamSession {
   }
 
   async process() {
-    this.cb.setProcessing(true);
+    this.cb.setProcessingState(true);
     console.time("chat stream processing");
     console.time("performance_time_to_first_token");
     console.time("performance_time_to_first_sentence");
@@ -93,7 +93,7 @@ export class ChatStreamSession {
           /* release lock ignored */
         }
       console.timeEnd("chat stream processing");
-      if (this.cb.isCurrent(this.streamIdx)) this.cb.setProcessing(false);
+      if (this.cb.isCurrent(this.streamIdx)) this.cb.setProcessingState(false);
       perfMark("chat:stream:done");
     }
     return this.aiTextLog;
