@@ -401,10 +401,11 @@ export class Chat {
     this.eventSource = new EventSource("/api/amicaHandler");
     this.eventSource.onmessage = async (event) => {
       try {
-        const msg = JSON.parse(event.data);
+        const msg: { type?: string; data?: unknown } = JSON.parse(event.data);
         const { type, data } = msg;
         switch (type) {
           case "normal": {
+            if (typeof data !== "string") break;
             const messages: Message[] = [
               { role: "system", content: config("system_prompt") },
               ...this.messageList,
@@ -415,6 +416,7 @@ export class Chat {
             break;
           }
           case "animation": {
+            if (typeof data !== "string") break;
             const { loadVRMAnimation } = await import(
               "@/lib/VRMAnimation/loadVRMAnimation"
             );
@@ -425,10 +427,12 @@ export class Chat {
             break;
           }
           case "playback": {
+            const delay = typeof data === "number" ? data : 0;
             this.viewer?.startRecording?.();
             setTimeout(() => {
               this.viewer?.stopRecording?.((videoBlob) => {
-                const url = URL.createObjectURL(videoBlob!);
+                if (!videoBlob) return;
+                const url = URL.createObjectURL(videoBlob);
                 const a = document.createElement("a");
                 a.href = url;
                 a.download = "recording.webm";
@@ -437,11 +441,11 @@ export class Chat {
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
               });
-            }, data);
+            }, delay);
             break;
           }
           case "systemPrompt": {
-            updateConfig("system_prompt", data);
+            if (typeof data === "string") updateConfig("system_prompt", data);
             break;
           }
           default:
@@ -501,7 +505,7 @@ export class Chat {
     ]);
     if (talk.message.trim() === "" || snapshot.tts_muted === "true")
       return null;
-    const backend = snapshot.tts_backend;
+    const backend = snapshot.tts_backend || "none";
     const handler = await getOrLoadTTSBackend(backend);
     if (!handler) {
       logger.warn("Unknown tts backend", backend);

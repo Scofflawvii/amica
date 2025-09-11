@@ -21,20 +21,39 @@ export type Talk = {
   message: string;
 };
 
-//Name of all the expression in the vrm 
+//Name of all the expression in the vrm
 export const emotionNames: string[] = [];
 
-export const emotions = 
-["neutral", "happy", "angry", "sad", "relaxed", "Surprised", 
-"Shy", "Jealous", "Bored", "Serious", "Suspicious", "Victory", 
-"Sleep", "Love"] as const;
+export const emotions = [
+  "neutral",
+  "happy",
+  "angry",
+  "sad",
+  "relaxed",
+  "Surprised",
+  "Shy",
+  "Jealous",
+  "Bored",
+  "Serious",
+  "Suspicious",
+  "Victory",
+  "Sleep",
+  "Love",
+] as const;
 
 // Convert user input to system format e.g. ["suspicious"] -> ["Sus"], ["sleep"] -> ["Sleep"]
 const userInputToSystem = (input: string) => {
   const mapping: { [key: string]: string } = {
-    ...Object.fromEntries(emotions
-      .filter(e => e[0] === e[0].toUpperCase())
-      .map(e => [e.toLowerCase(), e]))
+    ...(() => {
+      const entries: [string, string][] = [];
+      for (const emo of emotions) {
+        const first = emo?.[0];
+        if (first && first === first.toUpperCase()) {
+          entries.push([emo.toLowerCase(), emo]);
+        }
+      }
+      return Object.fromEntries(entries);
+    })(),
   };
 
   return mapping[input.toLowerCase()] || input;
@@ -52,12 +71,14 @@ export type Screenplay = {
 };
 
 export const textsToScreenplay = (
-  texts: string[],
+  texts: readonly (string | undefined)[],
 ): Screenplay[] => {
   const screenplays: Screenplay[] = [];
   let prevExpression = "neutral";
   for (let i = 0; i < texts.length; i++) {
-    const text = texts[i];
+    const raw = texts[i];
+    if (raw == null || raw === "") continue; // guard for noUncheckedIndexedAccess & empty entries
+    const text = raw;
 
     const match = text.match(/\[(.*?)\]/);
 
@@ -68,10 +89,10 @@ export const textsToScreenplay = (
     let expression = prevExpression;
     const systemTag = userInputToSystem(tag);
 
-    if (emotions.includes(systemTag as any)) {
-      console.log("Emotion detect :",systemTag);
-      expression = systemTag;
-      prevExpression = systemTag;
+    if (emotions.includes(systemTag as EmotionType)) {
+      console.log("Emotion detect :", systemTag);
+      expression = systemTag as EmotionType;
+      prevExpression = systemTag as EmotionType;
     }
 
     screenplays.push({
@@ -80,7 +101,7 @@ export const textsToScreenplay = (
         style: emotionToTalkStyle(expression as EmotionType),
         message: message,
       },
-      text: text,
+      text,
     });
   }
 

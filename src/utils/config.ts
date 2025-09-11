@@ -81,8 +81,9 @@ export const defaults: Readonly<Record<string, string>> = {
     process.env.NEXT_PUBLIC_VISION_OPENAI_APIKEY ?? "default",
   vision_openai_url:
     process.env.NEXT_PUBLIC_VISION_OPENAI_URL ?? "https://api-01.heyamica.com",
+  // Note: variable name corrected; previous code pointed at *_URL which could be undefined incorrectly
   vision_openai_model:
-    process.env.NEXT_PUBLIC_VISION_OPENAI_URL ?? "gpt-4-vision-preview",
+    process.env.NEXT_PUBLIC_VISION_OPENAI_MODEL ?? "gpt-4-vision-preview",
   vision_llamacpp_url:
     process.env.NEXT_PUBLIC_VISION_LLAMACPP_URL ?? "http://127.0.0.1:8081",
   vision_ollama_url:
@@ -202,11 +203,13 @@ export function config(key: string): string {
       key,
     )
   ) {
-    return (serverConfig as Record<string, string>)[key];
+    const v = (serverConfig as Record<string, string>)[key];
+    if (v !== undefined) return v;
   }
 
   if (Object.prototype.hasOwnProperty.call(defaults, key)) {
-    return defaults[key as keyof typeof defaults];
+    const dv = defaults[key as keyof typeof defaults];
+    if (dv !== undefined) return dv;
   }
 
   throw new Error(`config key not found: ${key}`);
@@ -230,9 +233,9 @@ export async function updateConfig(key: string, value: string) {
 
 export function defaultConfig(key: string): string {
   if (Object.prototype.hasOwnProperty.call(defaults, key)) {
-    return defaults[key as keyof typeof defaults];
+    const v = defaults[key as keyof typeof defaults];
+    if (v !== undefined) return v;
   }
-
   throw new Error(`config key not found: ${key}`);
 }
 

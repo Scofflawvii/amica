@@ -65,8 +65,11 @@ export class ChatStreamSession {
           rolePlay: this.rolePlay,
           callback: (talks: Screenplay[]) => {
             if (!this.cb.isCurrent(this.streamIdx)) return true;
-            if (!this.isThinking) this.cb.enqueueScreenplay(talks[0]);
-            this.cb.thought(this.isThinking, talks[0].text);
+            if (talks.length === 0) return false; // nothing to process yet
+            const first = talks[0];
+            if (!first) return false; // defensive for TS noUncheckedIndexedAccess
+            if (!this.isThinking) this.cb.enqueueScreenplay(first);
+            this.cb.thought(this.isThinking, first.text);
             if (!this.firstSentence) {
               console.timeEnd("performance_time_to_first_sentence");
               this.firstSentence = true;
