@@ -26,65 +26,69 @@ export default function VrmViewer({ chatMode }: { chatMode: boolean }) {
 
   const canvasRef = useCallback(
     (canvas: HTMLCanvasElement) => {
-      if (canvas && (!isVrmLocal || !isLoadingVrmList)) {
-        (async () => {
-          await viewer.setup(canvas);
+      if (!canvas) return;
+      if (isVrmLocal && isLoadingVrmList) return;
 
-          try {
-            const currentVrm = getCurrentVrm();
-            if (!currentVrm) {
-              setIsLoading(true);
-              return false;
-            } else {
-              // Temp Disable : WebXR
-              // await viewer.loadScenario(config('scenario_url'));
-              await viewer.loadVrm(buildUrl(currentVrm.url), (progress) => {
-                console.log(`loading model ${progress}`);
-              });
-              return true;
-            }
-          } catch (e) {
-            console.error("vrm loading error", e);
-            setLoadingError(true);
-            setIsLoading(false);
-            if (isTauri()) invoke("close_splashscreen");
+      const runSetup = async () => {
+        await viewer.setup(canvas);
+        try {
+          const currentVrm = getCurrentVrm();
+          if (!currentVrm) {
+            setIsLoading(true);
             return false;
           }
-        })().then((loaded) => {
-          if (loaded) {
-            console.log("vrm loaded");
-            setLoadingError(false);
-            setIsLoading(false);
-            if (isTauri()) invoke("close_splashscreen");
-          }
+          await viewer.loadVrm(buildUrl(currentVrm.url), (progress) => {
+            // keep lightweight; progress already logged elsewhere if needed
+            setLoadingProgress(String(progress));
+          });
+          return true;
+        } catch (e) {
+          console.error("vrm loading error", e);
+          setLoadingError(true);
+          setIsLoading(false);
+          if (isTauri()) invoke("close_splashscreen");
+          return false;
+        }
+      };
+
+      // Defer heavy WebGL init until idle to unblock first paint
+      if (typeof (window as any).requestIdleCallback === "function") {
+        (window as any).requestIdleCallback(() => {
+          runSetup().then((loaded) => {
+            if (loaded) {
+              setLoadingError(false);
+              setIsLoading(false);
+              if (isTauri()) invoke("close_splashscreen");
+            }
+          });
         });
-
-        // Replace VRM with Drag and Drop
-        canvas.addEventListener("dragover", function (event) {
-          event.preventDefault();
-        });
-
-        canvas.addEventListener("drop", function (event) {
-          event.preventDefault();
-
-          const files = event.dataTransfer?.files;
-          if (!files) {
-            return;
-          }
-
-          const file = files[0];
-          if (!file) {
-            return;
-          }
-
-          const file_type = file.name.split(".").pop();
-          if (file_type === "vrm") {
-            vrmListAddFile(file, viewer);
-          } /* else if (file_type === "glb") {
-            viewer.loadRoom(URL.createObjectURL(file));
-          }*/
-        });
+      } else {
+        setTimeout(() => {
+          runSetup().then((loaded) => {
+            if (loaded) {
+              setLoadingError(false);
+              setIsLoading(false);
+              if (isTauri()) invoke("close_splashscreen");
+            }
+          });
+        }, 0);
       }
+
+      // Drag & drop replacement
+      canvas.addEventListener("dragover", (event) => event.preventDefault());
+      canvas.addEventListener("drop", (event) => {
+        event.preventDefault();
+        const files = event.dataTransfer?.files;
+        if (!files?.[0]) return;
+        const file = files[0];
+        const file_type = file.name.split(".").pop();
+        if (file_type === "vrm") {
+          vrmListAddFile(file, viewer);
+        }
+      });
+
+      // Pause render loop when tab not visible (saves CPU/GPU)
+      // viewer already handles visibility internally (see viewer.ts _onVisibility)
     },
     [
       vrmList.findIndex((value) =>
