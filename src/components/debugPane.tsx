@@ -147,142 +147,146 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
 
   return (
     <>
-      <div className="z-max fixed inset-0 bg-[hsl(var(--surface))] text-[hsl(var(--text))]">
-        {/* Fixed panel that sits to the right of the sidebar; full-height and opaque */}
-        <div
-          className="z-max fixed inset-y-0 bg-[hsl(var(--surface))] text-left text-xs"
-          style={{ left: leftOffset, right: 0 }}>
-          <div className="border-border/50 border-b bg-[hsl(var(--surface-alt))] p-2">
-            <IconButton
-              iconName="24/Close"
-              isProcessing={false}
-              className="bg-secondary hover:bg-secondary-hover active:bg-secondary-active"
-              onClick={onClickClose}
-            />
-            <IconButton
-              iconName="24/Description"
-              isProcessing={false}
-              className="bg-primary hover:bg-primary-hover active:bg-primary-active ml-4"
-              onClick={onClickCopy}
-            />
-            <div className="text-muted ml-2 inline-block items-center">
-              <span className="px-1">
-                <span className="text-muted text-xs">llm: </span>
-                <span className="text-xs">{config("chatbot_backend")}</span>
-              </span>
-              <span className="px-1">
-                <span className="text-muted text-xs">tts: </span>
-                <span className="text-xs">{config("tts_backend")}</span>
-              </span>
-              <span className="px-1">
-                <span className="text-muted text-xs">stt: </span>
-                <span className="text-xs">{config("stt_backend")}</span>
-              </span>
-              <span className="px-1">
-                <span className="text-muted text-xs">bid: </span>
-                <span className="text-xs">
-                  {process.env.NEXT_PUBLIC_CONFIG_BUILD_ID}
-                </span>
-              </span>
-            </div>
-          </div>
-          <div className="border-border/30 border-b bg-[hsl(var(--surface-alt))] p-2">
-            <span className="ml-2">
-              <span className="text-muted ring-border/40 mx-1 inline-flex items-center rounded-md bg-[hsl(var(--surface-alt))] px-2 py-1 text-xs font-medium ring-1 ring-inset">
-                debug
-                <SwitchToggle
-                  enabled={typeDebugEnabled}
-                  set={setTypeDebugEnabled}
-                />
-              </span>
-              <span className="bg-success/15 text-success ring-success/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
-                info
-                <SwitchToggle
-                  enabled={typeInfoEnabled}
-                  set={setTypeInfoEnabled}
-                />
-              </span>
-              <span className="bg-warning/15 text-warning ring-warning/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
-                warn
-                <SwitchToggle
-                  enabled={typeWarnEnabled}
-                  set={setTypeWarnEnabled}
-                />
-              </span>
-              <span className="bg-danger/15 text-danger ring-danger/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
-                error
-                <SwitchToggle
-                  enabled={typeErrorEnabled}
-                  set={setTypeErrorEnabled}
-                />
-              </span>
-              <span className="bg-primary/15 text-primary ring-primary/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
-                perf
-                <SwitchToggle enabled={showPerf} set={setShowPerf} />
+      {/* Semi-transparent backdrop that can be clicked to close */}
+      <div
+        className="z-max fixed inset-0 bg-black/20 backdrop-blur-sm"
+        onClick={onClickClose}
+      />
+      {/* Floating rounded panel that sits beside the sidebar */}
+      <div
+        className="z-max border-border/20 fixed top-4 bottom-4 flex flex-col overflow-hidden rounded-lg border bg-[hsl(var(--surface))] text-left text-xs shadow-2xl"
+        style={{
+          left: leftOffset + 8,
+          width: `min(480px, calc(100vw - ${leftOffset + 32}px))`,
+        }}>
+        <div className="border-border/50 flex-shrink-0 border-b bg-[hsl(var(--surface-alt))] p-2">
+          <IconButton
+            iconName="24/Close"
+            isProcessing={false}
+            className="bg-secondary hover:bg-secondary-hover active:bg-secondary-active"
+            onClick={onClickClose}
+          />
+          <IconButton
+            iconName="24/Description"
+            isProcessing={false}
+            className="bg-primary hover:bg-primary-hover active:bg-primary-active ml-4"
+            onClick={onClickCopy}
+          />
+          <div className="text-muted ml-2 inline-block items-center">
+            <span className="px-1">
+              <span className="text-muted text-xs">llm: </span>
+              <span className="text-xs">{config("chatbot_backend")}</span>
+            </span>
+            <span className="px-1">
+              <span className="text-muted text-xs">tts: </span>
+              <span className="text-xs">{config("tts_backend")}</span>
+            </span>
+            <span className="px-1">
+              <span className="text-muted text-xs">stt: </span>
+              <span className="text-xs">{config("stt_backend")}</span>
+            </span>
+            <span className="px-1">
+              <span className="text-muted text-xs">bid: </span>
+              <span className="text-xs">
+                {process.env.NEXT_PUBLIC_CONFIG_BUILD_ID}
               </span>
             </span>
           </div>
-          {showPerf && <PerfMetrics />}
-          <div className="relative block max-h-[calc(100vh-140px)] w-full overflow-x-hidden overflow-y-scroll px-2">
-            {getLogs()
-              .slice(-TOTAL_ITEMS_TO_SHOW)
-              .filter((log) => {
-                if (log.type === "debug" && !typeDebugEnabled) return false;
-                if (
-                  (log.type === "info" || log.type === "log") &&
-                  !typeInfoEnabled
-                )
-                  return false;
-                if (log.type === "warn" && !typeWarnEnabled) return false;
-                if (log.type === "error" && !typeErrorEnabled) return false;
-                return true;
-              })
-              .map((log, idx: number) => (
-                <div
-                  key={log.ts + idx}
-                  className={clsx(
-                    "my-0.5 rounded",
-                    log.type === "error"
-                      ? "bg-danger/20"
-                      : "bg-[hsl(var(--surface-alt))]",
-                  )}>
-                  {log.type === "debug" && (
-                    <span className="text-muted ring-border/40 inline-flex w-12 items-center rounded-md bg-[hsl(var(--surface-alt))] px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
-                      debug
-                    </span>
-                  )}
-                  {(log.type === "info" || log.type === "log") && (
-                    <span className="bg-success/15 text-success ring-success/30 inline-flex w-12 items-center rounded-md px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
-                      info
-                    </span>
-                  )}
-                  {log.type === "warn" && (
-                    <span className="bg-warning/15 text-warning ring-warning/30 inline-flex w-12 items-center rounded-md px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
-                      warn
-                    </span>
-                  )}
-                  {log.type === "error" && (
-                    <span className="bg-danger/15 text-danger ring-danger/30 inline-flex w-12 items-center rounded-md px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
-                      error
-                    </span>
-                  )}
-
-                  <small className="text-muted px-1 font-mono">
-                    {(log.ts / 1000) | 0}
-                  </small>
-
-                  <span className="text-text text-md">
-                    {[...log.arguments]
-                      .map((v) =>
-                        typeof v === "object" ? JSON.stringify(v) : v,
-                      )
-                      .join(" ")}
+        </div>
+        <div className="border-border/30 flex-shrink-0 border-b bg-[hsl(var(--surface-alt))] p-2">
+          <span className="ml-2">
+            <span className="text-muted ring-border/40 mx-1 inline-flex items-center rounded-md bg-[hsl(var(--surface-alt))] px-2 py-1 text-xs font-medium ring-1 ring-inset">
+              debug
+              <SwitchToggle
+                enabled={typeDebugEnabled}
+                set={setTypeDebugEnabled}
+              />
+            </span>
+            <span className="bg-success/15 text-success ring-success/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
+              info
+              <SwitchToggle
+                enabled={typeInfoEnabled}
+                set={setTypeInfoEnabled}
+              />
+            </span>
+            <span className="bg-warning/15 text-warning ring-warning/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
+              warn
+              <SwitchToggle
+                enabled={typeWarnEnabled}
+                set={setTypeWarnEnabled}
+              />
+            </span>
+            <span className="bg-danger/15 text-danger ring-danger/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
+              error
+              <SwitchToggle
+                enabled={typeErrorEnabled}
+                set={setTypeErrorEnabled}
+              />
+            </span>
+            <span className="bg-primary/15 text-primary ring-primary/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
+              perf
+              <SwitchToggle enabled={showPerf} set={setShowPerf} />
+            </span>
+          </span>
+        </div>
+        {showPerf && <PerfMetrics />}
+        <div className="flex-1 overflow-x-hidden overflow-y-auto px-3 py-2">
+          {getLogs()
+            .slice(-TOTAL_ITEMS_TO_SHOW)
+            .filter((log) => {
+              if (log.type === "debug" && !typeDebugEnabled) return false;
+              if (
+                (log.type === "info" || log.type === "log") &&
+                !typeInfoEnabled
+              )
+                return false;
+              if (log.type === "warn" && !typeWarnEnabled) return false;
+              if (log.type === "error" && !typeErrorEnabled) return false;
+              return true;
+            })
+            .map((log, idx: number) => (
+              <div
+                key={log.ts + idx}
+                className={clsx(
+                  "my-0.5 rounded",
+                  log.type === "error"
+                    ? "bg-danger/20"
+                    : "bg-[hsl(var(--surface-alt))]",
+                )}>
+                {log.type === "debug" && (
+                  <span className="text-muted ring-border/40 inline-flex w-12 items-center rounded-md bg-[hsl(var(--surface-alt))] px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
+                    debug
                   </span>
-                </div>
-              ))}
-            <div ref={scrollRef} className="my-20" />
-            <div className="my-20 h-40 md:my-2 md:h-0" />
-          </div>
+                )}
+                {(log.type === "info" || log.type === "log") && (
+                  <span className="bg-success/15 text-success ring-success/30 inline-flex w-12 items-center rounded-md px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
+                    info
+                  </span>
+                )}
+                {log.type === "warn" && (
+                  <span className="bg-warning/15 text-warning ring-warning/30 inline-flex w-12 items-center rounded-md px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
+                    warn
+                  </span>
+                )}
+                {log.type === "error" && (
+                  <span className="bg-danger/15 text-danger ring-danger/30 inline-flex w-12 items-center rounded-md px-2 py-1 font-mono text-xs font-medium ring-1 ring-inset">
+                    error
+                  </span>
+                )}
+
+                <small className="text-muted px-1 font-mono">
+                  {(log.ts / 1000) | 0}
+                </small>
+
+                <span className="text-text text-md">
+                  {[...log.arguments]
+                    .map((v) => (typeof v === "object" ? JSON.stringify(v) : v))
+                    .join(" ")}
+                </span>
+              </div>
+            ))}
+          <div ref={scrollRef} className="my-20" />
+          <div className="my-20 h-40 md:my-2 md:h-0" />
         </div>
       </div>
     </>
