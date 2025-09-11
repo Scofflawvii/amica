@@ -19,7 +19,9 @@ export async function handleNews(): Promise<string> {
 
     const result = await expandPrompt(prompt, { context_str: fullNews });
 
-    console.log("News function calling result: ", fullNews);
+    nlog.debug("News function calling result", {
+      preview: fullNews.slice(0, 160),
+    });
     return result;
   } catch (error) {
     nlog.error("Error in handleNews", error);

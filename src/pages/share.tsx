@@ -44,7 +44,7 @@ async function updateVrmAvatar(viewer: any, url: string) {
 
 function vrmDetector(source: File, type: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    console.log(source);
+    slog.debug("vrmDetector source", source);
     (async () => {
       const ab = await source.arrayBuffer();
       const buf = Buffer.from(ab);
@@ -474,7 +474,7 @@ export default function Share() {
                           slog.error("loading animation failed", e);
                         }
                       })();
-                      console.log("vrm demo loaded");
+                      slog.info("vrm demo loaded");
                     }}
                   />
                 )}

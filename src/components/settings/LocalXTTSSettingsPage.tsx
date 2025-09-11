@@ -128,7 +128,7 @@ export function LocalXTTSSettingsPage({
           voices.length === 0 ||
           !voices.includes(config("alltalk_voice") || "")
         ) {
-          console.log("[AllTalk] Fetching standard voices");
+          slog.debug("[AllTalk] Fetching standard voices");
           await fetchVoices();
         }
 
@@ -138,7 +138,7 @@ export function LocalXTTSSettingsPage({
           (rvcVoices.length <= 1 ||
             !rvcVoices.includes(config("alltalk_rvc_voice") || "Disabled"))
         ) {
-          console.log("[AllTalk] Fetching RVC voices");
+          slog.debug("[AllTalk] Fetching RVC voices");
           await fetchRvcVoices();
         }
 

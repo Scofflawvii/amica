@@ -86,7 +86,7 @@ export function Moshi({
   };
 
   const handleWebSocketOpen = async () => {
-    console.log("WebSocket connection opened");
+    mlog.info("WebSocket connection opened");
 
     const recorder = new Recorder({
       encoderPath:
@@ -102,7 +102,7 @@ export function Moshi({
     recorder.ondataavailable = async (arrayBuffer: ArrayBuffer) => {
       if (socketRef.current) {
         if (socketRef.current.readyState !== WebSocket.OPEN) {
-          console.log("Socket not open, dropping audio");
+          mlog.warn("Socket not open, dropping audio");
           return;
         }
         await socketRef.current.send(arrayBuffer);
@@ -110,7 +110,7 @@ export function Moshi({
     };
 
     recorder.start().then(() => {
-      console.log("Recording started");
+      mlog.info("Recording started");
       audioControls.setRecorder(recorder);
     });
   };
@@ -137,7 +137,7 @@ export function Moshi({
     getBaseURL(),
     handleWebSocketOpen,
     handleWebSocketMessage,
-    () => console.log("WebSocket connection closed"),
+    () => mlog.info("WebSocket connection closed"),
     stopAllAction,
   );
 

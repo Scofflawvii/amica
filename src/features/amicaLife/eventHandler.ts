@@ -114,7 +114,7 @@ async function handleTextEvent(chat: Chat, amicaLife: AmicaLife) {
 // Handles sleep event.
 
 export async function handleSleepEvent(chat: Chat, amicaLife: AmicaLife) {
-  console.log("Sleeping...");
+  alog.info("Sleeping...");
   amicaLife.pause();
   amicaLife.isSleep = true;
   try {
@@ -194,7 +194,7 @@ export async function handleSubconsciousEvent(
       fourthStepPrompt,
       null,
     );
-    console.log("Stored Memory: ", compressSubconcious);
+    alog.debug("Stored Memory", { text: compressSubconcious.slice(0, 200) });
 
     // Add timestamp to the compressed subconscious
     const timestampedPrompt: TimestampedPrompt = {
@@ -222,7 +222,9 @@ export async function handleSubconsciousEvent(
       }
     }
 
-    console.log("Stored subconcious prompts:", storedSubconcious);
+    alog.debug("Stored subconscious prompts", {
+      count: storedSubconcious.length,
+    });
     amicaLife.setSubconciousLogs!(storedSubconcious);
 
     amicaLife.eventProcessing = false;

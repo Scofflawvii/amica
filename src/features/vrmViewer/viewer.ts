@@ -250,7 +250,7 @@ export class Viewer {
   }
 
   public async setup(canvas: HTMLCanvasElement) {
-    console.log("setup canvas");
+    vlog.debug("setup canvas");
     const parentElement = canvas.parentElement;
     const width = parentElement?.clientWidth || canvas.width;
     const height = parentElement?.clientHeight || canvas.height;

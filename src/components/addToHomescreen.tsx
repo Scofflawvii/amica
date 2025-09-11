@@ -64,7 +64,7 @@ export function AddToHomescreen() {
                         onClick={async () => {
                           try {
                             const installed = await promptToInstall();
-                            console.log(installed);
+                            clog.debug("a2hs installed result", installed);
                             if (installed.outcome === "accepted") {
                               updateConfig("show_add_to_homescreen", "false");
                             }

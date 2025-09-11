@@ -70,8 +70,7 @@ export class VrmDataProvider {
     try {
       await this.ensureDbOpen();
       const vrmDbModel = await this.db.vrms.where("hash").equals(hash).first();
-      console.log(`hash: ${hash}`);
-      console.log(`vrmDbModel: ${vrmDbModel}`);
+      vlog.debug("getItemAsBlob info", { hash, hasModel: !!vrmDbModel });
       return vrmDbModel ? Base64ToBlob(vrmDbModel.vrmData) : undefined;
     } catch (error) {
       vlog.error("Error getting VRM item as blob", error);

@@ -73,7 +73,7 @@ export function AmicaLifePage({
             const parsedContent = JSON.parse(content);
             if (parsedContent.idleTextPrompt) {
               amicaLife.loadIdleTextPrompt(parsedContent.idleTextPrompt);
-              console.log("idleTextPrompt", parsedContent.idleTextPrompt);
+              slog.debug("idleTextPrompt", parsedContent.idleTextPrompt);
             } else {
               slog.error("Wrong json format");
             }

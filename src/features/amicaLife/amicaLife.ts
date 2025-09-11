@@ -13,6 +13,8 @@ import {
   TimestampedPrompt,
 } from "@/features/amicaLife/eventHandler";
 import { Viewer } from "../vrmViewer/viewer";
+import { logger } from "@/utils/logger";
+const slog = logger.with({ subsystem: "amicaLife", module: "amicaLife" });
 
 export class AmicaLife {
   public initialized: boolean;
@@ -132,7 +134,7 @@ export class AmicaLife {
   // Function to check message from user
   public receiveMessageFromUser(message: string) {
     if (message.toLowerCase().includes("news")) {
-      console.log("Triggering news function call.");
+      slog.info("Triggering news function call.");
       this.insertFront({ events: "News" });
     }
 
@@ -163,7 +165,7 @@ export class AmicaLife {
 
     this.isProcessingIdleRunning = true;
 
-    console.log("Starting Amica Life");
+    slog.info("Starting Amica Life");
     while (config("amica_life_enabled") === "true") {
       // Check if amica is in idle state trigger processingEvent loop
       if (!this.chat?.isAwake()) {
@@ -175,7 +177,7 @@ export class AmicaLife {
     this.isProcessingIdleRunning = false;
     this.isProcessingEventRunning = false;
     this.triggerMessage = false;
-    console.log("Stopping idle loop");
+    slog.info("Stopping idle loop");
   }
 
   public async processingEvent() {
@@ -276,12 +278,13 @@ export class AmicaLife {
   // Function to pause the processingEvent loop is pauseFlag is true/false
   private async checkPause() {
     if (this.isPause) {
-      console.log("Amica Life Paused");
+      slog.info("Amica Life Paused");
       await new Promise<void>((resolve) => {
         const checkPause = setInterval(() => {
           if (!this.isPause) {
             clearInterval(checkPause);
-            resolve(console.log("Amica Life Initiated"));
+            slog.info("Amica Life Initiated");
+            resolve(undefined);
           }
         }, 50);
       });

@@ -202,7 +202,7 @@ export default function Home() {
       subsystem: "page",
       route: "/",
     });
-    console.log("Toggle XR", immersiveType);
+    plog.info("Toggle XR", { immersiveType });
 
     if (!window.navigator.xr) {
       plog.error("WebXR not supported");

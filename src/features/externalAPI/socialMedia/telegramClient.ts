@@ -23,7 +23,7 @@ class TelegramClient {
     const chatId = process.env.TELEGRAM_CHAT_ID as string;
     try {
       await this.bot.telegram.sendMessage(chatId, content);
-      console.log("Message posted successfully");
+      xlog.info("Message posted successfully");
     } catch (error) {
       xlog.error("Error posting message to Telegram", error);
     }
