@@ -122,6 +122,80 @@ npm run tauri dev
 
 View the [documentation](https://docs.heyamica.com) for more information on how to configure and use Amica.
 
+### ⚠️ Deprecations (In Progress)
+
+The chat subsystem is migrating to an observer-driven architecture.
+
+- `Chat.initialize(...)` (multi-callback signature) → Deprecated. Use `chat.initializeWithObserver(amicaLife, viewer, alert, observer)` and subscribe via a single `ChatObserver`.
+- Direct state setters (`setChatProcessing`, `setChatSpeaking`, etc.) should be treated as internal bridge methods. Prefer observer events: `onProcessingChange`, `onSpeakingChange`, `onAssistantDelta`, `onAssistantFlush`, `onStateChange`.
+- Custom streaming loops should not manually read LLM streams. Use `chat.makeAndHandleStream(messages)` or `askLLM(systemPrompt, userPrompt, chat)`.
+
+These legacy APIs will continue to function during the transition window but will emit a one‑time console warning. Remove any remaining usage before the next minor release.
+
+### ✅ Modern Usage Examples
+
+Observer-based UI wiring:
+
+```ts
+import { useEffect } from "react";
+import { Chat } from "@/features/chat/chat";
+import { ChatObserver } from "@/features/chat/chatObserver";
+
+export function useAttachChat(chat: Chat) {
+  useEffect(() => {
+    const obs: ChatObserver = {
+      onAssistantDelta: (d) => {
+        /* stream token */
+      },
+      onAssistantFlush: (full) => {
+        /* finalize */
+      },
+      onProcessingChange: (p) => {
+        /* spinner */
+      },
+      onStateChange: (next) => {
+        /* metrics or UX */
+      },
+    };
+    chat.addObserver(obs);
+    return () => chat.removeObserver(obs);
+  }, [chat]);
+}
+```
+
+Lightweight LLM call without audio (standalone):
+
+```ts
+import { askLLM } from "@/utils/askLlm";
+
+const text = await askLLM("You are a helper", "Summarize: ...", null);
+```
+
+Full pipeline LLM call (reuses streaming, observers, TTS):
+
+```ts
+const response = await askLLM(
+  "System instructions",
+  "Tell me a joke",
+  chatInstance,
+);
+```
+
+Vision round‑trip (image -> description -> contextual response):
+
+```ts
+import { askVisionLLM } from "@/utils/askLlm";
+const answer = await askVisionLLM(base64JpegData, chatInstance); // optional chat
+```
+
+Assistant event ordering contract:
+
+```
+onAssistantDelta (0..n times) → onAssistantFlush (1 per batch) → onChatLog → onShownMessage
+```
+
+Use this to optimize rendering (e.g. cheap append during deltas, expensive syntax highlight after flush).
+
 ## 📜 History
 
 This project originated as a fork of ChatVRM by Pixiv:
