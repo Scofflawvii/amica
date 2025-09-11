@@ -1,3 +1,16 @@
+/**
+ * Unified lightweight LLM helper utilities.
+ *
+ * askLLM:
+ *  - If provided a Chat instance, delegates fully to the Chat streaming pipeline
+ *    (observer notifications, audio TTS, metrics).
+ *  - If chat is null, performs a standalone streaming session using ChatStreamSession
+ *    for consistent token->sentence parsing but without audio generation.
+ *
+ * askVisionLLM:
+ *  - Obtains a textual description of an image via configured vision backend, then
+ *    funnels that description back through askLLM for normal processing.
+ */
 import { Message } from "@/features/chat/messages";
 import { Chat } from "@/features/chat/chat";
 import { ChatStreamSession } from "@/features/chat/chatSession";
@@ -16,6 +29,14 @@ import { getKoboldAiChatResponseStream } from "@/features/chat/koboldAiChat";
 import { config } from "@/utils/config";
 
 // Function to ask llm with custom system prompt, if doesn't want it to speak provide the chat in params as null.
+/**
+ * Ask the language model with an explicit system + user prompt.
+ *
+ * @param systemPrompt System role instructions.
+ * @param userPrompt   User content / query.
+ * @param chat         Active Chat instance (full pipeline) or null (standalone).
+ * @returns Final assistant text (concatenated sentences) without leading emotion tags trimmed.
+ */
 export async function askLLM(
   systemPrompt: string,
   userPrompt: string,
@@ -66,7 +87,14 @@ export async function askLLM(
   return await session.process();
 }
 
-export async function askVisionLLM(imageData: string): Promise<string> {
+/**
+ * Multimodal vision helper: converts image -> textual description -> contextual follow-up query.
+ * Falls back gracefully if backend unsupported.
+ */
+export async function askVisionLLM(
+  imageData: string,
+  chat?: Chat | null,
+): Promise<string> {
   try {
     const visionBackend = config("vision_backend");
 
@@ -91,7 +119,7 @@ export async function askVisionLLM(imageData: string): Promise<string> {
     }
 
     let content = `This is a picture I just took from my webcam (described between [[ and ]] ): [[${res}]] Please respond accordingly and as if it were just sent and as though you can see it.`;
-    const result = await askLLM(config("system_prompt"), content, null);
+    const result = await askLLM(config("system_prompt"), content, chat ?? null);
 
     return result;
   } catch (e: any) {
