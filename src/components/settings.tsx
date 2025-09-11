@@ -23,51 +23,145 @@ import { config, updateConfig } from "@/utils/config";
 
 import { Link } from "./settings/common";
 
-import { MenuPage } from "./settings/MenuPage";
-import { LanguagePage } from "./settings/LanguagePage";
-import { ResetSettingsPage } from "./settings/ResetSettingsPage";
-import { DeveloperPage } from "./settings/DeveloperPage";
-import { CommunityPage } from "./settings/CommunityPage";
-
-import { BackgroundImgPage } from "./settings/BackgroundImgPage";
-import { BackgroundColorPage } from "./settings/BackgroundColorPage";
-import { BackgroundVideoPage } from "./settings/BackgroundVideoPage";
-import { CharacterModelPage } from "./settings/CharacterModelPage";
-import { CharacterAnimationPage } from "./settings/CharacterAnimationPage";
-
-import { ChatbotBackendPage } from "./settings/ChatbotBackendPage";
-import { ArbiusLLMSettingsPage } from "./settings/ArbiusLLMSettingsPage";
-import { ChatGPTSettingsPage } from "./settings/ChatGPTSettingsPage";
-import { LlamaCppSettingsPage } from "./settings/LlamaCppSettingsPage";
-import { OllamaSettingsPage } from "./settings/OllamaSettingsPage";
-import { KoboldAiSettingsPage } from "./settings/KoboldAiSettingsPage";
-import { MoshiSettingsPage } from "./settings/MoshiSettingsPage";
-
-import { TTSBackendPage } from "./settings/TTSBackendPage";
-import { ElevenLabsSettingsPage } from "./settings/ElevenLabsSettingsPage";
-import { SpeechT5SettingsPage } from "./settings/SpeechT5SettingsPage";
-import { OpenAITTSSettingsPage } from "./settings/OpenAITTSSettingsPage";
-import { PiperSettingsPage } from "./settings/PiperSettingsPage";
-import { CoquiLocalSettingsPage } from "./settings/CoquiLocalSettingsPage";
-import { LocalXTTSSettingsPage } from "./settings/LocalXTTSSettingsPage";
-
-import { RVCSettingsPage } from "./settings/RVCSettingsPage";
-
-import { STTBackendPage } from "./settings/STTBackendPage";
-import { STTWakeWordSettingsPage } from "./settings/STTWakeWordSettingsPage";
-
-import { WhisperOpenAISettingsPage } from "./settings/WhisperOpenAISettingsPage";
-import { WhisperCppSettingsPage } from "./settings/WhisperCppSettingsPage";
-
-import { VisionBackendPage } from "./settings/VisionBackendPage";
-import { VisionLlamaCppSettingsPage } from "./settings/VisionLlamaCppSettingsPage";
-import { VisionOllamaSettingsPage } from "./settings/VisionOllamaSettingsPage";
-import { VisionOpenAISettingsPage } from "./settings/VisionOpenAISettingsPage";
-import { VisionSystemPromptPage } from "./settings/VisionSystemPromptPage";
-
-import { NamePage } from "./settings/NamePage";
-import { SystemPromptPage } from "./settings/SystemPromptPage";
-import { AmicaLifePage } from "./settings/AmicaLifePage";
+// Dynamic page chunk loader: reduce initial bundle by deferring rarely used settings subpages
+import dynamic from "next/dynamic";
+const MenuPage = dynamic(() =>
+  import("./settings/MenuPage").then((m) => m.MenuPage),
+);
+const LanguagePage = dynamic(() =>
+  import("./settings/LanguagePage").then((m) => m.LanguagePage),
+);
+const ResetSettingsPage = dynamic(() =>
+  import("./settings/ResetSettingsPage").then((m) => m.ResetSettingsPage),
+);
+const DeveloperPage = dynamic(() =>
+  import("./settings/DeveloperPage").then((m) => m.DeveloperPage),
+);
+const CommunityPage = dynamic(() =>
+  import("./settings/CommunityPage").then((m) => m.CommunityPage),
+);
+const BackgroundImgPage = dynamic(() =>
+  import("./settings/BackgroundImgPage").then((m) => m.BackgroundImgPage),
+);
+const BackgroundColorPage = dynamic(() =>
+  import("./settings/BackgroundColorPage").then((m) => m.BackgroundColorPage),
+);
+const BackgroundVideoPage = dynamic(() =>
+  import("./settings/BackgroundVideoPage").then((m) => m.BackgroundVideoPage),
+);
+const CharacterModelPage = dynamic(() =>
+  import("./settings/CharacterModelPage").then((m) => m.CharacterModelPage),
+);
+const CharacterAnimationPage = dynamic(() =>
+  import("./settings/CharacterAnimationPage").then(
+    (m) => m.CharacterAnimationPage,
+  ),
+);
+const ChatbotBackendPage = dynamic(() =>
+  import("./settings/ChatbotBackendPage").then((m) => m.ChatbotBackendPage),
+);
+const ArbiusLLMSettingsPage = dynamic(() =>
+  import("./settings/ArbiusLLMSettingsPage").then(
+    (m) => m.ArbiusLLMSettingsPage,
+  ),
+);
+const ChatGPTSettingsPage = dynamic(() =>
+  import("./settings/ChatGPTSettingsPage").then((m) => m.ChatGPTSettingsPage),
+);
+const LlamaCppSettingsPage = dynamic(() =>
+  import("./settings/LlamaCppSettingsPage").then((m) => m.LlamaCppSettingsPage),
+);
+const OllamaSettingsPage = dynamic(() =>
+  import("./settings/OllamaSettingsPage").then((m) => m.OllamaSettingsPage),
+);
+const KoboldAiSettingsPage = dynamic(() =>
+  import("./settings/KoboldAiSettingsPage").then((m) => m.KoboldAiSettingsPage),
+);
+const MoshiSettingsPage = dynamic(() =>
+  import("./settings/MoshiSettingsPage").then((m) => m.MoshiSettingsPage),
+);
+const TTSBackendPage = dynamic(() =>
+  import("./settings/TTSBackendPage").then((m) => m.TTSBackendPage),
+);
+const ElevenLabsSettingsPage = dynamic(() =>
+  import("./settings/ElevenLabsSettingsPage").then(
+    (m) => m.ElevenLabsSettingsPage,
+  ),
+);
+const SpeechT5SettingsPage = dynamic(() =>
+  import("./settings/SpeechT5SettingsPage").then((m) => m.SpeechT5SettingsPage),
+);
+const OpenAITTSSettingsPage = dynamic(() =>
+  import("./settings/OpenAITTSSettingsPage").then(
+    (m) => m.OpenAITTSSettingsPage,
+  ),
+);
+const PiperSettingsPage = dynamic(() =>
+  import("./settings/PiperSettingsPage").then((m) => m.PiperSettingsPage),
+);
+const CoquiLocalSettingsPage = dynamic(() =>
+  import("./settings/CoquiLocalSettingsPage").then(
+    (m) => m.CoquiLocalSettingsPage,
+  ),
+);
+const LocalXTTSSettingsPage = dynamic(() =>
+  import("./settings/LocalXTTSSettingsPage").then(
+    (m) => m.LocalXTTSSettingsPage,
+  ),
+);
+const RVCSettingsPage = dynamic(() =>
+  import("./settings/RVCSettingsPage").then((m) => m.RVCSettingsPage),
+);
+const STTBackendPage = dynamic(() =>
+  import("./settings/STTBackendPage").then((m) => m.STTBackendPage),
+);
+const STTWakeWordSettingsPage = dynamic(() =>
+  import("./settings/STTWakeWordSettingsPage").then(
+    (m) => m.STTWakeWordSettingsPage,
+  ),
+);
+const WhisperOpenAISettingsPage = dynamic(() =>
+  import("./settings/WhisperOpenAISettingsPage").then(
+    (m) => m.WhisperOpenAISettingsPage,
+  ),
+);
+const WhisperCppSettingsPage = dynamic(() =>
+  import("./settings/WhisperCppSettingsPage").then(
+    (m) => m.WhisperCppSettingsPage,
+  ),
+);
+const VisionBackendPage = dynamic(() =>
+  import("./settings/VisionBackendPage").then((m) => m.VisionBackendPage),
+);
+const VisionLlamaCppSettingsPage = dynamic(() =>
+  import("./settings/VisionLlamaCppSettingsPage").then(
+    (m) => m.VisionLlamaCppSettingsPage,
+  ),
+);
+const VisionOllamaSettingsPage = dynamic(() =>
+  import("./settings/VisionOllamaSettingsPage").then(
+    (m) => m.VisionOllamaSettingsPage,
+  ),
+);
+const VisionOpenAISettingsPage = dynamic(() =>
+  import("./settings/VisionOpenAISettingsPage").then(
+    (m) => m.VisionOpenAISettingsPage,
+  ),
+);
+const VisionSystemPromptPage = dynamic(() =>
+  import("./settings/VisionSystemPromptPage").then(
+    (m) => m.VisionSystemPromptPage,
+  ),
+);
+const NamePage = dynamic(() =>
+  import("./settings/NamePage").then((m) => m.NamePage),
+);
+const SystemPromptPage = dynamic(() =>
+  import("./settings/SystemPromptPage").then((m) => m.SystemPromptPage),
+);
+const AmicaLifePage = dynamic(() =>
+  import("./settings/AmicaLifePage").then((m) => m.AmicaLifePage),
+);
 import { useVrmStoreContext } from "@/features/vrmStore/vrmStoreContext";
 import { OpenRouterSettings } from "./settings/OpenRouterSettingsPage";
 import { ExternalAPIPage } from "./settings/ExternalAPIPage";
