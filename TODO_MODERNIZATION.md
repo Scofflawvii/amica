@@ -12,7 +12,7 @@ Legend:
 
 ## Quick Win Starter Set (Suggested First 5)
 
-1. (P0 S) Enable stricter TypeScript flags (`strict`, `noUncheckedIndexedAccess`) — track any `any` cleanups. **WIP** (added `noUncheckedIndexedAccess`; current tsc error lines: 86 (was ~102 after flag enable). Breakdown: possibly undefined 29, assignability 15, index type 2, other 40. Concentrated remaining: VRM/animation/blob/number utilities (44). Sample `any` annotations snapshot: 76 lines; cleanup batches 1–2 reduced general app errors; batch 3 targeting VRM & utilities next).
+1. (P0 S) Enable stricter TypeScript flags (`strict`, `noUncheckedIndexedAccess`) — track any `any` cleanups. **DONE** (`strict` + `noUncheckedIndexedAccess` enabled in `tsconfig.json`; `npm run typecheck` passes with 0 errors. Remaining broad `any` usages tracked under §1 Type Safety cleanups and lint warnings.)
 2. (P0 S) Introduce structured logger wrapper (levels + JSON in prod) & replace ad-hoc `console.*` in new code. **DONE** (added `src/utils/logger.ts` with debug/info/warn/error, pretty in dev and JSON in prod; adopted in perf summary, VRM demo, chatLog, and OpenAI TTS error paths; tests remain green).
 3. (P1 S) Add bundle analyzer + size thresholds in CI (warn > baseline + % delta). **WIP** (added script `scripts/check_bundle_size.mjs` and CI gate; initial absolute total JS budget with optional baseline delta planned next).
 4. (P1 M) Add accessibility smoke tests (axe + Playwright) for core views (chat, settings, viewer, overlays).
