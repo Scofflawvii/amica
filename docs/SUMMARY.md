@@ -50,6 +50,7 @@
 
 - [Using Window.ai](./guides/using-windowai.md)
 - [Using Moshi (Voice to Voice)](./guides/using-moshi.md)
+- [Chat Observer Migration](./guides/chat-observer-migration.md)
 
 ## 🧩 Plugin System
 
