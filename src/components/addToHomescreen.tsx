@@ -1,3 +1,5 @@
+import { logger } from "@/utils/logger";
+const clog = logger.with({ subsystem: "ui", module: "addToHomescreen" });
 import { useTranslation } from "react-i18next";
 
 import { Fragment, useEffect, useState } from "react";
@@ -67,7 +69,7 @@ export function AddToHomescreen() {
                               updateConfig("show_add_to_homescreen", "false");
                             }
                           } catch (e) {
-                            console.error(e);
+                            clog.error("a2hs prompt error", e);
                           }
                         }}
                         className="bg-secondary hover:bg-secondary-hover active:bg-secondary-press focus-visible:ring-primary focus-visible:ring-offset-surface inline-flex items-center rounded-md px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none">

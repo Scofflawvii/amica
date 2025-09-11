@@ -1,5 +1,6 @@
 import { Message } from "./messages";
-import { config } from '@/utils/config';
+import { logger } from "@/utils/logger";
+import { config } from "@/utils/config";
 
 function getApiKey(configKey: string) {
   const apiKey = config(configKey);
@@ -17,7 +18,7 @@ async function getResponseStream(
 ) {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "Authorization": `Bearer ${apiKey}`,
+    Authorization: `Bearer ${apiKey}`,
     "HTTP-Referer": "https://amica.arbius.ai",
     "X-Title": "Amica",
   };
@@ -34,12 +35,12 @@ async function getResponseStream(
   });
 
   const reader = res.body?.getReader();
-  if (res.status !== 200 || ! reader) {
+  if (res.status !== 200 || !reader) {
     if (res.status === 401) {
-      throw new Error('Invalid OpenAI authentication');
+      throw new Error("Invalid OpenAI authentication");
     }
     if (res.status === 402) {
-      throw new Error('Payment required');
+      throw new Error("Payment required");
     }
 
     throw new Error(`OpenAI chat error (${res.status})`);
@@ -74,12 +75,12 @@ async function getResponseStream(
                 controller.enqueue(messagePiece);
               }
             } catch (error) {
-              console.error(error);
+              logger.error("openai stream parse error", error);
             }
           }
         }
       } catch (error) {
-        console.error(error);
+        logger.error("openai stream error", error);
         controller.error(error);
       } finally {
         reader.releaseLock();
@@ -89,7 +90,7 @@ async function getResponseStream(
     async cancel() {
       await reader?.cancel();
       reader.releaseLock();
-    }
+    },
   });
 
   return stream;
@@ -102,7 +103,7 @@ export async function getOpenAiChatResponseStream(messages: Message[]) {
   return getResponseStream(messages, url, model, apiKey);
 }
 
-export async function getOpenAiVisionChatResponse(messages: Message[],) {
+export async function getOpenAiVisionChatResponse(messages: Message[]) {
   const apiKey = getApiKey("vision_openai_apikey");
   const url = config("vision_openai_url");
   const model = config("vision_openai_model");

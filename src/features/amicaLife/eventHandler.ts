@@ -13,6 +13,8 @@ import { Viewer } from "../vrmViewer/viewer";
 import { config } from "@/utils/config";
 import isDev from "@/utils/isDev";
 import { handleSubconscious } from "../externalAPI/externalAPI";
+import { logger } from "@/utils/logger";
+const alog = logger.with({ subsystem: "amicaLife", module: "eventHandler" });
 
 export const idleEvents = ["VRMA", "Subconcious", "IdleTextPrompts"] as const;
 
@@ -83,7 +85,7 @@ async function handleVRMAnimationEvent(viewer: Viewer, amicaLife: AmicaLife) {
       }, duration * 1000);
     }
   } catch (error) {
-    console.error("Error loading animation:", error);
+    alog.error("Error loading animation", error);
   }
 }
 
@@ -102,8 +104,8 @@ async function handleTextEvent(chat: Chat, amicaLife: AmicaLife) {
     amicaLife.eventProcessing = false;
     console.timeEnd(`processing_event IdleTextPrompts`);
   } catch (error) {
-    console.error(
-      "Error occurred while sending a message through chat instance:",
+    alog.error(
+      "Error occurred while sending a message through chat instance",
       error,
     );
   }
@@ -123,7 +125,7 @@ export async function handleSleepEvent(chat: Chat, amicaLife: AmicaLife) {
     amicaLife.eventProcessing = false;
     console.timeEnd("processing_event Sleep");
   } catch (error) {
-    console.error("Error playing emotion sleep:", error);
+    alog.error("Error playing emotion sleep", error);
   }
 }
 
@@ -205,7 +207,7 @@ export async function handleSubconsciousEvent(
       try {
         storedSubconcious = await handleSubconscious(timestampedPrompt);
       } catch (error) {
-        console.error("Error handling external API:", error);
+        alog.error("Error handling external API", error);
       }
       // External API Off or Isn't development case
     } else {
@@ -226,7 +228,7 @@ export async function handleSubconsciousEvent(
     amicaLife.eventProcessing = false;
     console.timeEnd(`processing_event Subconcious`);
   } catch (error) {
-    console.error("Error handling subconscious event:", error);
+    alog.error("Error handling subconscious event", error);
   }
 }
 
@@ -242,8 +244,8 @@ export async function handleNewsEvent(chat: Chat, amicaLife: AmicaLife) {
     amicaLife.eventProcessing = false;
     console.timeEnd("processing_event News");
   } catch (error) {
-    console.error(
-      "Error occurred while sending a message through chat instance:",
+    alog.error(
+      "Error occurred while sending a message through chat instance",
       error,
     );
   }
@@ -258,7 +260,7 @@ export async function handleIdleEvent(
   viewer: Viewer,
 ) {
   if (!chat) {
-    console.error("Chat instance is not available");
+    alog.error("Chat instance is not available");
     return;
   }
 

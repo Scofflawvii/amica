@@ -1,6 +1,8 @@
 import { randomBytes } from "crypto";
 import type { NextApiResponse } from "next";
 import fs from "fs";
+import { logger } from "@/utils/logger";
+const xlog = logger.with({ subsystem: "externalAPI", module: "apiHelper" });
 import { sseClients } from "@/pages/api/amicaHandler";
 
 export interface ApiResponse {
@@ -31,7 +33,9 @@ export const sendError = (
 
 export const sendToClients = (message: { type: string; data: any }) => {
   const formattedMessage = JSON.stringify(message);
-  sseClients.forEach((client) => client.res.write(`data: ${formattedMessage}\n\n`));
+  sseClients.forEach((client) =>
+    client.res.write(`data: ${formattedMessage}\n\n`),
+  );
 };
 
 export const readFile = (filePath: string): any => {
@@ -39,7 +43,7 @@ export const readFile = (filePath: string): any => {
     const data = fs.readFileSync(filePath, "utf8");
     return JSON.parse(data);
   } catch (error) {
-    console.error(`Error reading file at ${filePath}:`, error);
+    xlog.error(`Error reading file at ${filePath}`, error);
     throw new Error(`Failed to read file: ${error}`);
   }
 };
@@ -48,7 +52,7 @@ export const writeFile = (filePath: string, content: any): void => {
   try {
     fs.writeFileSync(filePath, JSON.stringify(content, null, 2), "utf8");
   } catch (error) {
-    console.error(`Error writing file at ${filePath}:`, error);
+    xlog.error(`Error writing file at ${filePath}`, error);
     throw new Error(`Failed to write file: ${error}`);
   }
 };

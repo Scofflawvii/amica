@@ -27,6 +27,8 @@ import {
 } from "@/features/chat/ollamaChat";
 import { getKoboldAiChatResponseStream } from "@/features/chat/koboldAiChat";
 import { config } from "@/utils/config";
+import { logger } from "@/utils/logger";
+const clog = logger.with({ subsystem: "chat", module: "askLlm" });
 
 // Function to ask llm with custom system prompt, if doesn't want it to speak provide the chat in params as null.
 /**
@@ -114,7 +116,7 @@ export async function askVisionLLM(
     } else if (visionBackend === "vision_ollama") {
       res = await getOllamaVisionChatResponse(messages, imageData);
     } else {
-      console.warn("vision_backend not supported", visionBackend);
+      clog.warn("vision_backend not supported", { visionBackend });
       return "vision_backend not supported";
     }
 
@@ -123,7 +125,7 @@ export async function askVisionLLM(
 
     return result;
   } catch (e: any) {
-    console.error("getVisionResponse", e.toString());
+    clog.error("getVisionResponse", e.toString());
     // alert?.error("Failed to get vision response", e.toString());
     return "Failed to get vision response";
   }

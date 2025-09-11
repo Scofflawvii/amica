@@ -33,6 +33,9 @@ import { XRControllerModelFactory } from "./XRControllerModelFactory";
 import { XRHandModelFactory } from "./XRHandModelFactory";
 import { Model } from "./model";
 import { Room } from "./room";
+import { logger } from "@/utils/logger";
+
+const vlog = logger.with({ subsystem: "viewer" });
 
 // Add the extension functions
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
@@ -272,7 +275,7 @@ export class Viewer {
           powerPreference: "high-performance",
         }) as unknown as THREE.WebGLRenderer;
       } catch (err) {
-        console.warn("WebGPU init failed; falling back to WebGL", err);
+        vlog.warn("WebGPU init failed; falling back to WebGL", err);
         renderer = new THREE.WebGLRenderer({
           canvas,
           alpha: true,
@@ -556,7 +559,7 @@ export class Viewer {
         statsDom.style.left = window.innerWidth - 80 + "px";
         document.body.appendChild(statsDom);
       } else {
-        console.warn(
+        vlog.warn(
           "Stats DOM element not available; skipping on-page stats overlay.",
         );
       }
@@ -773,7 +776,7 @@ export class Viewer {
   public onSessionEnded(/*event*/) {
     // TODO investigate this
     if (!this) {
-      console.error("onSessionEnded called without this");
+      vlog.error("onSessionEnded called without this");
       return;
     }
     if (!this.currentSession) return;
@@ -797,7 +800,7 @@ export class Viewer {
 
     const baseReferenceSpace = this.renderer!.xr.getReferenceSpace();
     if (!baseReferenceSpace) {
-      console.warn("baseReferenceSpace not found");
+      vlog.warn("baseReferenceSpace not found");
       return;
     }
 
@@ -986,7 +989,7 @@ export class Viewer {
               geometry?.deleteAttribute(key);
             }
           } catch (e) {
-            console.error("error disposing room geometry", e);
+            vlog.error("error disposing room geometry", e);
           }
         }
       }
@@ -998,7 +1001,7 @@ export class Viewer {
         } catch (e) {
           // ignore dispose errors in teardown
           if (config("debug_gfx") === "true")
-            console.warn("disposeBoundsTree failed", e);
+            vlog.warn("disposeBoundsTree failed", e);
         }
       }
       this.roomTargets = [];
@@ -1236,7 +1239,7 @@ export class Viewer {
         }
       } catch (e) {
         // if the models get removed from scene during raycast then this will throw an error
-        console.error("intersectObjects error", e);
+        vlog.error("intersectObjects error", e);
         return;
       }
 
@@ -1399,7 +1402,7 @@ export class Viewer {
     try {
       this.model?.update(delta);
     } catch (e) {
-      console.error("model update error", e);
+      vlog.error("model update error", e);
     }
 
     this.modelMsPanel.update(performance.now() - ptime, 40);
@@ -1408,7 +1411,7 @@ export class Viewer {
     try {
       this.renderer!.render(this.scene!, this.camera!);
     } catch (e) {
-      console.error("render error", e);
+      vlog.error("render error", e);
     }
     this.renderMsPanel.update(performance.now() - ptime, 100);
 
@@ -1647,7 +1650,7 @@ export class Viewer {
       // Dispose renderer
       this.renderer?.dispose();
     } catch (e) {
-      console.warn("Viewer dispose error", e);
+      vlog.warn("Viewer dispose error", e);
     }
   }
 }

@@ -1,6 +1,10 @@
-import * as THREE from 'three';
-import { GLTF, GLTFLoader, GLTFParser } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import * as THREE from "three";
+import {
+  GLTF,
+  GLTFLoader,
+  GLTFParser,
+} from "three/examples/jsm/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 
 // Type for the extension callback
 type ExtensionCallback = (parser: GLTFParser) => Promise<void> | void;
@@ -10,21 +14,21 @@ interface OptimizationOptions {
   skipTextures?: boolean;
   maxTextureSize?: number;
   generateMipmaps?: boolean;
-  
+
   // Geometry options
   skipDraco?: boolean;
   preserveIndices?: boolean;
-  
+
   // Animation options
   skipAnimations?: boolean;
-  
+
   // Material options
   simplifyMaterials?: boolean;
   disableNormalMaps?: boolean;
-  
+
   // Performance options
   disposeSourceData?: boolean;
-  
+
   // Custom optimization callbacks
   onMesh?: (mesh: THREE.Mesh) => void;
   onMaterial?: (material: THREE.Material) => void;
@@ -48,7 +52,7 @@ class OptimizedGLTFLoader {
       simplifyMaterials: false,
       disableNormalMaps: false,
       disposeSourceData: true,
-      ...options
+      ...options,
     };
 
     this.loader = new GLTFLoader();
@@ -59,7 +63,7 @@ class OptimizedGLTFLoader {
     // Setup Draco if not skipped
     if (!this.options.skipDraco) {
       this.dracoLoader = new DRACOLoader();
-      this.dracoLoader.setDecoderPath('/draco/');  // Adjust path as needed
+      this.dracoLoader.setDecoderPath("/draco/"); // Adjust path as needed
       this.loader.setDRACOLoader(this.dracoLoader);
     }
   }
@@ -72,21 +76,21 @@ class OptimizedGLTFLoader {
   public register(callback: ExtensionCallback): this {
     // Add to our extensions array
     this.extensions.push(callback);
-    
+
     // Register with the underlying loader
     this.loader.register(callback as any);
-    
+
     return this;
   }
-
 
   private optimizeTexture(texture: THREE.Texture) {
     if (!texture) return;
 
     // Apply texture optimizations
     texture.generateMipmaps = this.options.generateMipmaps || false;
-    texture.minFilter = this.options.generateMipmaps ? 
-      THREE.LinearMipmapLinearFilter : THREE.LinearFilter;
+    texture.minFilter = this.options.generateMipmaps
+      ? THREE.LinearMipmapLinearFilter
+      : THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
     texture.anisotropy = 1; // Disable anisotropic filtering
 
@@ -101,21 +105,21 @@ class OptimizedGLTFLoader {
 
     if (this.options.simplifyMaterials) {
       // Simplify material settings
-      if ('fog' in material) {
+      if ("fog" in material) {
         (material as any).fog = false;
       }
-      if ('dithering' in material) {
+      if ("dithering" in material) {
         material.dithering = false;
       }
-      if ('flatShading' in material) {
+      if ("flatShading" in material) {
         (material as any).flatShading = true;
       }
-      
+
       if (material instanceof THREE.MeshStandardMaterial) {
         material.roughness = 1;
         material.metalness = 0;
         material.envMapIntensity = 0;
-        
+
         if (this.options.disableNormalMaps) {
           material.normalMap = null;
         }
@@ -134,7 +138,7 @@ class OptimizedGLTFLoader {
     // Optimize geometry
     if (mesh.geometry) {
       mesh.geometry.computeBoundingSphere();
-      
+
       if (!this.options.preserveIndices) {
         // Only remove indices if it won't affect the geometry
         const geometry = mesh.geometry;
@@ -144,18 +148,19 @@ class OptimizedGLTFLoader {
           }
         }
       }
-      
+
       // Disable frustum culling for static objects
       mesh.frustumCulled = false;
     }
 
     // Optimize materials
-    const materials = Array.isArray(mesh.material) ? 
-      mesh.material : [mesh.material];
-    
-    materials.forEach(material => {
+    const materials = Array.isArray(mesh.material)
+      ? mesh.material
+      : [mesh.material];
+
+    materials.forEach((material) => {
       this.optimizeMaterial(material);
-      
+
       // Optimize textures in material
       if (material) {
         Object.entries(material).forEach(([_, value]) => {
@@ -205,7 +210,10 @@ class OptimizedGLTFLoader {
       await this.optimizeScene(gltf);
       return gltf;
     } catch (error) {
-      console.error('Error loading GLTF:', error);
+      const { logger } = await import("./logger");
+      logger
+        .with({ subsystem: "gfx", module: "gltfOptimizer" })
+        .error("Error loading GLTF", error);
       throw error;
     }
   }
@@ -214,7 +222,7 @@ class OptimizedGLTFLoader {
     url: string,
     onLoad?: (gltf: GLTF) => void,
     onProgress?: (event: ProgressEvent<EventTarget>) => void,
-    onError?: (error: ErrorEvent) => void
+    onError?: (error: ErrorEvent) => void,
   ): void {
     this.loader.load(
       url,
@@ -227,7 +235,7 @@ class OptimizedGLTFLoader {
         }
       },
       onProgress,
-      onError as any
+      onError as any,
     );
   }
 

@@ -2,6 +2,8 @@ import { createHash } from "crypto";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useContext, useState, useEffect, useRef } from "react";
+import { logger } from "@/utils/logger";
+const slog = logger.with({ subsystem: "page", route: "/share" });
 import { useTranslation } from "react-i18next";
 
 import { config, updateConfig } from "@/utils/config";
@@ -36,7 +38,7 @@ async function updateVrmAvatar(viewer: any, url: string) {
       // TODO handle loading progress
     });
   } catch (e) {
-    console.error(e);
+    slog.error("updateVrmAvatar error", e);
   }
 }
 
@@ -306,7 +308,7 @@ export default function Share() {
                 acceptedFileTypes={["image/png", "image/jpeg"]}
                 onremovefile={(err, file) => {
                   if (err) {
-                    console.error(err);
+                    slog.error("canvas export error", err);
                     return;
                   }
 
@@ -314,7 +316,7 @@ export default function Share() {
                 }}
                 onprocessfile={(err, file) => {
                   if (err) {
-                    console.error(err);
+                    slog.error("video export error", err);
                     return;
                   }
 
@@ -419,7 +421,7 @@ export default function Share() {
                 }}
                 onremovefile={(err, file) => {
                   if (err) {
-                    console.error(err);
+                    slog.error("vrm removefile error", err);
                     return;
                   }
 
@@ -428,7 +430,7 @@ export default function Share() {
                 }}
                 onprocessfile={(err, file) => {
                   if (err) {
-                    console.error(err);
+                    slog.error("vrm processfile error", err);
                     return;
                   }
 
@@ -461,7 +463,7 @@ export default function Share() {
                             "/animations/idle_loop.vrma",
                           );
                           if (!animation) {
-                            console.error("loading animation failed");
+                            slog.error("loading animation failed");
                             return;
                           }
                           viewer.model!.loadAnimation(animation!);
@@ -469,7 +471,7 @@ export default function Share() {
                             viewer.resetCamera();
                           });
                         } catch (e) {
-                          console.error("loading animation failed", e);
+                          slog.error("loading animation failed", e);
                         }
                       })();
                       console.log("vrm demo loaded");
@@ -510,7 +512,7 @@ export default function Share() {
                 fileValidateTypeDetectType={vrmDetector}
                 onremovefile={(err, file) => {
                   if (err) {
-                    console.error(err);
+                    slog.error("vrm load error", err);
                     return;
                   }
 
@@ -518,7 +520,7 @@ export default function Share() {
                 }}
                 onprocessfile={(err, file) => {
                   if (err) {
-                    console.error(err);
+                    slog.error("room load error", err);
                     return;
                   }
 
@@ -562,7 +564,7 @@ export default function Share() {
                 acceptedFileTypes={["audio/wav", "audio/mpeg"]}
                 onremovefile={(err, file) => {
                   if (err) {
-                    console.error(err);
+                    slog.error("screenshot error", err);
                     return;
                   }
 
@@ -570,7 +572,7 @@ export default function Share() {
                 }}
                 onprocessfile={(err, file) => {
                   if (err) {
-                    console.error(err);
+                    slog.error("record error", err);
                     return;
                   }
 

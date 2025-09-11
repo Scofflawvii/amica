@@ -1,4 +1,11 @@
-import { TwitterApi, TwitterApiReadWrite, TwitterApiReadOnly, TweetV2PostTweetResult } from 'twitter-api-v2';
+import {
+  TwitterApi,
+  TwitterApiReadWrite,
+  TwitterApiReadOnly,
+  TweetV2PostTweetResult,
+} from "twitter-api-v2";
+import { logger } from "@/utils/logger";
+const xlog = logger.with({ subsystem: "externalAPI", module: "twitter" });
 
 class TwitterClient {
   private twitterClient: TwitterApiReadWrite;
@@ -38,12 +45,14 @@ class TwitterClient {
   }
 
   // Function to post a tweet
-  public async postTweet(content: string): Promise<TweetV2PostTweetResult | undefined> {
+  public async postTweet(
+    content: string,
+  ): Promise<TweetV2PostTweetResult | undefined> {
     try {
       const response = await this.twitterClient.v2.tweet(content);
       return response;
     } catch (error) {
-      console.error('Error posting tweet:', error);
+      xlog.error("Error posting tweet", error);
       return;
     }
   }
@@ -51,5 +60,6 @@ class TwitterClient {
 
 // Export an instance of the TwitterClient class for use
 export const twitterClientInstance = new TwitterClient();
-export const twitterReadWriteClient = twitterClientInstance.getReadWriteClient();
+export const twitterReadWriteClient =
+  twitterClientInstance.getReadWriteClient();
 export const twitterReadOnlyClient = twitterClientInstance.getReadOnlyClient();

@@ -14,6 +14,9 @@ import { EmoteController } from "@/features/emoteController/emoteController";
 import { ProceduralAnimation } from "@/features/proceduralAnimation/proceduralAnimation";
 import { Screenplay } from "@/features/chat/messages";
 import { config } from "@/utils/config";
+import { logger } from "@/utils/logger";
+
+const vlog = logger.with({ subsystem: "viewer", module: "model" });
 
 /**
  * 3Dキャラクターを管理するクラス
@@ -367,7 +370,7 @@ export class Model {
         }
       }
     } else {
-      console.warn("Could not determine start position from animation clip.");
+      vlog.warn("Could not determine start position from animation clip.");
     }
   }
 

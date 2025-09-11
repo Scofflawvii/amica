@@ -14,7 +14,6 @@ import {
 } from "@/features/amicaLife/eventHandler";
 import { Viewer } from "../vrmViewer/viewer";
 
-
 export class AmicaLife {
   public initialized: boolean;
 
@@ -48,12 +47,17 @@ export class AmicaLife {
     this.isProcessingIdleRunning = false;
   }
 
-  public initialize(viewer: Viewer, chat: Chat, setSubconciousLogs: (subconciousLogs: TimestampedPrompt[]) => void, isChatSpeaking: boolean) {
+  public initialize(
+    viewer: Viewer,
+    chat: Chat,
+    setSubconciousLogs: (subconciousLogs: TimestampedPrompt[]) => void,
+    isChatSpeaking: boolean,
+  ) {
     this.viewer = viewer;
     this.chat = chat;
 
-    this.setSubconciousLogs = setSubconciousLogs
-    this.isChatSpeaking = isChatSpeaking
+    this.setSubconciousLogs = setSubconciousLogs;
+    this.isChatSpeaking = isChatSpeaking;
 
     this.loadIdleTextPrompt(null);
 
@@ -127,13 +131,15 @@ export class AmicaLife {
 
   // Function to check message from user
   public receiveMessageFromUser(message: string) {
-    if (message.toLowerCase().includes('news')) {
+    if (message.toLowerCase().includes("news")) {
       console.log("Triggering news function call.");
-      this.insertFront({events: "News"});
+      this.insertFront({ events: "News" });
     }
 
     // Re-enqueue subconcious event after get the user input (1 Subconcious events per idle cycle)
-    (!this.containsEvent("Subconcious")) ? this.mainEvents.enqueue({ events: "Subconcious" }) : null;
+    !this.containsEvent("Subconcious")
+      ? this.mainEvents.enqueue({ events: "Subconcious" })
+      : null;
 
     this.pause();
     this.wakeFromSleep();
@@ -151,7 +157,9 @@ export class AmicaLife {
 
   public async processingIdle() {
     // Preventing duplicate processingIdle loop
-    if (this.isProcessingIdleRunning) { return; }
+    if (this.isProcessingIdleRunning) {
+      return;
+    }
 
     this.isProcessingIdleRunning = true;
 
@@ -193,9 +201,8 @@ export class AmicaLife {
         this.chat!.speakJobs.size() < 1 &&
         this.chat!.ttsJobs.size() < 1 &&
         !this.isChatSpeaking &&
-        !this.eventProcessing 
+        !this.eventProcessing
       ) {
-
         resumeIdleTimer();
 
         // Check for pause and sleep
@@ -216,12 +223,18 @@ export class AmicaLife {
           console.time(`processing_event ${idleEvent.events}`);
           this.eventProcessing = true;
           await handleIdleEvent(idleEvent, this, this.chat!, this.viewer!);
-          !(idleEvent.events === 'Subconcious' || idleEvent.events === 'Sleep') ? this.mainEvents.enqueue(idleEvent) : null;
+          !(idleEvent.events === "Subconcious" || idleEvent.events === "Sleep")
+            ? this.mainEvents.enqueue(idleEvent)
+            : null;
         } else {
           //removed for staging usage
           //console.log("Handling idle event:", "No idle events in queue");
-        } 
-      } else if ( this.chat!.speakJobs.size() > 0 || this.chat!.ttsJobs.size() > 0 || this.isChatSpeaking) {
+        }
+      } else if (
+        this.chat!.speakJobs.size() > 0 ||
+        this.chat!.ttsJobs.size() > 0 ||
+        this.isChatSpeaking
+      ) {
         pauseIdleTimer();
       }
 
@@ -244,7 +257,10 @@ export class AmicaLife {
     if (!this.isSleep) {
       const chat = this.chat;
       if (!chat) {
-        console.error("Chat instance is not available");
+        const { logger } = await import("@/utils/logger");
+        logger
+          .with({ subsystem: "amicaLife", module: "amicaLife" })
+          .error("Chat instance is not available");
         return;
       }
       const idleTime = chat.idleTime();
@@ -321,5 +337,4 @@ export class AmicaLife {
     this.isSleep = false;
     this.viewer?.model?.playEmotion("Neutral");
   }
-  
 }

@@ -8,6 +8,9 @@ import { invoke } from "@tauri-apps/api/core";
 // ChatContext import removed (was unused here after refactor)
 import clsx from "clsx";
 import { perfMark, logPerfSummaryOnce } from "@/utils/perf";
+import { logger } from "@/utils/logger";
+
+const vlog = logger.with({ subsystem: "viewer", module: "component" });
 
 export default function VrmViewer({ chatMode }: { chatMode: boolean }) {
   const { viewer } = useContext(ViewerContext);
@@ -46,7 +49,7 @@ export default function VrmViewer({ chatMode }: { chatMode: boolean }) {
           perfMark("vrm:loadVrm:done");
           return true;
         } catch (e) {
-          console.error("vrm loading error", e);
+          vlog.error("vrm loading error", e);
           setLoadingError(true);
           setIsLoading(false);
           if (isTauri()) invoke("close_splashscreen");

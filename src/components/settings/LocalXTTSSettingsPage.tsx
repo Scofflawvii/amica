@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
+import { logger } from "@/utils/logger";
+const slog = logger.with({ subsystem: "settings", page: "localxtts" });
 import { Listbox, Transition } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { config, updateConfig } from "@/utils/config";
@@ -90,7 +92,7 @@ export function LocalXTTSSettingsPage({
         }
       }
     } catch (err) {
-      console.error("Error fetching voices:", err);
+      slog.error("Error fetching voices", err);
       setError("Failed to fetch voices");
     } finally {
       setLoading(false);
@@ -108,7 +110,7 @@ export function LocalXTTSSettingsPage({
         }
       }
     } catch (err) {
-      console.error("Error fetching RVC voices:", err);
+      slog.error("Error fetching RVC voices", err);
     }
   };
 
@@ -151,7 +153,7 @@ export function LocalXTTSSettingsPage({
           setSelectedRvcVoice(savedRvcVoice);
         }
       } catch (err) {
-        console.error("[AllTalk] Error loading data:", err);
+        slog.error("[AllTalk] Error loading data", err);
         setError("Failed to load voice data");
       } finally {
         setLoading(false);
@@ -192,7 +194,7 @@ export function LocalXTTSSettingsPage({
       const audio = new Audio(audioUrl);
       await audio.play();
     } catch (err) {
-      console.error("Preview error:", err);
+      slog.error("Preview error", err);
       setError("Failed to preview voice");
     } finally {
       setLoading(false);

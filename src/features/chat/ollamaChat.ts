@@ -1,6 +1,7 @@
 import { Message } from "./messages";
+import { logger } from "@/utils/logger";
 import { buildPrompt } from "@/utils/buildPrompt";
-import { config } from '@/utils/config';
+import { config } from "@/utils/config";
 
 export async function getOllamaChatResponseStream(messages: Message[]) {
   const headers: Record<string, string> = {
@@ -16,7 +17,7 @@ export async function getOllamaChatResponseStream(messages: Message[]) {
   });
 
   const reader = res.body?.getReader();
-  if (res.status !== 200 || ! reader) {
+  if (res.status !== 200 || !reader) {
     throw new Error(`Ollama chat error (${res.status})`);
   }
 
@@ -31,8 +32,8 @@ export async function getOllamaChatResponseStream(messages: Message[]) {
           const data = decoder.decode(value);
           const jsonResponses = data
             .trim() // Ollama sends an empty line after the final JSON message...
-            .split("\n")
-            //.filter((val) => !!val) 
+            .split("\n");
+          //.filter((val) => !!val)
 
           for (const jsonResponse of jsonResponses) {
             try {
@@ -42,12 +43,12 @@ export async function getOllamaChatResponseStream(messages: Message[]) {
                 controller.enqueue(messagePiece);
               }
             } catch (error) {
-              console.error(error);
+              logger.error("ollama stream parse error", error);
             }
           }
         }
       } catch (error) {
-        console.error(error);
+        logger.error("ollama stream error", error);
         controller.error(error);
       } finally {
         reader.releaseLock();
@@ -57,13 +58,16 @@ export async function getOllamaChatResponseStream(messages: Message[]) {
     async cancel() {
       await reader?.cancel();
       reader.releaseLock();
-    }
+    },
   });
 
   return stream;
 }
 
-export async function getOllamaVisionChatResponse(messages: Message[], imageData: string) {
+export async function getOllamaVisionChatResponse(
+  messages: Message[],
+  imageData: string,
+) {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };

@@ -18,6 +18,8 @@ import {
   getMultipartBoundary,
   FormidablePart,
 } from "formidable";
+import { logger } from "@/utils/logger";
+const xlog = logger.with({ subsystem: "api", route: "/api/mediaHandler" });
 
 // Configure body parsing: disable only for multipart/form-data
 export const config = {
@@ -71,7 +73,7 @@ export default async function handler(
 
       await handleRequest(currentSessionId, timestamp, fields, files, res);
     } catch (error) {
-      console.error("Form parsing error:", error);
+      xlog.error("Form parsing error", error);
       return sendError(res, currentSessionId, "Failed to parse form data.");
     }
   } else {

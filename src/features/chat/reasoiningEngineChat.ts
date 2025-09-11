@@ -1,23 +1,23 @@
-import { log } from "console";
 import { Message } from "./messages";
 import { config } from "@/utils/config";
+import { logger } from "@/utils/logger";
+
+const log = logger.with({ subsystem: "chat", backend: "reasoning" });
 
 export async function getReasoingEngineChatResponseStream(
   systemPrompt: Message,
   messages: Message[],
 ) {
-  const response = await fetch(config("reasoning_engine_url"),
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        systemPrompt: systemPrompt,
-        messages: messages,
-      }),
+  const response = await fetch(config("reasoning_engine_url"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify({
+      systemPrompt: systemPrompt,
+      messages: messages,
+    }),
+  });
 
   if (!response.ok) {
     throw new Error(
@@ -58,12 +58,12 @@ export async function getReasoingEngineChatResponseStream(
                 controller.enqueue(messagePiece);
               }
             } catch (error) {
-              console.error(error);
+              log.error("reasoning stream chunk parse error", error);
             }
           }
         }
       } catch (error) {
-        console.error(error);
+        log.error("reasoning stream error", error);
         controller.error(error);
       } finally {
         reader.releaseLock();

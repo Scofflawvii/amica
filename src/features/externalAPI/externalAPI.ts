@@ -5,6 +5,8 @@ import {
   TimestampedPrompt,
 } from "../amicaLife/eventHandler";
 import { Message } from "../chat/messages";
+import { logger } from "@/utils/logger";
+const xlog = logger.with({ subsystem: "externalAPI", module: "externalAPI" });
 
 // Build URLs lazily and safely to avoid ReferenceError/TypeError in SSR or
 // when NEXT_PUBLIC_DEVELOPMENT_BASE_URL is unset.
@@ -48,7 +50,7 @@ export async function fetcher(
           body: JSON.stringify(data),
         });
       } catch (error) {
-        console.error("Failed to POST server config: ", error);
+        xlog.error("Failed to POST server config", error);
       }
       break;
 
@@ -59,7 +61,7 @@ export async function fetcher(
           serverConfig = await response.json();
         }
       } catch (error) {
-        console.error("Failed to fetch server config:", error);
+        xlog.error("Failed to fetch server config", error);
       }
       break;
 

@@ -142,7 +142,7 @@ export class Chat {
     if (!(globalThis as any).__amica_init_warned) {
       (globalThis as any).__amica_init_warned = true;
       // One-time deprecation notice
-      console.warn(
+      logger.warn(
         "Chat.initialize legacy setter signature is deprecated; migrate to initializeWithObserver()",
       );
     }

@@ -198,19 +198,23 @@ export default function Home() {
   };
 
   const toggleXR = async (immersiveType: XRSessionMode) => {
+    const plog = (await import("@/utils/logger")).logger.with({
+      subsystem: "page",
+      route: "/",
+    });
     console.log("Toggle XR", immersiveType);
 
     if (!window.navigator.xr) {
-      console.error("WebXR not supported");
+      plog.error("WebXR not supported");
       return;
     }
     if (!(await window.navigator.xr.isSessionSupported(immersiveType))) {
-      console.error("Session not supported");
+      plog.error("Session not supported");
       return;
     }
 
     if (!viewer.isReady) {
-      console.error("Viewer not ready");
+      plog.error("Viewer not ready");
       return;
     }
 
@@ -232,7 +236,7 @@ export default function Home() {
         await viewer.currentSession.end();
       } catch (err) {
         // some times session already ended not due to user interaction
-        console.warn(err);
+        plog.warn("XR end session warning", err);
       }
 
       // @ts-expect-error - WebXR types may not be fully available
@@ -266,7 +270,7 @@ export default function Home() {
 
       viewer.onSessionStarted(session, immersiveType);
     } catch (err) {
-      console.error(err);
+      plog.error("requestSession failed", err);
     }
   };
 

@@ -1,4 +1,6 @@
 import { expandPrompt } from "../functionCalling/eventHandler";
+import { logger } from "@/utils/logger";
+const nlog = logger.with({ subsystem: "plugins", module: "news" });
 
 const prompt = `You are a newscaster specializing in providing news. Use the following context from The New York Times News to commented on. [{context_str}]`;
 
@@ -20,7 +22,7 @@ export async function handleNews(): Promise<string> {
     console.log("News function calling result: ", fullNews);
     return result;
   } catch (error) {
-    console.error("Error in handleNews:", error);
+    nlog.error("Error in handleNews", error);
     return "An error occurred while fetching and processing the news.";
   }
 }

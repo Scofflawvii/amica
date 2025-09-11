@@ -4,6 +4,8 @@ import { BasicPage, FormRow, NotUsingAlert } from "./common";
 import { TextInput } from "@/components/textInput";
 import { config, updateConfig } from "@/utils/config";
 import { kokoroVoiceList } from "@/features/kokoro/kokoro";
+import { logger } from "@/utils/logger";
+const slog = logger.with({ subsystem: "settings", page: "kokoro" });
 
 export function KokoroSettingsPage({
   kokoroUrl,
@@ -35,7 +37,7 @@ export function KokoroSettingsPage({
           setVoiceList(formattedVoices);
         }
       } catch (error) {
-        console.error("Error fetching kokoro voice list:", error);
+        slog.error("Error fetching kokoro voice list", error);
       }
     }
     fetchVoiceList();

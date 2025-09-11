@@ -1,10 +1,15 @@
-import sharp from 'sharp';
-import { askVisionLLM } from '@/utils/askLlm';
+import sharp from "sharp";
+import { askVisionLLM } from "@/utils/askLlm";
+import { logger } from "@/utils/logger";
+const xlog = logger.with({
+  subsystem: "externalAPI",
+  module: "imageProcessor",
+});
 
 export async function processImage(payload: Buffer): Promise<string> {
   const jpegImg = await convertToJpeg(payload);
   if (!jpegImg) {
-    throw new Error('Failed to process image');
+    throw new Error("Failed to process image");
   }
   return await askVisionLLM(jpegImg);
 }
@@ -12,9 +17,9 @@ export async function processImage(payload: Buffer): Promise<string> {
 async function convertToJpeg(payload: Buffer): Promise<string | null> {
   try {
     const jpegBuffer = await sharp(payload).jpeg().toBuffer();
-    return jpegBuffer.toString('base64');
+    return jpegBuffer.toString("base64");
   } catch (error) {
-    console.error('Error converting image to .jpeg:', error);
+    xlog.error("Error converting image to .jpeg", error);
     return null;
   }
 }

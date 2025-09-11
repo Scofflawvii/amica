@@ -1,15 +1,19 @@
 import { Message } from "./messages";
+import { logger } from "@/utils/logger";
 import { buildPrompt, buildVisionPrompt } from "@/utils/buildPrompt";
-import { config } from '@/utils/config';
+import { config } from "@/utils/config";
 
 export async function getLlamaCppChatResponseStream(messages: Message[]) {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "Connection": "keep-alive",
-    "Accept": "text/event-stream",
+    Connection: "keep-alive",
+    Accept: "text/event-stream",
   };
   const prompt = buildPrompt(messages);
-  const stop: string[] = [`${config("name")}:`, ...`${config("llamacpp_stop_sequence")}`.split("||")];
+  const stop: string[] = [
+    `${config("name")}:`,
+    ...`${config("llamacpp_stop_sequence")}`.split("||"),
+  ];
   const res = await fetch(`${config("llamacpp_url")}/completion`, {
     headers: headers,
     method: "POST",
@@ -24,7 +28,7 @@ export async function getLlamaCppChatResponseStream(messages: Message[]) {
   });
 
   const reader = res.body?.getReader();
-  if (res.status !== 200 || ! reader) {
+  if (res.status !== 200 || !reader) {
     throw new Error(`LlamaCpp chat error (${res.status})`);
   }
 
@@ -37,7 +41,7 @@ export async function getLlamaCppChatResponseStream(messages: Message[]) {
         let cont = true;
         while (true) {
           const { done, value } = await reader.read();
-          if (done || ! cont) break;
+          if (done || !cont) break;
           const data = decoder.decode(value);
           const chunks = data
             .split("data:")
@@ -61,12 +65,12 @@ export async function getLlamaCppChatResponseStream(messages: Message[]) {
                 controller.enqueue(messagePiece);
               }
             } catch (error) {
-              console.error(error);
+              logger.error("llamacpp stream parse error", error);
             }
           }
         }
       } catch (error) {
-        console.error(error);
+        logger.error("llamacpp stream error", error);
         controller.error(error);
       } finally {
         reader.releaseLock();
@@ -76,17 +80,20 @@ export async function getLlamaCppChatResponseStream(messages: Message[]) {
     async cancel() {
       await reader?.cancel();
       reader.releaseLock();
-    }
+    },
   });
 
   return stream;
 }
 
-export async function getLlavaCppChatResponse(messages: Message[], imageData: string) {
+export async function getLlavaCppChatResponse(
+  messages: Message[],
+  imageData: string,
+) {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "Connection": "keep-alive",
-    "Accept": "text/event-stream",
+    Connection: "keep-alive",
+    Accept: "text/event-stream",
   };
   const prompt = buildVisionPrompt(messages);
 
@@ -98,27 +105,25 @@ export async function getLlavaCppChatResponse(messages: Message[], imageData: st
       n_predict: 400,
       temperature: 0.7,
       cache_prompt: true,
-      stop: [
-        "</s>",
-        `${config('name')}:`,
-        "User:"
+      stop: ["</s>", `${config("name")}:`, "User:"],
+      image_data: [
+        {
+          data: imageData,
+          id: 10,
+        },
       ],
-      image_data: [{
-        data: imageData,
-        id: 10,
-      }],
       prompt,
     }),
   });
 
-  if (! res.ok) {
+  if (!res.ok) {
     throw new Error(`LlamaCpp llava chat error (${res.status})`);
   }
 
-  console.log('body', res.body);
+  logger.debug("llamacpp vision response body", res.body);
 
   const reader = res.body?.getReader();
-  if (res.status !== 200 || ! reader) {
+  if (res.status !== 200 || !reader) {
     throw new Error(`LlamaCpp vision error (${res.status})`);
   }
 
@@ -132,7 +137,7 @@ export async function getLlavaCppChatResponse(messages: Message[], imageData: st
         let cont = true;
         while (true) {
           const { done, value } = await reader.read();
-          if (done || ! cont) break;
+          if (done || !cont) break;
           const data = decoder.decode(value);
           const chunks = data
             .split("data:")
@@ -156,12 +161,12 @@ export async function getLlavaCppChatResponse(messages: Message[], imageData: st
                 controller.enqueue(messagePiece);
               }
             } catch (error) {
-              console.error(error);
+              logger.error("llamacpp vision parse error", error);
             }
           }
         }
       } catch (error) {
-        console.error(error);
+        logger.error("llamacpp vision stream error", error);
         controller.error(error);
       } finally {
         reader.releaseLock();
@@ -171,7 +176,7 @@ export async function getLlavaCppChatResponse(messages: Message[], imageData: st
     async cancel() {
       await reader?.cancel();
       reader.releaseLock();
-    }
+    },
   });
 
   const sreader = await stream.getReader();

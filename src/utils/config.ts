@@ -227,7 +227,10 @@ export async function updateConfig(key: string, value: string) {
     // Sync update to server config
     await handleConfig("update", { key, value });
   } catch (e) {
-    console.error(`Error updating config for key "${key}": ${e}`);
+    const { logger } = await import("./logger");
+    logger
+      .with({ subsystem: "config" })
+      .error("Error updating config", { key, error: String(e) });
   }
 }
 

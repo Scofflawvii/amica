@@ -1,9 +1,18 @@
+import { logger } from "@/utils/logger";
+const vlog = logger.with({ subsystem: "viewer", module: "XRHandMeshModel" });
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
-const DEFAULT_HAND_PROFILE_PATH = '/controllers/generic-hand/';
+const DEFAULT_HAND_PROFILE_PATH = "/controllers/generic-hand/";
 
 class XRHandMeshModel {
-  constructor(handModel, controller, path, handedness, loader = null, onLoad = null) {
+  constructor(
+    handModel,
+    controller,
+    path,
+    handedness,
+    loader = null,
+    onLoad = null,
+  ) {
     this.controller = controller;
     this.handModel = handModel;
 
@@ -14,50 +23,50 @@ class XRHandMeshModel {
       loader.setPath(path || DEFAULT_HAND_PROFILE_PATH);
     }
 
-    loader.load(`${handedness}.glb`, gltf => {
+    loader.load(`${handedness}.glb`, (gltf) => {
       const object = gltf.scene.children[0];
       this.handModel.add(object);
 
-      const mesh = object.getObjectByProperty('type', 'SkinnedMesh');
+      const mesh = object.getObjectByProperty("type", "SkinnedMesh");
       mesh.frustumCulled = false;
       mesh.castShadow = true;
       mesh.receiveShadow = true;
 
       const joints = [
-        'wrist',
-        'thumb-metacarpal',
-        'thumb-phalanx-proximal',
-        'thumb-phalanx-distal',
-        'thumb-tip',
-        'index-finger-metacarpal',
-        'index-finger-phalanx-proximal',
-        'index-finger-phalanx-intermediate',
-        'index-finger-phalanx-distal',
-        'index-finger-tip',
-        'middle-finger-metacarpal',
-        'middle-finger-phalanx-proximal',
-        'middle-finger-phalanx-intermediate',
-        'middle-finger-phalanx-distal',
-        'middle-finger-tip',
-        'ring-finger-metacarpal',
-        'ring-finger-phalanx-proximal',
-        'ring-finger-phalanx-intermediate',
-        'ring-finger-phalanx-distal',
-        'ring-finger-tip',
-        'pinky-finger-metacarpal',
-        'pinky-finger-phalanx-proximal',
-        'pinky-finger-phalanx-intermediate',
-        'pinky-finger-phalanx-distal',
-        'pinky-finger-tip',
+        "wrist",
+        "thumb-metacarpal",
+        "thumb-phalanx-proximal",
+        "thumb-phalanx-distal",
+        "thumb-tip",
+        "index-finger-metacarpal",
+        "index-finger-phalanx-proximal",
+        "index-finger-phalanx-intermediate",
+        "index-finger-phalanx-distal",
+        "index-finger-tip",
+        "middle-finger-metacarpal",
+        "middle-finger-phalanx-proximal",
+        "middle-finger-phalanx-intermediate",
+        "middle-finger-phalanx-distal",
+        "middle-finger-tip",
+        "ring-finger-metacarpal",
+        "ring-finger-phalanx-proximal",
+        "ring-finger-phalanx-intermediate",
+        "ring-finger-phalanx-distal",
+        "ring-finger-tip",
+        "pinky-finger-metacarpal",
+        "pinky-finger-phalanx-proximal",
+        "pinky-finger-phalanx-intermediate",
+        "pinky-finger-phalanx-distal",
+        "pinky-finger-tip",
       ];
 
-      joints.forEach(jointName => {
+      joints.forEach((jointName) => {
         const bone = object.getObjectByName(jointName);
 
         if (bone !== undefined) {
           bone.jointName = jointName;
         } else {
-          console.warn(`Couldn't find ${jointName} in ${handedness} hand mesh`);
+          vlog.warn(`Couldn't find ${jointName} in ${handedness} hand mesh`);
         }
 
         this.bones.push(bone);
@@ -71,7 +80,7 @@ class XRHandMeshModel {
     // XR Joints
     const XRJoints = this.controller.joints;
 
-    for (let i=0; i < this.bones.length; i++) {
+    for (let i = 0; i < this.bones.length; i++) {
       const bone = this.bones[i];
 
       if (bone) {

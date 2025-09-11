@@ -4,6 +4,8 @@ import { BasicPage, FormRow, NotUsingAlert } from "./common";
 import { TextInput } from "@/components/textInput";
 import { config, updateConfig } from "@/utils/config";
 import { coquiLocalVoiceIdList } from "@/features/coquiLocal/coquiLocal";
+import { logger } from "@/utils/logger";
+const slog = logger.with({ subsystem: "settings", page: "coquiLocal" });
 
 export function CoquiLocalSettingsPage({
   coquiLocalUrl,
@@ -31,7 +33,7 @@ export function CoquiLocalSettingsPage({
           );
         }
       } catch (error) {
-        console.error("Error fetching voice list:", error);
+        slog.error("Error fetching voice list", error);
       }
     }
     fetchVoiceList();

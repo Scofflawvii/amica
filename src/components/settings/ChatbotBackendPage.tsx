@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { getWindowAI } from "window.ai";
 import { BasicPage, Link, FormRow, getLinkFromPage } from "./common";
 import { updateConfig } from "@/utils/config";
+import { logger } from "@/utils/logger";
+const slog = logger.with({ subsystem: "settings", page: "chatbot" });
 import { isTauri } from "@/utils/isTauri";
 
 const chatbotBackends = [
@@ -48,7 +50,7 @@ export function ChatbotBackendPage({
           setWindowAiDetected(true);
         }
       } catch (e) {
-        console.error("window.ai", e);
+        slog.error("window.ai error", e);
       }
     })();
   }, []);

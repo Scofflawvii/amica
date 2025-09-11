@@ -1,4 +1,6 @@
-import { Telegraf } from 'telegraf';
+import { Telegraf } from "telegraf";
+import { logger } from "@/utils/logger";
+const xlog = logger.with({ subsystem: "externalAPI", module: "telegram" });
 
 class TelegramClient {
   private bot: Telegraf;
@@ -7,7 +9,9 @@ class TelegramClient {
     const botToken = process.env.TELEGRAM_BOT_TOKEN as string;
 
     if (!botToken) {
-      throw new Error('TELEGRAM_BOT_TOKEN is not defined in the environment variables');
+      throw new Error(
+        "TELEGRAM_BOT_TOKEN is not defined in the environment variables",
+      );
     }
 
     // Initialize the Telegraf bot with the bot token
@@ -19,9 +23,9 @@ class TelegramClient {
     const chatId = process.env.TELEGRAM_CHAT_ID as string;
     try {
       await this.bot.telegram.sendMessage(chatId, content);
-      console.log('Message posted successfully');
+      console.log("Message posted successfully");
     } catch (error) {
-      console.error('Error posting message to Telegram:', error);
+      xlog.error("Error posting message to Telegram", error);
     }
   }
 
@@ -32,4 +36,3 @@ class TelegramClient {
 
 // Export an instance of the TelegramClient class for use
 export const telegramClientInstance = new TelegramClient();
-

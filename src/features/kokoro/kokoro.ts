@@ -1,8 +1,9 @@
-import { config } from '@/utils/config';
+import { config } from "@/utils/config";
+import { logger } from "@/utils/logger";
 
-export async function kokoro(
-  message: string,
-) {
+const tlog = logger.with({ subsystem: "tts", module: "kokoro" });
+
+export async function kokoro(message: string) {
   try {
     const res = await fetch(`${config("kokoro_url")}/tts`, {
       method: "POST",
@@ -14,34 +15,31 @@ export async function kokoro(
         "Content-Type": "application/json",
       },
     });
-    if (! res.ok) {
-      console.error(res);
+    if (!res.ok) {
+      tlog.error("kokoro tts non-ok response", { status: res.status });
       throw new Error("Kokoro TTS API Error");
     }
     const data = (await res.arrayBuffer()) as any;
 
     return { audio: data };
   } catch (e) {
-    console.error('ERROR', e);
+    tlog.error("kokoro tts error", e);
     throw new Error("Kokoro TTS API Error");
   }
 }
 
-export async function kokoroVoiceList(
-) {
+export async function kokoroVoiceList() {
   try {
     const response = await fetch(`${config("kokoro_url")}/voices`, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Accept': "application/text",
-      }
-    })
+        Accept: "application/text",
+      },
+    });
 
     return response.json();
-
   } catch (error) {
-
-    console.error('Error fetching kokoro voice:', error);
+    tlog.error("Error fetching kokoro voice", error);
     throw error;
   }
 }

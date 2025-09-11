@@ -6,6 +6,8 @@ import { RangeInput } from "@/components/rangeInput";
 import { SwitchBox } from "@/components/switchBox";
 import { NumberInput } from "../numberInput";
 import { useCallback, useContext, useEffect, useRef } from "react";
+import { logger } from "@/utils/logger";
+const slog = logger.with({ subsystem: "settings", page: "amicaLife" });
 import { ChatContext } from "@/features/chat/chatContext";
 import { TextInput } from "../textInput";
 import { IconButton } from "../iconButton";
@@ -73,7 +75,7 @@ export function AmicaLifePage({
               amicaLife.loadIdleTextPrompt(parsedContent.idleTextPrompt);
               console.log("idleTextPrompt", parsedContent.idleTextPrompt);
             } else {
-              console.error("Wrong json format");
+              slog.error("Wrong json format");
             }
           }
         };
