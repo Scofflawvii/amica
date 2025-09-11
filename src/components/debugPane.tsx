@@ -94,8 +94,9 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
 
   return (
     <>
-      <div className="bg-surface z-max fixed top-0 left-0 h-full w-full text-[hsl(var(--text))]">
-        <div className="z-max relative top-0 left-0 max-h-full w-full text-left text-xs">
+      <div className="z-max fixed inset-0 text-[hsl(var(--text))]">
+        {/* Content panel sits beside the left sidebar (assumed ~80px). On small screens it uses full width. */}
+        <div className="z-max bg-surface fixed inset-y-0 right-0 left-0 text-left text-xs md:left-20">
           <div className="bg-surface-alt border-border/50 border-b p-2">
             <IconButton
               iconName="24/Close"
@@ -168,7 +169,7 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
             </span>
           </div>
           {showPerf && <PerfMetrics />}
-          <div className="relative inline-block max-h-screen w-full overflow-y-scroll px-2 md:px-8">
+          <div className="relative inline-block max-h-[calc(100vh-140px)] w-full overflow-y-scroll px-2 md:px-8">
             {getLogs()
               .slice(-TOTAL_ITEMS_TO_SHOW)
               .filter((log) => {
