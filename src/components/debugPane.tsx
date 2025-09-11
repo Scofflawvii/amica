@@ -4,6 +4,7 @@ import { IconButton } from "@/components/iconButton";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 import { clsx } from "clsx";
 import { config } from "@/utils/config";
+import PerfMetrics from "@/components/perfMetrics";
 // Portal removed: component rendered within GuiLayer parent portal.
 
 const TOTAL_ITEMS_TO_SHOW = 100;
@@ -48,6 +49,7 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
   const [typeInfoEnabled, setTypeInfoEnabled] = useState(true);
   const [typeWarnEnabled, setTypeWarnEnabled] = useState(true);
   const [typeErrorEnabled, setTypeErrorEnabled] = useState(true);
+  const [showPerf, setShowPerf] = useState(true);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -159,8 +161,13 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
                   set={setTypeErrorEnabled}
                 />
               </span>
+              <span className="bg-primary/15 text-primary ring-primary/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
+                perf
+                <SwitchToggle enabled={showPerf} set={setShowPerf} />
+              </span>
             </span>
           </div>
+          {showPerf && <PerfMetrics />}
           <div className="relative inline-block max-h-screen w-full overflow-y-scroll px-2 md:px-8">
             {getLogs()
               .slice(-TOTAL_ITEMS_TO_SHOW)
