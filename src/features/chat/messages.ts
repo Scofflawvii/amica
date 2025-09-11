@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 export type Role = "assistant" | "system" | "user";
 
 // ChatGPT API
@@ -90,7 +91,7 @@ export const textsToScreenplay = (
     const systemTag = userInputToSystem(tag);
 
     if (emotions.includes(systemTag as EmotionType)) {
-      console.log("Emotion detect :", systemTag);
+      logger.debug("Emotion detect", { tag: systemTag });
       expression = systemTag as EmotionType;
       prevExpression = systemTag as EmotionType;
     }

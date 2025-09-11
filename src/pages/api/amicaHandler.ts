@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { logger } from "@/utils/logger";
 
 import { config } from "@/utils/config";
 import {
@@ -129,7 +130,7 @@ const handleSSEConnection = (
   sseClients.push(client);
 
   _req.on("close", () => {
-    console.log("Client disconnected");
+    logger.debug("SSE client disconnected");
     sseClients.splice(sseClients.indexOf(client), 1);
     res.end();
   });

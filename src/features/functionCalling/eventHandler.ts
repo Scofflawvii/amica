@@ -1,12 +1,13 @@
 import { handleNews } from "../plugins/news";
+import { logger } from "@/utils/logger";
 
 export async function expandPrompt(prompt: string, values: any) {
-    for (const key in values) {
-      prompt = prompt.replace(`{${key}}`, values[key]);
-    }
-    return prompt;
+  for (const key in values) {
+    prompt = prompt.replace(`{${key}}`, values[key]);
+  }
+  return prompt;
 }
-  
+
 export async function handleFunctionCalling(event: string) {
   switch (event) {
     case "news": {
@@ -15,6 +16,6 @@ export async function handleFunctionCalling(event: string) {
     }
 
     default:
-      console.log(`Unknown event: ${event}`);
+      logger.debug("Unknown function-calling event", { event });
   }
 }

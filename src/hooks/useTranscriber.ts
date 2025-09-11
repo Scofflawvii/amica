@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { logger } from "@/utils/logger";
 import { useWorker } from "./useWorker";
 import { updateFileProgress } from "@/utils/progress";
 
@@ -68,7 +69,7 @@ export function useTranscriber(): Transcriber {
         break;
       case "complete":
         // Received complete transcript
-        console.log("useTranscriber complete", message);
+        logger.debug("useTranscriber complete", { message });
         // eslint-disable-next-line no-case-declarations
         const completeMessage = message as TranscriberCompleteData;
         setTranscript({

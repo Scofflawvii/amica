@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { logger } from "./logger";
 
 interface Dimensions {
   width: number;
@@ -214,13 +215,22 @@ function logTextureInfo(gltf: GLTF): void {
       : [mesh.material];
 
     materials.forEach((material: THREE.Material, index: number) => {
-      console.group(`Material ${index} on mesh "${node.name}"`);
+      // Grouping is only visible in dev tools; keep in dev logs only
+      console.group?.(`Material ${index} on mesh "${node.name}"`);
       Object.entries(material).forEach(([key, value]) => {
         if (value instanceof THREE.Texture && value.image) {
-          console.log(`${key}: ${value.image.width}x${value.image.height}`);
+          logger
+            .with({ subsystem: "gfx", module: "textureDownscaler" })
+            .debug("texture size", {
+              materialIndex: index,
+              mesh: node.name,
+              key,
+              width: (value.image as any).width,
+              height: (value.image as any).height,
+            });
         }
       });
-      console.groupEnd();
+      console.groupEnd?.();
     });
   });
 }

@@ -77,7 +77,7 @@ export class SpeechPipeline {
         const lt = (window as any).chatvrm_latency_tracker;
         if (lt?.active) {
           const ms = Date.now() - lt.start;
-          console.log("performance_latency", ms);
+          logger.debug("performance_latency", { ms });
           lt.active = false;
         }
 

@@ -97,7 +97,7 @@ export default function Share() {
         setVrmLoadingFromIndexedDb(true);
       });
     } else {
-      console.log("FilePond not loaded, retry in 0.5 sec");
+      slog.debug("FilePond not loaded, retry in 0.5 sec");
       delay(500).then(uploadVrmFromIndexedDb);
     }
   }
@@ -161,7 +161,7 @@ export default function Share() {
       );
 
       const data = await res.json();
-      console.log("response", data);
+      slog.debug("registerCharacter response", data);
 
       setSqid(data.sqid);
 

@@ -500,7 +500,7 @@ export class Viewer {
         igroup.listenToXRControllerEvents(controller2);
       }
     } catch (e) {
-      console.log("No controller available", e);
+      vlog.debug("No controller available", e);
     }
 
     // gui
@@ -1016,7 +1016,7 @@ export class Viewer {
       this.room = new Room();
     }
     return this.room.loadSplat(url).then(async () => {
-      console.log("splat loaded");
+      vlog.debug("splat loaded");
       if (!this.room?.splat) return;
 
       this.room.splat.position.set(0, 4, 0);
@@ -1043,13 +1043,13 @@ export class Viewer {
   }
 
   public onSelect(event: XRInputSourceEvent) {
-    console.log("onSelect", event);
-    console.log("onSelect", event.inputSource);
-    console.log("onSelect", event.inputSource.hand);
-    console.log("onSelect", event.inputSource.handedness);
-    console.log("onSelect", event.inputSource.gripSpace);
-    console.log("onSelect", event.inputSource.targetRayMode);
-    console.log("onSelect", event.inputSource.targetRaySpace);
+    const src = event.inputSource as any;
+    vlog.debug("onSelect", {
+      handedness: src?.handedness,
+      targetRayMode: src?.targetRayMode,
+      hasHand: !!src?.hand,
+      hasGripSpace: !!src?.gripSpace,
+    });
   }
 
   public doublePinchHandler() {
@@ -1511,7 +1511,7 @@ export class Viewer {
     videoElement.srcObject = stream;
     videoElement.play();
 
-    console.log("Start streaming!");
+    vlog.debug("Start streaming!");
   }
 
   public stopStreaming() {
@@ -1523,7 +1523,7 @@ export class Viewer {
       .forEach((track: { stop: () => any }) => track.stop());
     this.videoStream = null; // Clear the stream reference
 
-    console.log("Streaming stopped!");
+    vlog.debug("Streaming stopped!");
   }
 
   // Method to start recording

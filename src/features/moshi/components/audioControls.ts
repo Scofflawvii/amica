@@ -1,36 +1,35 @@
+import { logger } from "@/utils/logger";
 interface Recorder {
-    start: () => Promise<void>;
-    stop: () => void;
-    ondataavailable: (arrayBuffer: ArrayBuffer) => void;
-    setRecordingGain: (gain: number) => void;
+  start: () => Promise<void>;
+  stop: () => void;
+  ondataavailable: (arrayBuffer: ArrayBuffer) => void;
+  setRecordingGain: (gain: number) => void;
 }
 
 export class AudioControls {
-    private recorderInstance: Recorder | null = null;
-    private muted = true;
-    
-    constructor() {
-    }
+  private recorderInstance: Recorder | null = null;
+  private muted = true;
 
-    public getRecorder() {
-        return this.recorderInstance;
-    }
+  constructor() {}
 
-    public setRecorder(recorder: Recorder | null) {
-        this.recorderInstance = recorder;
-        this.muted = false;
-        this.recorderInstance?.setRecordingGain(1);
-    }
+  public getRecorder() {
+    return this.recorderInstance;
+  }
 
-    public toggleMute() {
-        if (!this.recorderInstance) return;
-        this.muted = !this.muted;
-        this.recorderInstance.setRecordingGain(this.muted ? 0 : 1);
-        console.log("muted moshi mic: ", this.muted)
-    }
+  public setRecorder(recorder: Recorder | null) {
+    this.recorderInstance = recorder;
+    this.muted = false;
+    this.recorderInstance?.setRecordingGain(1);
+  }
 
-    public isMuted() {
-        return this.muted;
-    }
+  public toggleMute() {
+    if (!this.recorderInstance) return;
+    this.muted = !this.muted;
+    this.recorderInstance.setRecordingGain(this.muted ? 0 : 1);
+    logger.debug("muted moshi mic", { muted: this.muted });
+  }
+
+  public isMuted() {
+    return this.muted;
+  }
 }
-

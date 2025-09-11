@@ -8,7 +8,7 @@ export async function localXTTSTTS(message: string) {
     .replace("/api/tts-generate", "");
 
   // Log the config values for debugging
-  console.log("[AllTalk] Config values:", {
+  tlog.debug("[AllTalk] Config values:", {
     url: config("localXTTS_url"),
     version: config("alltalk_version"),
     voice: config("alltalk_voice"),
@@ -41,8 +41,8 @@ export async function localXTTSTTS(message: string) {
   }
 
   try {
-    console.log("[AllTalk] Processing text:", message);
-    console.log("[AllTalk] Form data:", Object.fromEntries(formData));
+    tlog.debug("[AllTalk] Processing text:", message);
+    tlog.debug("[AllTalk] Form data:", Object.fromEntries(formData));
 
     const res = await fetch(`${baseUrl}/api/tts-generate`, {
       method: "POST",
@@ -58,7 +58,7 @@ export async function localXTTSTTS(message: string) {
     }
 
     const data = await res.json();
-    console.log("[AllTalk] TTS Response:", data);
+    tlog.debug("[AllTalk] TTS Response:", data);
 
     // Handle V1/V2 URL differences
     const audioUrl =
@@ -66,7 +66,7 @@ export async function localXTTSTTS(message: string) {
         ? data.output_file_url // V1 returns full URL
         : `${baseUrl}${data.output_file_url}`; // V2 returns relative path
 
-    console.log("[AllTalk] Generated audio URL:", audioUrl);
+    tlog.debug("[AllTalk] Generated audio URL:", audioUrl);
 
     // Fetch the actual audio data
     const audioResponse = await fetch(audioUrl);
@@ -75,7 +75,7 @@ export async function localXTTSTTS(message: string) {
     }
 
     const audioData = await audioResponse.arrayBuffer();
-    console.log("[AllTalk] Received audio data size:", audioData.byteLength);
+    tlog.debug("[AllTalk] Received audio data size:", audioData.byteLength);
 
     return { audio: audioData };
   } catch (e) {
