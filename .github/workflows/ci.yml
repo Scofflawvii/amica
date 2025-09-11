@@ -38,3 +38,9 @@ jobs:
           BUNDLE_CHECK_SCOPE: shared
           BUNDLE_MAX_KB: '2400'
         run: node scripts/check_bundle_size.mjs
+
+      - name: Bundle size check (total)
+        env:
+          BUNDLE_CHECK_SCOPE: total
+          BUNDLE_MAX_KB: '3400'
+        run: node scripts/check_bundle_size.mjs
