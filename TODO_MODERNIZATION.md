@@ -16,7 +16,7 @@ Legend:
 2. (P0 S) Introduce structured logger wrapper (levels + JSON in prod) & replace ad-hoc `console.*` in new code. **DONE** (added `src/utils/logger.ts` with debug/info/warn/error, pretty in dev and JSON in prod; migrated warn/error across viewer, chat, settings, TTS (piper/kokoro/localXTTS/rvc/coquiLocal), external API modules, pages, and utils; tests/typecheck green).
 3. (P1 S) Add bundle analyzer + size thresholds in CI (warn > baseline + % delta). **DONE** (manifest-based size checker wired to postbuild and CI with shared and total caps; follow-ups: baseline deltas & per-chunk reporting).
 4. (P1 M) Add accessibility smoke tests (axe + Playwright) for core views (chat, settings, viewer, overlays).
-5. (P1 S) Conventional commits + auto CHANGELOG (Changesets or semantic-release) + deprecation removal schedule.
+5. (P1 S) Conventional commits + auto CHANGELOG (semantic-release) + deprecation removal schedule. **DONE** (commitlint + husky in place; semantic-release configured with automated changelog + GitHub release workflow.)
 
 ---
 
