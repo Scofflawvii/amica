@@ -55,6 +55,8 @@ export function DebugPane({ onClickClose, mode = "embedded" }: DebugPaneProps) {
   const [typeErrorEnabled, setTypeErrorEnabled] = useState(true);
   const [showPerf, setShowPerf] = useState(true);
   const [leftOffset, setLeftOffset] = useState(0);
+  // Tick state to force re-render so new logs are shown
+  const [tick, setTick] = useState(0);
   const isPopout = mode === "popout";
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -66,6 +68,15 @@ export function DebugPane({ onClickClose, mode = "embedded" }: DebugPaneProps) {
       behavior: "auto",
       block: "center",
     });
+  }, []);
+
+  // Periodically refresh (lightweight) so new logs show up without user interaction
+  useEffect(() => {
+    const id = window.setInterval(
+      () => setTick((t) => (t + 1) % 1_000_000),
+      1000,
+    );
+    return () => window.clearInterval(id);
   }, []);
 
   // Auto-detect sidebar bounds to avoid overlap; update on resize
@@ -173,24 +184,6 @@ export function DebugPane({ onClickClose, mode = "embedded" }: DebugPaneProps) {
             className="bg-primary hover:bg-primary-hover active:bg-primary-active ml-4"
             onClick={onClickCopy}
           />
-          {mode === "embedded" && (
-            <button
-              type="button"
-              onClick={() => {
-                try {
-                  window.open(
-                    "/debug-popout",
-                    "amica-debug-popout",
-                    "width=700,height=800,resizable,scrollbars",
-                  );
-                } catch {
-                  /* ignore */
-                }
-              }}
-              className="border-border/40 ml-2 rounded-md border px-2 py-1 text-xs font-medium hover:bg-[hsl(var(--surface-alt))] active:scale-[.97]">
-              Popout
-            </button>
-          )}
           {mode === "popout" && (
             <button
               type="button"

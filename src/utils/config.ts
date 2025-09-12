@@ -2,7 +2,8 @@ import { handleConfig, serverConfig } from "@/features/externalAPI/externalAPI";
 
 export const defaults: Readonly<Record<string, string>> = {
   // Debug settings
-  debug_mode: process.env.NEXT_PUBLIC_DEBUG_MODE ?? "false",
+  // Enable debug mode by default; can still be overridden via NEXT_PUBLIC_DEBUG_MODE
+  debug_mode: process.env.NEXT_PUBLIC_DEBUG_MODE ?? "true",
   debug_log: process.env.NEXT_PUBLIC_DEBUG_LOG ?? "true",
   debug_info: process.env.NEXT_PUBLIC_DEBUG_INFO ?? "true",
   debug_warn: process.env.NEXT_PUBLIC_DEBUG_WARN ?? "true",

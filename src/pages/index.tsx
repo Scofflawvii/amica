@@ -40,10 +40,6 @@ const Settings = dynamic(
   () => import("@/components/settings").then((m) => m.Settings),
   { ssr: false, loading: () => <div className="z-modal" /> },
 );
-const DebugPane = dynamic(
-  () => import("@/components/debugPane").then((m) => m.DebugPane),
-  { ssr: false, loading: () => null },
-);
 const EmbeddedWebcam = dynamic(
   () => import("@/components/embeddedWebcam").then((m) => m.EmbeddedWebcam),
   { ssr: false, loading: () => null },
@@ -110,7 +106,7 @@ export default function Home() {
   const [showArbiusIntroduction, setShowArbiusIntroduction] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showChatLog, setShowChatLog] = useState(false);
-  const [showDebug, setShowDebug] = useState(false);
+  // Debug pane now always opens in external popout window; internal state removed
   const [showChatMode, setShowChatMode] = useState(false);
   const [showSubconciousText, setShowSubconciousText] = useState(false);
 
@@ -347,7 +343,7 @@ export default function Home() {
             />
           </div>
         )}
-        {showDebug && <DebugPane onClickClose={() => setShowDebug(false)} />}
+        {/* DebugPane embedded removed; use popout window instead */}
         {config("chatbot_backend") === "moshi" && (
           <Moshi
             setAssistantText={() => {
@@ -448,7 +444,17 @@ export default function Home() {
               <MenuButton
                 large={isVRHeadset}
                 icon={CodeBracketSquareIcon}
-                onClick={() => setShowDebug(true)}
+                onClick={() => {
+                  try {
+                    window.open(
+                      "/debug-popout",
+                      "amica-debug-popout",
+                      "width=700,height=800,resizable,scrollbars",
+                    );
+                  } catch {
+                    /* ignore */
+                  }
+                }}
                 label="debug"
               />
 
