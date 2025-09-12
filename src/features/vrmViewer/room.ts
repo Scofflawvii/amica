@@ -1,10 +1,10 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import * as GaussianSplats3D from '@mkkellogg/gaussian-splats-3d';
+import * as GaussianSplats3D from "@mkkellogg/gaussian-splats-3d";
 
 export class Room {
   public room?: THREE.Group;
-  public splat?: any;
+  public splat?: InstanceType<typeof GaussianSplats3D.DropInViewer>;
 
   public async loadRoom(
     url: string,
@@ -52,7 +52,7 @@ export class Room {
       loader.load(
         url,
         async (gltf) => {
-          setLoadingProgress('Room fully 100% loaded');
+          setLoadingProgress("Room fully 100% loaded");
           /*
           {
             const analyzer = new GLTFAnalyzer();

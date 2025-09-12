@@ -41,7 +41,7 @@ export class Model {
 
   public async loadVRM(
     url: string,
-    setLoadingProgress: (progress: string) => void,
+    _setLoadingProgress: (progress: string) => void,
   ): Promise<void> {
     const loader = new GLTFLoader();
     /*
@@ -89,10 +89,17 @@ export class Model {
     // Decide material type:
     // - If WebGPU is active, prefer node material (MToonNodeMaterial)
     // - Otherwise, follow configuration with classic MToon as default
-    let materialType: any = MToonMaterial;
+    // Material type can be multiple classes (classic MToon, node variant, or standard three materials)
+    // Use a loose union rather than any to keep downstream property access checked.
+    // Generic catch-all material constructor type. We intentionally use any here because
+    // different material classes have incompatible constructor param shapes; a common
+    // structural supertype would be overly complex and not worth the type noise.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type MaterialCtor = new (...args: any[]) => THREE.Material;
+    let materialType: MaterialCtor = MToonMaterial as unknown as MaterialCtor;
     if (this._preferNodeMaterial) {
       const { MToonNodeMaterial } = await import("@pixiv/three-vrm/nodes");
-      materialType = MToonNodeMaterial;
+      materialType = MToonNodeMaterial as unknown as MaterialCtor;
     } else {
       switch (config("mtoon_material_type")) {
         case "mtoon":
@@ -101,7 +108,7 @@ export class Model {
         case "mtoon_node": {
           // Allow override but only when explicitly requested via config
           const { MToonNodeMaterial } = await import("@pixiv/three-vrm/nodes");
-          materialType = MToonNodeMaterial;
+          materialType = MToonNodeMaterial as unknown as MaterialCtor;
           break;
         }
         case "meshtoon":
@@ -123,7 +130,7 @@ export class Model {
     }
 
     loader.register((parser) => {
-      const options: any = {
+      const options: Record<string, unknown> = {
         lookAtPlugin: new VRMLookAtSmootherLoaderPlugin(parser),
         mtoonMaterialPlugin: new MToonMaterialLoaderPlugin(parser, {
           materialType,
@@ -181,26 +188,36 @@ export class Model {
           // await downscaleModelTextures(gltf, 128);
 
           const mtoonDebugMode = config("mtoon_debug_mode");
-          vrm.scene.traverse((obj: any) => {
+          vrm.scene.traverse((obj: THREE.Object3D) => {
             obj.frustumCulled = false;
-
-            if (mtoonDebugMode !== "none" && obj.material) {
-              const applyDebug = (mat: any) => {
+            if (mtoonDebugMode !== "none" && (obj as THREE.Mesh).isMesh) {
+              const mesh = obj as THREE.Mesh;
+              const material = mesh.material as
+                | THREE.Material
+                | THREE.Material[]
+                | undefined;
+              if (!material) return;
+              const applyDebug = (mat: unknown) => {
                 // Only apply to classic MToonMaterial. Node material variant
                 // (used for WebGPU) does not support this property and can
                 // trigger TSL assign errors.
-                if (
-                  mat?.isMToonMaterial === true &&
-                  mat?.isNodeMaterial !== true &&
-                  "debugMode" in mat
-                ) {
-                  mat.debugMode = mtoonDebugMode;
+                const m = mat as {
+                  isMToonMaterial?: boolean;
+                  isNodeMaterial?: boolean;
+                  debugMode?: unknown;
+                };
+                if (m.isMToonMaterial === true && m.isNodeMaterial !== true) {
+                  try {
+                    (m as { debugMode?: unknown }).debugMode = mtoonDebugMode;
+                  } catch {
+                    /* ignore unsupported */
+                  }
                 }
               };
-              if (Array.isArray(obj.material)) {
-                obj.material.forEach(applyDebug);
+              if (Array.isArray(material)) {
+                material.forEach(applyDebug);
               } else {
-                applyDebug(obj.material);
+                applyDebug(material);
               }
             }
           });
@@ -230,7 +247,7 @@ export class Model {
 
           resolve();
         },
-        (xhr) => {
+        (_xhr) => {
           // Temp Disable : WebXR
           // setLoadingProgress(
           //   `${Math.floor((xhr.loaded / xhr.total) * 10000) / 100}% loaded`,
@@ -248,20 +265,25 @@ export class Model {
       return;
     }
 
-    this.vrm.scene.traverse((obj: any) => {
+    this.vrm.scene.traverse((obj: THREE.Object3D) => {
       obj.frustumCulled = false;
-
-      if (obj.isMesh) {
-        if (Array.isArray(obj.material)) {
-          obj.material.forEach((mat: any) => {
-            mat.transparent = true;
-            mat.opacity = opacity;
-            mat.alphaTest = 0;
-          });
-        } else if (obj.material) {
-          obj.material.transparent = true;
-          obj.material.opacity = opacity;
-          obj.material.alphaTest = 0;
+      if ((obj as THREE.Mesh).isMesh) {
+        const mesh = obj as THREE.Mesh;
+        const apply = (mat: THREE.Material) => {
+          mat.transparent = true;
+          (
+            mat as THREE.Material & { opacity?: number; alphaTest?: number }
+          ).opacity = opacity;
+          (
+            mat as THREE.Material & { opacity?: number; alphaTest?: number }
+          ).alphaTest = 0;
+        };
+        if (Array.isArray(mesh.material as unknown)) {
+          (mesh.material as unknown as THREE.Material[]).forEach(
+            (m) => m && apply(m),
+          );
+        } else if (mesh.material) {
+          apply(mesh.material as THREE.Material);
         }
       }
     });
