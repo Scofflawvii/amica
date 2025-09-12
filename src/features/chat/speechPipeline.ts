@@ -3,20 +3,36 @@ import { logger } from "@/utils/logger";
 import { Screenplay, Talk } from "./messages";
 import { ChatState } from "./chat";
 
+export interface TTSJob {
+  screenplay: Screenplay;
+  streamIdx: number;
+}
+export interface SpeakJob {
+  audioBuffer: ArrayBuffer | null;
+  screenplay: Screenplay;
+  streamIdx: number;
+}
+
+export interface AsyncQueueLike<T> {
+  dequeue(): Promise<T>;
+  enqueue(v: T): void;
+  clear(): void;
+}
+
 // Minimal Chat-like surface we depend on (structural typing)
 export interface ChatSpeechHost {
   currentStreamIdx: number;
-  ttsJobs: { dequeue(): Promise<any>; enqueue(v: any): void; clear(): void };
-  speakJobs: { dequeue(): Promise<any>; enqueue(v: any): void; clear(): void };
+  ttsJobs: AsyncQueueLike<TTSJob>;
+  speakJobs: AsyncQueueLike<SpeakJob>;
   fetchAudio(talk: Talk): Promise<ArrayBuffer | null>;
-  appendAssistantBuffered(text: string, flushNow?: boolean): any;
+  appendAssistantBuffered(text: string, flushNow?: boolean): void;
   viewer?: {
     model?: { speak?: (a: ArrayBuffer, s: Screenplay) => Promise<void> };
   };
   setChatSpeaking?: (b: boolean) => void;
   isAwake(): boolean;
   updateAwake(): void;
-  transitionPublic(next: string): void;
+  transitionPublic(next: ChatState | string): void;
   getState(): ChatState | string;
 }
 
@@ -45,7 +61,9 @@ export class SpeechPipeline {
     this.ttsLoopStarted = true;
     (async () => {
       for (;;) {
-        const job = await this.host.ttsJobs.dequeue().catch(() => undefined);
+        const job = await this.host.ttsJobs
+          .dequeue()
+          .catch(() => undefined as unknown as TTSJob | undefined);
         if (!job) continue;
         if (job.streamIdx !== this.host.currentStreamIdx) continue; // stale
         try {
@@ -70,7 +88,7 @@ export class SpeechPipeline {
       for (;;) {
         const speak = await this.host.speakJobs
           .dequeue()
-          .catch(() => undefined);
+          .catch(() => undefined as unknown as SpeakJob | undefined);
         if (!speak) continue;
         if (speak.streamIdx !== this.host.currentStreamIdx) continue; // stale
 

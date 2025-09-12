@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import { Chat } from "./chat";
 import { Message, Role } from "./messages";
-import { ChatObserver } from "./chatObserver";
+import { ChatObserver, ChatStateString } from "./chatObserver";
 
 export interface ChatUIState {
   chatLog: Message[];
@@ -47,7 +47,9 @@ export const ChatUIStateProvider: React.FC<ProviderProps> = ({
   const [shownMessage, setShownMessage] = useState<Role>("system");
   const [processing, setProcessing] = useState(false);
   const [speaking, setSpeaking] = useState(false);
-  const [state, setState] = useState<string>(chat.getState() as any);
+  const [state, setState] = useState<ChatStateString | string>(
+    chat.getState() as ChatStateString | string,
+  );
 
   // stable refs to avoid re-subscribing
   const observerRef = useRef<ChatObserver | null>(null);
@@ -57,10 +59,10 @@ export const ChatUIStateProvider: React.FC<ProviderProps> = ({
       onUserMessage: (m) => setUserMessage(m),
       onAssistantMessage: (m) => setAssistantMessage(m),
       onThoughtMessage: (m) => setThoughtMessage(m),
-      onShownMessage: (r: any) => setShownMessage(r as Role),
+      onShownMessage: (r) => setShownMessage(r),
       onProcessingChange: (p) => setProcessing(p),
       onSpeakingChange: (s) => setSpeaking(s),
-      onStateChange: (next) => setState(next as any),
+      onStateChange: (next) => setState(next),
     };
   }
 
