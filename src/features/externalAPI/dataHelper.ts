@@ -28,38 +28,70 @@ export const handleGetUserInputMessages = () =>
   readFile(userInputMessagesFilePath);
 export const handleGetChatLogs = () => readFile(chatLogsFilePath);
 
-// POST Request Handlers
-export const handlePostConfig = (body: any) => updateConfig(body);
-export const handlePostSubconscious = (body: any) => updateSubconscious(body);
-export const handlePostUserInputMessages = (body: any) => updateUserInputMessages(body);
-export const handlePostLogs = (body: any) => updateLogs(body);
-export const handlePostChatLogs = (body: any) => updateChatLogs(body);
+// Domain types
+export interface ConfigMap {
+  [key: string]: string;
+}
+export interface UpdateConfigBody {
+  key?: string;
+  value?: string;
+} // single key update
+export type UpdateConfigPayload = UpdateConfigBody | ConfigMap;
+
+export interface SubconsciousBody {
+  subconscious: string[];
+}
+export interface UserInputMessage {
+  message: string;
+  ts?: number;
+}
+export interface LogBody {
+  type: string;
+  ts: number;
+  arguments: unknown[];
+}
+export type ChatLogEntry = { role: string; content: string; ts?: number };
+
+// POST Request Handlers (typed)
+export const handlePostConfig = (body: UpdateConfigPayload) =>
+  updateConfig(body);
+export const handlePostSubconscious = (body: SubconsciousBody) =>
+  updateSubconscious(body);
+export const handlePostUserInputMessages = (body: UserInputMessage) =>
+  updateUserInputMessages(body);
+export const handlePostLogs = (body: LogBody) => updateLogs(body);
+export const handlePostChatLogs = (body: ChatLogEntry[]) =>
+  updateChatLogs(body);
 
 // Update Functions
-const updateConfig = (body: any) => {
-  const config = readFile(configFilePath);
-  if (body.key && body.value !== undefined) {
-    const { key, value } = body;
-    if (!Object.prototype.hasOwnProperty.call(config, key)) {
+const updateConfig = (body: UpdateConfigPayload) => {
+  const current = (readFile(configFilePath) as ConfigMap) || {};
+  if (
+    typeof body === "object" &&
+    body !== null &&
+    "key" in body &&
+    Object.prototype.hasOwnProperty.call(body, "value")
+  ) {
+    const { key, value } = body as UpdateConfigBody & { value: string };
+    if (typeof key !== "string") {
+      throw new Error("Config key must be a string.");
+    }
+    if (!Object.prototype.hasOwnProperty.call(current, key)) {
       throw new Error(`Config key "${key}" not found.`);
     }
-    config[key] = value;
-    writeFile(configFilePath, config);
+    current[key] = value;
+    writeFile(configFilePath, current);
     return { message: "Config updated successfully." };
   }
-
-  if (typeof body === "object" && !Array.isArray(body)) {
-    for (const [key, value] of Object.entries(body)) {
-      config[key] = value;
-    }
-    writeFile(configFilePath, config);
-    return { message: "Config updated successfully." };
+  // treat as bulk map update
+  for (const [k, v] of Object.entries(body as ConfigMap)) {
+    current[k] = v;
   }
-
-  throw new Error("Invalid body format.");
+  writeFile(configFilePath, current);
+  return { message: "Config updated successfully." };
 };
 
-const updateSubconscious = (body: any) => {
+const updateSubconscious = (body: SubconsciousBody) => {
   if (!isDev || config("external_api_enabled") !== "true") {
     return;
   }
@@ -71,37 +103,37 @@ const updateSubconscious = (body: any) => {
   return { message: "Subconscious data updated successfully." };
 };
 
-const updateUserInputMessages = (body: any) => {
+const updateUserInputMessages = (body: UserInputMessage) => {
   if (!isDev || config("external_api_enabled") !== "true") {
     return;
   }
 
-  let existingMessage = readFile(userInputMessagesFilePath);
-  if (!Array.isArray(existingMessage)) {
-    existingMessage = [];
-  }
-  existingMessage.push(body);
-  writeFile(userInputMessagesFilePath, existingMessage);
+  const existing = readFile(userInputMessagesFilePath);
+  const arr: UserInputMessage[] = Array.isArray(existing)
+    ? (existing as UserInputMessage[])
+    : [];
+  arr.push(body);
+  writeFile(userInputMessagesFilePath, arr);
   return { message: "User input messages updated successfully." };
 };
 
-const updateLogs = (body: any) => {
+const updateLogs = (body: LogBody) => {
   if (!isDev || config("external_api_enabled") !== "true") {
     return;
   }
 
   const { type, ts, arguments: logArguments } = body;
   const logEntry = { type, ts, arguments: logArguments };
-  let existingLogs = readFile(logsFilePath);
-  if (!Array.isArray(existingLogs)) {
-    existingLogs = [];
-  }
-  existingLogs.push(logEntry);
-  writeFile(logsFilePath, existingLogs);
+  const existing = readFile(logsFilePath);
+  const logs: LogBody[] = Array.isArray(existing)
+    ? (existing as LogBody[])
+    : [];
+  logs.push(logEntry as unknown as LogBody);
+  writeFile(logsFilePath, logs);
   return { message: "Logs updated successfully." };
 };
 
-const updateChatLogs = (body: any) => {
+const updateChatLogs = (body: ChatLogEntry[]) => {
   if (!isDev || config("external_api_enabled") !== "true") {
     return;
   }

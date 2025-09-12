@@ -5,19 +5,19 @@ import { logger } from "@/utils/logger";
 const xlog = logger.with({ subsystem: "externalAPI", module: "apiHelper" });
 import { sseClients } from "@/pages/api/amicaHandler";
 
-export interface ApiResponse {
+export interface ApiResponse<T = unknown> {
   sessionId?: string;
   outputType?: string;
-  response?: any;
+  response?: T;
   error?: string;
 }
 
-export interface apiLogEntry {
+export interface ApiLogEntry<T = unknown> {
   sessionId: string;
   timestamp: string;
   inputType: string;
   outputType: string;
-  response?: any;
+  response?: T;
   error?: string;
 }
 
@@ -31,14 +31,18 @@ export const sendError = (
   status = 400,
 ) => res.status(status).json({ sessionId, error: message });
 
-export const sendToClients = (message: { type: string; data: any }) => {
+export interface SSEMessage<T = unknown> {
+  type: string;
+  data: T;
+}
+export const sendToClients = <T>(message: SSEMessage<T>) => {
   const formattedMessage = JSON.stringify(message);
   sseClients.forEach((client) =>
     client.res.write(`data: ${formattedMessage}\n\n`),
   );
 };
 
-export const readFile = (filePath: string): any => {
+export const readFile = (filePath: string): unknown => {
   try {
     const data = fs.readFileSync(filePath, "utf8");
     return JSON.parse(data);
@@ -48,7 +52,7 @@ export const readFile = (filePath: string): any => {
   }
 };
 
-export const writeFile = (filePath: string, content: any): void => {
+export const writeFile = (filePath: string, content: unknown): void => {
   try {
     fs.writeFileSync(filePath, JSON.stringify(content, null, 2), "utf8");
   } catch (error) {

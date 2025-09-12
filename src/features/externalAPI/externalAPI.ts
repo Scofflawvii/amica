@@ -34,13 +34,14 @@ export const chatLogsUrl = () => makeApiUrl("chatLogs");
 // Cached server config
 export let serverConfig: Record<string, string> = {};
 
+export type FetchMethod = "POST" | "GET";
 export async function fetcher(
-  method: string,
+  method: FetchMethod,
   urlStr: string | null,
-  data?: any,
-) {
+  data?: unknown,
+): Promise<void> {
   if (!urlStr) return; // Nothing to do without a valid absolute URL
-  let response: any;
+  let response: Response | undefined;
   switch (method) {
     case "POST":
       try {
@@ -49,7 +50,7 @@ export async function fetcher(
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
         });
-      } catch (error) {
+      } catch (error: unknown) {
         xlog.error("Failed to POST server config", error);
       }
       break;
@@ -60,7 +61,7 @@ export async function fetcher(
         if (response.ok) {
           serverConfig = await response.json();
         }
-      } catch (error) {
+      } catch (error: unknown) {
         xlog.error("Failed to fetch server config", error);
       }
       break;
@@ -151,7 +152,7 @@ export async function handleChatLogs(messages: Message[]) {
 
 export async function handleSubconscious(
   timestampedPrompt: TimestampedPrompt,
-): Promise<any> {
+): Promise<void> {
   if (!isDev || config("external_api_enabled") !== "true") {
     return;
   }
@@ -187,5 +188,6 @@ export async function handleSubconscious(
     throw new Error("Failed to update subconscious data");
   }
 
-  return currentStoredSubconscious;
+  // appended subcon has been persisted; function contract is void
+  return;
 }
