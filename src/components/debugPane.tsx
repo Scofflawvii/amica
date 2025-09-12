@@ -5,7 +5,6 @@ import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 import { clsx } from "clsx";
 import { config } from "@/utils/config";
 import PerfMetrics from "@/components/perfMetrics";
-// Portal removed: component rendered within GuiLayer parent portal.
 
 const TOTAL_ITEMS_TO_SHOW = 100;
 
@@ -44,13 +43,19 @@ function SwitchToggle({
   );
 }
 
-export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
+interface DebugPaneProps {
+  onClickClose: () => void;
+  mode?: "embedded" | "popout";
+}
+
+export function DebugPane({ onClickClose, mode = "embedded" }: DebugPaneProps) {
   const [typeDebugEnabled, setTypeDebugEnabled] = useState(false);
   const [typeInfoEnabled, setTypeInfoEnabled] = useState(true);
   const [typeWarnEnabled, setTypeWarnEnabled] = useState(true);
   const [typeErrorEnabled, setTypeErrorEnabled] = useState(true);
   const [showPerf, setShowPerf] = useState(true);
   const [leftOffset, setLeftOffset] = useState(0);
+  const isPopout = mode === "popout";
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -65,6 +70,7 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
 
   // Auto-detect sidebar bounds to avoid overlap; update on resize
   useEffect(() => {
+    if (isPopout) return; // no sidebar offset logic in popout
     const measure = () => {
       if (typeof document === "undefined") return;
       const el = document.getElementById("amica-sidebar");
@@ -74,8 +80,7 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
         return;
       }
       const r = el.getBoundingClientRect();
-      const margin = 12; // breathing room beside sidebar
-      // Clamp to right screen bound with a minimum panel width of 320px
+      const margin = 12;
       const maxLeft = Math.max(0, width - 320);
       const next = Math.max(0, Math.min(maxLeft, r.right + margin));
       setLeftOffset(next);
@@ -87,7 +92,7 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
       window.removeEventListener("resize", measure);
       window.clearInterval(id);
     };
-  }, []);
+  }, [isPopout]);
 
   // Shape of a captured console log item (mirrors error handler injection logic)
   interface LogItem {
@@ -136,7 +141,6 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
           return `${ts}\t${log.type}\t${args}`;
         })
         .join("\n");
-      // Clipboard API may be unavailable in some contexts
       if (typeof navigator !== "undefined" && navigator.clipboard) {
         void navigator.clipboard.writeText(text);
       }
@@ -147,18 +151,15 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
 
   return (
     <>
-      {/* Semi-transparent backdrop that can be clicked to close */}
+      {/* Floating / Popout debug panel */}
       <div
-        className="z-max fixed inset-0 bg-black/20 backdrop-blur-sm"
-        onClick={onClickClose}
-      />
-      {/* Floating rounded panel that sits beside the sidebar */}
-      <div
-        className="z-max border-border/20 fixed top-4 bottom-4 flex flex-col overflow-hidden rounded-lg border bg-[hsl(var(--surface))] text-left text-xs shadow-2xl"
-        style={{
-          left: leftOffset + 8,
-          width: `min(480px, calc(100vw - ${leftOffset + 32}px))`,
-        }}>
+        className={clsx(
+          "z-max border-border/30 flex flex-col overflow-hidden rounded-lg border bg-[hsl(var(--surface))] text-left text-xs shadow-2xl",
+          isPopout
+            ? "fixed inset-2 md:inset-4"
+            : "fixed top-4 bottom-4 w-[480px] max-w-[calc(100vw-2rem)]",
+        )}
+        style={isPopout ? undefined : { left: leftOffset + 8 }}>
         <div className="border-border/50 flex-shrink-0 border-b bg-[hsl(var(--surface-alt))] p-2">
           <IconButton
             iconName="24/Close"
@@ -172,6 +173,38 @@ export function DebugPane({ onClickClose }: { onClickClose: () => void }) {
             className="bg-primary hover:bg-primary-hover active:bg-primary-active ml-4"
             onClick={onClickCopy}
           />
+          {mode === "embedded" && (
+            <button
+              type="button"
+              onClick={() => {
+                try {
+                  window.open(
+                    "/debug-popout",
+                    "amica-debug-popout",
+                    "width=700,height=800,resizable,scrollbars",
+                  );
+                } catch {
+                  /* ignore */
+                }
+              }}
+              className="border-border/40 ml-2 rounded-md border px-2 py-1 text-xs font-medium hover:bg-[hsl(var(--surface-alt))] active:scale-[.97]">
+              Popout
+            </button>
+          )}
+          {mode === "popout" && (
+            <button
+              type="button"
+              onClick={() => {
+                try {
+                  window.close();
+                } catch {
+                  /* ignore */
+                }
+              }}
+              className="border-border/40 ml-2 rounded-md border px-2 py-1 text-xs font-medium hover:bg-[hsl(var(--surface-alt))] active:scale-[.97]">
+              Close Window
+            </button>
+          )}
           <div className="text-muted ml-2 inline-block items-center">
             <span className="px-1">
               <span className="text-muted text-xs">llm: </span>
