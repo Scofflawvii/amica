@@ -67,6 +67,8 @@ export default function App({ Component, pageProps }: AppProps) {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Provide a fallback title so every document has one even if a page forgets to set it */}
+        <title>Amica</title>
       </Head>
       {process.env.NODE_ENV !== "production" ? (
         // Safely unregister any SW during dev to avoid workbox 404 noise

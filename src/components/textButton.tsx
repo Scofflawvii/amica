@@ -33,9 +33,13 @@ export const TextButton = ({
   children,
   ...rest
 }: Props) => {
+  // If no aria-label is provided, attempt to derive from text content (React children toString fallback)
+  const fallbackLabel =
+    typeof children === "string" ? children : rest["aria-label"];
   return (
     <button
       {...rest}
+      aria-label={rest["aria-label"] || (fallbackLabel as string)}
       className={clsx(
         "rounded-lg px-4 py-2 font-bold transition-colors",
         variantClasses[variant],

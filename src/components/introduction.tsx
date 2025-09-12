@@ -52,7 +52,7 @@ export const Introduction = ({ open }: { open: boolean }) => {
               <a
                 href="https://docs.heyamica.com"
                 target="_blank"
-                className="text-cyan-500">
+                className="text-primary font-semibold underline">
                 {t("Read the full documentation here.")}
               </a>
             </p>
@@ -64,7 +64,7 @@ export const Introduction = ({ open }: { open: boolean }) => {
                 updateConfig("show_introduction", "false");
                 setOpened(false);
               }}
-              className="bg-secondary hover:bg-secondary-hover focus-visible:outline-secondary inline-flex items-center rounded-md px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+              className="btn-inverse">
               {t("dont_show_again", "Don't show again")}
             </button>
             <button

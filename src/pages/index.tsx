@@ -1,5 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { clsx } from "clsx";
+import Head from "next/head";
 import { M_PLUS_2, Montserrat } from "next/font/google";
 import {
   ChatBubbleLeftIcon,
@@ -227,34 +228,34 @@ export default function Home() {
 
     if (viewer.currentSession) {
       viewer.onSessionEnded();
-
       try {
         await viewer.currentSession.end();
       } catch (err) {
-        // some times session already ended not due to user interaction
         plog.warn("XR end session warning", err);
       }
 
+      // Try offering a new session if API available
       // @ts-expect-error - WebXR types may not be fully available
       if (window.navigator.xr.offerSession !== undefined) {
         // @ts-expect-error - WebXR navigator types may not be fully available
-        const session = await navigator.xr?.offerSession(
+        const offered = await navigator.xr?.offerSession(
           immersiveType,
           sessionInit,
         );
-        viewer.onSessionStarted(session, immersiveType);
+        if (offered) viewer.onSessionStarted(offered, immersiveType);
       }
       return;
     }
 
+    // Offer session if supported path exists first
     // @ts-expect-error - WebXR types may not be fully available
     if (window.navigator.xr.offerSession !== undefined) {
       // @ts-expect-error - WebXR navigator types may not be fully available
-      const session = await navigator.xr?.offerSession(
+      const offered = await navigator.xr?.offerSession(
         immersiveType,
         sessionInit,
       );
-      viewer.onSessionStarted(session, immersiveType);
+      if (offered) viewer.onSessionStarted(offered, immersiveType);
       return;
     }
 
@@ -361,6 +362,7 @@ export default function Home() {
                 icon={WrenchScrewdriverIcon}
                 onClick={() => setShowSettings(true)}
                 label="show settings"
+                ariaLabel="Open settings"
               />
 
               {showChatLog ? (
@@ -369,6 +371,7 @@ export default function Home() {
                   icon={ChatBubbleLeftIcon}
                   onClick={toggleChatLog}
                   label="hide chat log"
+                  ariaLabel="Hide chat log"
                 />
               ) : (
                 <MenuButton
@@ -376,6 +379,7 @@ export default function Home() {
                   icon={ChatBubbleLeftRightIcon}
                   onClick={toggleChatLog}
                   label="show chat log"
+                  ariaLabel="Show chat log"
                 />
               )}
 
@@ -385,6 +389,7 @@ export default function Home() {
                   icon={SpeakerXMarkIcon}
                   onClick={toggleTTSMute}
                   label="unmute"
+                  ariaLabel="Unmute speech"
                 />
               ) : (
                 <MenuButton
@@ -392,6 +397,7 @@ export default function Home() {
                   icon={SpeakerWaveIcon}
                   onClick={toggleTTSMute}
                   label="mute"
+                  ariaLabel="Mute speech"
                 />
               )}
 
@@ -401,6 +407,7 @@ export default function Home() {
                   icon={VideoCameraIcon}
                   onClick={() => setWebcamEnabled(false)}
                   label="disable webcam"
+                  ariaLabel="Disable webcam"
                 />
               ) : (
                 <MenuButton
@@ -408,6 +415,7 @@ export default function Home() {
                   icon={VideoCameraSlashIcon}
                   onClick={() => setWebcamEnabled(true)}
                   label="enable webcam"
+                  ariaLabel="Enable webcam"
                 />
               )}
 
@@ -417,12 +425,14 @@ export default function Home() {
                 href="/share"
                 target={isTauri() ? "" : "_blank"}
                 label="share"
+                ariaLabel="Share"
               />
               <MenuButton
                 large={isVRHeadset}
                 icon={CloudArrowDownIcon}
                 href="/import"
                 label="import"
+                ariaLabel="Import"
               />
 
               {showSubconciousText ? (
@@ -431,6 +441,7 @@ export default function Home() {
                   icon={IconBrain}
                   onClick={toggleShowSubconciousText}
                   label="hide subconscious"
+                  ariaLabel="Hide subconscious text"
                 />
               ) : (
                 <MenuButton
@@ -438,6 +449,7 @@ export default function Home() {
                   icon={IconBrain}
                   onClick={toggleShowSubconciousText}
                   label="show subconscious"
+                  ariaLabel="Show subconscious text"
                 />
               )}
 
@@ -456,12 +468,18 @@ export default function Home() {
                   }
                 }}
                 label="debug"
+                ariaLabel="Open debug window"
               />
 
               <div className="flex flex-row items-center space-x-2">
                 <VerticalSwitchBox
                   value={showChatMode}
                   label={""}
+                  aria-label={
+                    showChatMode
+                      ? "Disable chat mode view"
+                      : "Enable chat mode view"
+                  }
                   onChange={toggleChatMode}
                 />
               </div>
@@ -485,35 +503,39 @@ export default function Home() {
           </div>
         </div>
 
-        {showChatLog && <ChatLog messages={chatLog} />}
+        <main id="amica-main" className="relative block" role="main">
+          {showChatLog && <ChatLog messages={chatLog} />}
 
-        {/* Normal chat text */}
-        {!showSubconciousText && !showChatLog && !showChatMode && (
-          <>
-            {shownMessage === "assistant" && (
-              <AssistantText message={assistantMessage} />
-            )}
-            {shownMessage === "user" && <UserText message={userMessage} />}
-          </>
-        )}
+          {/* Normal chat text */}
+          {!showSubconciousText && !showChatLog && !showChatMode && (
+            <>
+              {shownMessage === "assistant" && (
+                <AssistantText message={assistantMessage} />
+              )}
+              {shownMessage === "user" && <UserText message={userMessage} />}
+            </>
+          )}
 
-        {/* Thought text */}
-        {thoughtMessage !== "" && <ThoughtText message={thoughtMessage} />}
+          {/* Thought text */}
+          {thoughtMessage !== "" && <ThoughtText message={thoughtMessage} />}
 
-        {/* Chat mode text */}
-        {showChatMode && <ChatModeText messages={chatLog} />}
+          {/* Chat mode text */}
+          {showChatMode && <ChatModeText messages={chatLog} />}
 
-        {/* Subconcious stored prompt text */}
-        {showSubconciousText && <SubconciousText messages={subconciousLogs} />}
+          {/* Subconcious stored prompt text */}
+          {showSubconciousText && (
+            <SubconciousText messages={subconciousLogs} />
+          )}
 
-        <AddToHomescreen />
+          <AddToHomescreen />
 
-        <Alert />
+          <Alert />
 
-        {/* Message input anchored at bottom */}
-        <div className="z-floating pointer-events-auto fixed bottom-0 left-0 w-full p-2">
-          <MessageInputContainer isChatProcessing={chatProcessing} />
-        </div>
+          {/* Message input anchored at bottom (positioned outside flow but still within landmark) */}
+          <div className="z-floating pointer-events-auto fixed bottom-0 left-0 w-full p-2">
+            <MessageInputContainer isChatProcessing={chatProcessing} />
+          </div>
+        </main>
       </GuiLayer>
     </div>
   );

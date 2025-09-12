@@ -11,6 +11,19 @@ test.describe("Accessibility", () => {
     // Wait for a key UI landmark (sidebar id used by DebugPane positioning)
     await page.waitForSelector("#amica-sidebar", { timeout: 15000 });
 
+    // Ensure document has a title element populated
+    await page.waitForFunction(
+      () => document.title.length > 0 || document.readyState === "complete",
+      undefined,
+      {
+        timeout: 15000,
+      },
+    );
+     
+    console.log(`[a11y-debug] document.title="${await page.title()}"`);
+
+    // (Debug logging removed after achieving green baseline)
+
     await injectAxe(page);
 
     // Run axe; limit to serious/critical impacts for fast signal

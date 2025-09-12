@@ -16,6 +16,8 @@ const config = {
   moduleNameMapper: {
     '^three/examples/jsm/loaders/GLTFLoader.js$': '<rootDir>/__mocks__/GLTFLoaderMock.js'
   },
+  // Ignore Playwright test directory so playwright specs don't execute under Jest
+  testPathIgnorePatterns: ['<rootDir>/tests/e2e/'],
 }
  
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

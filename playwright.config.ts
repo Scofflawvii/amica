@@ -11,5 +11,14 @@ export default defineConfig({
     trace: "on-first-retry",
     video: "retain-on-failure",
   },
+  // Launch the Next.js dev server automatically for local + CI runs if one isn't already running.
+  webServer: process.env.PLAYWRIGHT_BASE_URL
+    ? undefined
+    : {
+        command: "npm run dev",
+        port: 3000,
+        reuseExistingServer: false, // force fresh server so latest code (a11y fixes) is picked up
+        timeout: 120_000,
+      },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 });

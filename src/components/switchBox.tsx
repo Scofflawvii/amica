@@ -166,9 +166,11 @@ export const VerticalSwitchBox = ({
           </span>
         </span>
       </Switch>
-      <Switch.Label as="span" className="text-sm font-medium">
-        {label}
-      </Switch.Label>
+      {label && (
+        <Switch.Label as="span" className="text-sm font-medium">
+          {label}
+        </Switch.Label>
+      )}
     </Switch.Group>
   );
 };

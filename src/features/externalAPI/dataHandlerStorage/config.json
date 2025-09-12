@@ -1,5 +1,5 @@
 {
-  "debug_mode": "false",
+  "debug_mode": "true",
   "debug_log": "true",
   "debug_info": "true",
   "debug_warn": "true",

@@ -12,13 +12,12 @@ export const IconButton = ({
   label,
   ...rest
 }: Props) => {
+  const accessibleLabel = label || iconName.replace(/[-_/]/g, " ");
   return (
     <button
       {...rest}
-      className={`bg-primary hover:bg-primary-hover active:bg-primary-press disabled:bg-primary-disabled text-white rounded-lg text-sm p-1 text-center inline-flex items-center mr-2
-        ${rest.className}
-      `}
-    >
+      aria-label={rest["aria-label"] || accessibleLabel}
+      className={`bg-primary hover:bg-primary-hover active:bg-primary-press disabled:bg-primary-disabled mr-2 inline-flex items-center rounded-lg p-1 text-center text-sm text-white ${rest.className} `}>
       {isProcessing ? (
         <pixiv-icon name={"24/Dot"} scale="1"></pixiv-icon>
       ) : (
