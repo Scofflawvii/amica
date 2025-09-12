@@ -1,4 +1,5 @@
-#!/bin/sh
-. "/home/scofflawvii/DevProjects/amica/.husky/_/husky.sh"
+#!/usr/bin/env sh
 
-npx --no-install commitlint --edit 
+# Run commitlint on the prepared commit message. Husky v9+ does not require sourcing _/husky.sh
+# NOTE: --edit receives the path to the commit message file as $1 automatically
+npx --no-install commitlint --edit "$1"
