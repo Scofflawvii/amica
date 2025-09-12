@@ -178,6 +178,9 @@ export default [
       "@typescript-eslint/no-explicit-any":
         process.env.NODE_ENV === "production" ? "off" : "warn",
       "@typescript-eslint/ban-ts-comment": "warn",
+      // NOTE: '@typescript-eslint/ban-types' was removed in the current plugin version.
+      // If we need similar restrictions later we can add a custom lint rule or
+      // rely on targeted rules (e.g. no-unsafe-function-type) instead.
     },
   },
   {
