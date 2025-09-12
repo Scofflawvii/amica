@@ -108,7 +108,8 @@ export class Chat {
     this.lastAwake = 0;
     const noop = () => {};
     // Map legacy setters to observer notifications so existing code keeps working
-    this.setChatLog = (log: any[]) => this.notify((o) => o.onChatLog?.(log));
+    this.setChatLog = (log: Message[]) =>
+      this.notify((o) => o.onChatLog?.(log));
     this.setUserMessage = (m: string) =>
       this.notify((o) => o.onUserMessage?.(m));
     this.setAssistantMessage = (m: string) =>
