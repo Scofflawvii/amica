@@ -85,7 +85,9 @@ export function ThemeToggle() {
       ) : (
         <MoonIcon className="h-4 w-4" />
       )}
-      <span className="hidden sm:inline">{isDark ? "Light" : "Dark"}</span>
+      <span className="sr-only">
+        {isDark ? "Switch to light theme" : "Switch to dark theme"}
+      </span>
     </TextButton>
   );
 }

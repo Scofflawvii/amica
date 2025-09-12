@@ -1206,6 +1206,7 @@ export const Settings = ({ onClickClose }: { onClickClose: () => void }) => {
               <TextButton
                 variant="primary"
                 className="ml-4 rounded-b-none px-8 text-lg shadow-sm"
+                aria-label="Go back"
                 onClick={() => {
                   if (breadcrumbs.length === 0) {
                     onClickClose();
