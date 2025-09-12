@@ -1,6 +1,6 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
-import { BasicPage, FormRow, NotUsingAlert } from './common';
+import { BasicPage, FormRow, NotUsingAlert } from "./common";
 import { TextInput } from "@/components/textInput";
 import { SecretTextInput } from "@/components/secretTextInput";
 import { config, updateConfig } from "@/utils/config";
@@ -26,20 +26,23 @@ export function WhisperOpenAISettingsPage({
 
   return (
     <BasicPage
-      title={t("Whisper (OpenAI)") + " "+ t("Settings")}
-      description={t("Whisper_OpenAI_desc", "Configure Whisper (OpenAI)")}
-    >
-      { config("stt_backend") !== "whisper_openai" && (
+      title={t("Whisper (OpenAI)") + " " + t("Settings")}
+      description={t("Whisper_OpenAI_desc", "Configure Whisper (OpenAI)")}>
+      {config("stt_backend") !== "whisper_openai" && (
         <NotUsingAlert>
-          {t("not_using_alert", "You are not currently using {{name}} as your {{what}} backend. These settings will not be used.", {name: t("Whisper (OpenAI)"), what: t("STT")})}
+          {t(
+            "not_using_alert",
+            "You are not currently using {{name}} as your {{what}} backend. These settings will not be used.",
+            { name: t("Whisper (OpenAI)"), what: t("STT") },
+          )}
         </NotUsingAlert>
-      ) }
-      <ul role="list" className="divide-y divide-gray-100 max-w-xs">
+      )}
+      <ul role="list" className="max-w-xs divide-y divide-gray-100">
         <li className="py-4">
           <FormRow label={t("OpenAI URL")}>
             <TextInput
               value={whisperOpenAIUrl}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setWhisperOpenAIUrl(event.target.value);
                 updateConfig("openai_whisper_url", event.target.value);
                 setSettingsUpdated(true);
@@ -51,7 +54,7 @@ export function WhisperOpenAISettingsPage({
           <FormRow label={t("API Key")}>
             <SecretTextInput
               value={whisperOpenAIApiKey}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setWhisperOpenAIApiKey(event.target.value);
                 updateConfig("openai_whisper_apikey", event.target.value);
                 setSettingsUpdated(true);
@@ -63,7 +66,7 @@ export function WhisperOpenAISettingsPage({
           <FormRow label={t("Model")}>
             <TextInput
               value={whisperOpenAIModel}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setWhisperOpenAIModel(event.target.value);
                 updateConfig("openai_whisper_model", event.target.value);
                 setSettingsUpdated(true);

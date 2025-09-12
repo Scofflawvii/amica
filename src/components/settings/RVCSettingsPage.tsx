@@ -99,7 +99,7 @@ export function RVCSettingsPage({
               <FormRow label={t("URL")}>
                 <TextInput
                   value={rvcUrl}
-                  onChange={(event: React.ChangeEvent<any>) => {
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                     setRvcUrl(event.target.value);
                     updateConfig("rvc_url", event.target.value);
                     setSettingsUpdated(true);
@@ -112,7 +112,7 @@ export function RVCSettingsPage({
                 <div className="flex items-center">
                   <TextInput
                     value={rvcModelName}
-                    onChange={(event: React.ChangeEvent<any>) => {
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                       setRvcModelName(event.target.value);
                       updateConfig("rvc_model_name", event.target.value);
                       setSettingsUpdated(true);
@@ -140,7 +140,7 @@ export function RVCSettingsPage({
                 <div className="flex items-center">
                   <TextInput
                     value={rvcIndexPath}
-                    onChange={(event: React.ChangeEvent<any>) => {
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                       setRvcIndexPath(event.target.value);
                       updateConfig("rvc_index_path", event.target.value);
                       setSettingsUpdated(true);
@@ -170,9 +170,10 @@ export function RVCSettingsPage({
                     value={rvcF0upKey}
                     min={0}
                     max={1}
-                    onChange={(event: React.ChangeEvent<any>) => {
-                      setRvcF0upKey(event.target.value);
-                      updateConfig("rvc_f0_upkey", event.target.value);
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                      const value = Number(event.target.value);
+                      setRvcF0upKey(value);
+                      updateConfig("rvc_f0_upkey", value.toString());
                       setSettingsUpdated(true);
                     }}
                   />
@@ -197,7 +198,7 @@ export function RVCSettingsPage({
                   <select
                     className="border-border/40 bg-surface-alt/70 dark:bg-surface-alt/60 focus:ring-primary/60 mt-2 block w-full rounded-md border py-1.5 pr-10 pl-3 text-sm text-[hsl(var(--text))] focus:ring-2 focus:outline-none"
                     value={rvcF0Method}
-                    onChange={(event: React.ChangeEvent<any>) => {
+                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
                       setRvcF0Method(event.target.value);
                       updateConfig("rvc_f0_method", event.target.value);
                       setSettingsUpdated(true);
@@ -231,7 +232,7 @@ export function RVCSettingsPage({
                 <div className="flex items-center">
                   <TextInput
                     value={rvcIndexRate}
-                    onChange={(event: React.ChangeEvent<any>) => {
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                       setRvcIndexRate(event.target.value);
                       updateConfig("rvc_index_rate", event.target.value);
                       setSettingsUpdated(true);
@@ -259,9 +260,10 @@ export function RVCSettingsPage({
                     value={rvcFilterRadius}
                     min={0}
                     max={7}
-                    onChange={(event: React.ChangeEvent<any>) => {
-                      setRvcFilterRadius(event.target.value);
-                      updateConfig("rvc_filter_radius", event.target.value);
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                      const value = Number(event.target.value);
+                      setRvcFilterRadius(value);
+                      updateConfig("rvc_filter_radius", value.toString());
                       setSettingsUpdated(true);
                     }}
                   />
@@ -290,9 +292,10 @@ export function RVCSettingsPage({
                     value={rvcResampleSr}
                     min={0}
                     max={48000}
-                    onChange={(event: React.ChangeEvent<any>) => {
-                      setRvcResampleSr(event.target.value);
-                      updateConfig("rvc_resample_sr", event.target.value);
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                      const value = Number(event.target.value);
+                      setRvcResampleSr(value);
+                      updateConfig("rvc_resample_sr", value.toString());
                       setSettingsUpdated(true);
                     }}
                   />
@@ -321,9 +324,10 @@ export function RVCSettingsPage({
                     value={rvcRmsMixRate}
                     min={0}
                     max={1}
-                    onChange={(event: React.ChangeEvent<any>) => {
-                      setRvcRmsMixRate(event.target.value);
-                      updateConfig("rvc_rms_mix_rate", event.target.value);
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                      const value = Number(event.target.value);
+                      setRvcRmsMixRate(value);
+                      updateConfig("rvc_rms_mix_rate", value.toString());
                       setSettingsUpdated(true);
                     }}
                   />
@@ -352,9 +356,10 @@ export function RVCSettingsPage({
                     value={rvcProtect}
                     min={0}
                     max={0.5}
-                    onChange={(event: React.ChangeEvent<any>) => {
-                      setRvcProtect(event.target.value);
-                      updateConfig("rvc_protect", event.target.value);
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                      const value = Number(event.target.value);
+                      setRvcProtect(value);
+                      updateConfig("rvc_protect", value.toString());
                       setSettingsUpdated(true);
                     }}
                   />

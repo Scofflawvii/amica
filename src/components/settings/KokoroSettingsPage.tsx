@@ -61,7 +61,7 @@ export function KokoroSettingsPage({
           <FormRow label={t("URL")}>
             <TextInput
               value={kokoroUrl}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setKokoroUrl(event.target.value);
                 updateConfig("kokoro_url", event.target.value);
                 setSettingsUpdated(true);
@@ -74,7 +74,7 @@ export function KokoroSettingsPage({
             <select
               className="input-base mt-2 block w-full pr-10 pl-3"
               value={kokoroVoice}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
                 event.preventDefault();
                 setKokoroVoice(event.target.value);
                 updateConfig("kokoro_voice", event.target.value);

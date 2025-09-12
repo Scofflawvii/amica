@@ -28,7 +28,7 @@ export function SystemPromptPage({
               value={systemPrompt}
               rows={8}
               className="input-base placeholder:text-muted/60 block w-full"
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => {
                 event.preventDefault();
                 setSystemPrompt(event.target.value);
                 updateConfig("system_prompt", event.target.value);

@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 import { BasicPage, FormRow, NotUsingAlert } from "./common";
 import { TextInput } from "@/components/textInput";
@@ -19,24 +19,35 @@ export function VisionOllamaSettingsPage({
 }) {
   const { t } = useTranslation();
 
-  const description = <>{t("ollama_desc", "Ollama lets you get up and running with large language models locally. Download from")} <a href="https://ollama.ai/">{t("ollama.ai")}</a></>;
+  const description = (
+    <>
+      {t(
+        "ollama_desc",
+        "Ollama lets you get up and running with large language models locally. Download from",
+      )}{" "}
+      <a href="https://ollama.ai/">{t("ollama.ai")}</a>
+    </>
+  );
 
   return (
     <BasicPage
       title={t("Ollama") + " " + t("Settings")}
-      description={description}
-    >
-      { config("vision_backend") !== "vision_ollama" && (
+      description={description}>
+      {config("vision_backend") !== "vision_ollama" && (
         <NotUsingAlert>
-          {t("not_using_alert", "You are not currently using {{name}} as your {{what}} backend. These settings will not be used.", {name: t("Ollama"), what: t("Vision")})}
+          {t(
+            "not_using_alert",
+            "You are not currently using {{name}} as your {{what}} backend. These settings will not be used.",
+            { name: t("Ollama"), what: t("Vision") },
+          )}
         </NotUsingAlert>
-      ) }
-      <ul role="list" className="divide-y divide-gray-100 max-w-xs">
+      )}
+      <ul role="list" className="max-w-xs divide-y divide-gray-100">
         <li className="py-4">
           <FormRow label={t("API URL")}>
             <TextInput
               value={visionOllamaUrl}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setVisionOllamaUrl(event.target.value);
                 updateConfig("vision_ollama_url", event.target.value);
                 setSettingsUpdated(true);
@@ -48,7 +59,7 @@ export function VisionOllamaSettingsPage({
           <FormRow label={t("Model")}>
             <TextInput
               value={visionOllamaModel}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setVisionOllamaModel(event.target.value);
                 updateConfig("vision_ollama_model", event.target.value);
                 setSettingsUpdated(true);

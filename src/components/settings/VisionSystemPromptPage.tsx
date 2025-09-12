@@ -28,7 +28,7 @@ export function VisionSystemPromptPage({
               value={visionSystemPrompt}
               rows={8}
               className="input-base placeholder:text-muted/60 block w-full"
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => {
                 event.preventDefault();
                 setVisionSystemPrompt(event.target.value);
                 updateConfig("vision_system_prompt", event.target.value);

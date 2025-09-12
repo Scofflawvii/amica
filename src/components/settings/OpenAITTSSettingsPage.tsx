@@ -1,6 +1,6 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
-import { BasicPage, FormRow, NotUsingAlert } from './common';
+import { BasicPage, FormRow, NotUsingAlert } from "./common";
 import { TextInput } from "@/components/textInput";
 import { SecretTextInput } from "@/components/secretTextInput";
 import { config, updateConfig } from "@/utils/config";
@@ -30,20 +30,23 @@ export function OpenAITTSSettingsPage({
 
   return (
     <BasicPage
-      title={t("OpenAI TTS") + " "+ t("Settings")}
-      description={t("OpenAI_tts_desc", "Configure OpenAI TTS")}
-    >
-      { config("tts_backend") !== "openai_tts" && (
+      title={t("OpenAI TTS") + " " + t("Settings")}
+      description={t("OpenAI_tts_desc", "Configure OpenAI TTS")}>
+      {config("tts_backend") !== "openai_tts" && (
         <NotUsingAlert>
-          {t("not_using_alert", "You are not currently using {{name}} as your {{what}} backend. These settings will not be used.", {name: t("OpenAI"), what: t("TTS")})}
+          {t(
+            "not_using_alert",
+            "You are not currently using {{name}} as your {{what}} backend. These settings will not be used.",
+            { name: t("OpenAI"), what: t("TTS") },
+          )}
         </NotUsingAlert>
-      ) }
-      <ul role="list" className="divide-y divide-gray-100 max-w-xs">
+      )}
+      <ul role="list" className="max-w-xs divide-y divide-gray-100">
         <li className="py-4">
           <FormRow label={t("API Key")}>
             <SecretTextInput
               value={openAITTSApiKey}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 event.preventDefault();
                 setOpenAITTSApiKey(event.target.value);
                 updateConfig("openai_tts_apikey", event.target.value);
@@ -56,7 +59,7 @@ export function OpenAITTSSettingsPage({
           <FormRow label={t("API URL")}>
             <TextInput
               value={openAITTSUrl}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 event.preventDefault();
                 setOpenAITTSUrl(event.target.value);
                 updateConfig("openai_tts_url", event.target.value);
@@ -69,7 +72,7 @@ export function OpenAITTSSettingsPage({
           <FormRow label={t("Model")}>
             <TextInput
               value={openAITTSModel}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 event.preventDefault();
                 setOpenAITTSModel(event.target.value);
                 updateConfig("openai_tts_model", event.target.value);
@@ -82,7 +85,7 @@ export function OpenAITTSSettingsPage({
           <FormRow label={t("Voice")}>
             <TextInput
               value={openAITTSVoice}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 event.preventDefault();
                 setOpenAITTSVoice(event.target.value);
                 updateConfig("openai_tts_voice", event.target.value);

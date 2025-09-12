@@ -1,8 +1,8 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
-import { BasicPage, FormRow, NotUsingAlert } from './common';
-import { TextInput } from '@/components/textInput';
-import { SwitchBox } from '@/components/switchBox';
+import { BasicPage, FormRow, NotUsingAlert } from "./common";
+import { TextInput } from "@/components/textInput";
+import { SwitchBox } from "@/components/switchBox";
 import { config, updateConfig } from "@/utils/config";
 
 export function KoboldAiSettingsPage({
@@ -26,20 +26,26 @@ export function KoboldAiSettingsPage({
 
   return (
     <BasicPage
-      title={t("KoboldAI") + " "+ t("Settings")}
-      description={t("kobold_cpp_desc", "KoboldCpp is an easy-to-use AI text-generation software for GGML and GGUF models.")}
-    >
-      { config("chatbot_backend") !== "koboldai" && (
+      title={t("KoboldAI") + " " + t("Settings")}
+      description={t(
+        "kobold_cpp_desc",
+        "KoboldCpp is an easy-to-use AI text-generation software for GGML and GGUF models.",
+      )}>
+      {config("chatbot_backend") !== "koboldai" && (
         <NotUsingAlert>
-          {t("not_using_alert", "You are not currently using {{name}} as your {{what}} backend. These settings will not be used.", {name: t("KoboldAI"), what: t("ChatBot")})}
+          {t(
+            "not_using_alert",
+            "You are not currently using {{name}} as your {{what}} backend. These settings will not be used.",
+            { name: t("KoboldAI"), what: t("ChatBot") },
+          )}
         </NotUsingAlert>
-      ) }
-      <ul role="list" className="divide-y divide-gray-100 max-w-xs">
+      )}
+      <ul role="list" className="max-w-xs divide-y divide-gray-100">
         <li className="py-4">
           <FormRow label={t("API URL")}>
             <TextInput
               value={koboldAiUrl}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setKoboldAiUrl(event.target.value);
                 updateConfig("koboldai_url", event.target.value);
                 setSettingsUpdated(true);
@@ -51,7 +57,7 @@ export function KoboldAiSettingsPage({
           <FormRow label={t("STOP SEQUENCE")}>
             <TextInput
               value={koboldAiStopSequence}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setKoboldAiStopSequence(event.target.value);
                 updateConfig("koboldai_stop_sequence", event.target.value);
                 setSettingsUpdated(true);
