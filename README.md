@@ -234,7 +234,48 @@ z-[2] -> z-vrm (already in place for VRM canvas)
 
 See `docs/z-index-scale.md` for deeper guidance.
 
-## 🔒 License
+## � Releases & Versioning
+
+This project uses **semantic-release** with **Conventional Commits** to fully automate versioning, CHANGELOG generation, Git tags and GitHub Releases.
+
+Key points:
+
+- Branches:
+  - `master` – stable channel (production).
+  - `develop` – prerelease channel (`beta` dist‑tag); versions published here get a prerelease suffix (e.g. `0.4.0-beta.2`).
+- While we are in the 0.x phase, declared breaking changes ("BREAKING CHANGE:" footer or `!` in the type/scope) are down‑scoped to a **minor** bump instead of triggering 1.0.0 immediately. This accelerates iteration prior to 1.0 hardening.
+- The npm publish step is disabled (`npmPublish: false`); releases only update `package.json`, `CHANGELOG.md`, create a Git tag and a GitHub Release.
+- Commits that trigger releases (common types):
+  - `feat:` → minor version bump (or prerelease minor on `develop`).
+  - `fix:` / `perf:` / `docs:` (README scope) / `chore(deps):` → patch bump.
+  - `BREAKING CHANGE:` footer (or `!`) → minor bump (during 0.x) or major once ≥1.0.0.
+
+Local tooling:
+
+```bash
+# Dry run (shows next version & notes without changing anything)
+npm run release:dry
+
+# Full release (CI normally runs this on push to master / develop)
+npm run release
+```
+
+Creating a prerelease:
+
+1. Branch from `master` into `develop` (or merge latest `master`).
+2. Land conventional commits (e.g. `feat: add streaming buffer`).
+3. Push – the GitHub Action tags a beta version `0.x.y-beta.N` and updates the prerelease GitHub Release.
+4. After validation, merge `develop` → `master` to cut the stable release.
+
+Guidelines:
+
+1. Keep commits small and conventional; squash only if the final message preserves semantic meaning.
+2. Group refactors with `refactor:` (no release unless accompanied by `feat`/`fix` or breaking footer).
+3. Use `test:` / `build:` / `ci:` / `docs:` for non-code or support changes; most of these will not trigger a release (except README docs rule above).
+
+Once we graduate to `1.0.0`, breaking changes will trigger true major bumps (remove the temporary rule in `.releaserc.json`).
+
+## �🔒 License
 
 - The majority of this project is released under the MIT license as found in the [LICENSE](https://github.com/semperai/amica/blob/master/LICENSE) file.
 - Assets such as 3D models and images are released under their authors respective licenses.
