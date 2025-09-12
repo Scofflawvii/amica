@@ -2,9 +2,12 @@ import { logger } from "@/utils/logger";
 export type Role = "assistant" | "system" | "user";
 
 // ChatGPT API
+export type ImagePart = { type: "image_url"; image_url: { url: string } };
+export type TextPart = { type: "text"; text: string };
+export type MultiModalContent = (TextPart | ImagePart)[];
 export type Message = {
   role: Role;
-  content: string; // this can be a string or like {type: "image", image_url: {url: "https://example.com/image.jpg"} } but the typing for it sucks
+  content: string | MultiModalContent;
 };
 
 const talkStyles = [

@@ -86,8 +86,9 @@ export class ChatStreamSession {
         this.rolePlay = proc.rolePlay;
         if (proc.shouldBreak) break;
       }
-    } catch (e: any) {
-      this.cb.appendError(e.toString());
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      this.cb.appendError(msg);
     } finally {
       if (!(this as any).reader?.closed)
         try {

@@ -476,8 +476,8 @@ export class Chat {
     let stream: ReadableStream<Uint8Array> | null = null;
     try {
       stream = await this.getChatResponseStream(messages);
-    } catch (e: any) {
-      const msg = e.toString();
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
       this.alert?.error("Failed to get chat response", msg);
       logger.error("Failed to get chat response", msg);
       return msg;
@@ -518,9 +518,10 @@ export class Chat {
         rvcTransform: (a) => this.handleRvc(a),
         snapshot,
       });
-    } catch (e: any) {
-      logger.error("TTS handler failed", e.toString());
-      this.alert?.error("Failed to get TTS response", e.toString());
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      logger.error("TTS handler failed", msg);
+      this.alert?.error("Failed to get TTS response", msg);
       return null;
     } finally {
       perfMark(`tts:${backend}:done`);
@@ -561,7 +562,7 @@ export class Chat {
       } else if (visionBackend === "vision_openai") {
         const messages: Message[] = [
           { role: "user", content: config("vision_system_prompt") },
-          ...(this.messageList as any[]),
+          ...this.messageList,
           {
             role: "user",
             content: [
@@ -589,9 +590,10 @@ export class Chat {
           content: `This is a picture I just took from my webcam (described between [[ and ]] ): [[${res}]] Please respond accordingly and as if it were just sent and as though you can see it.`,
         },
       ]);
-    } catch (e: any) {
-      this.alert?.error("Failed to get vision response", e.toString());
-      logger.error("Failed to get vision response", e.toString());
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      this.alert?.error("Failed to get vision response", msg);
+      logger.error("Failed to get vision response", msg);
     }
   }
 
