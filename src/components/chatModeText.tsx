@@ -16,21 +16,32 @@ export const ChatModeText = ({ messages }: { messages: Message[] }) => {
   }, [messages]);
 
   return (
-    <div className="fixed bottom-0 mb-20 flex h-[90%] w-full flex-col justify-end">
-      <div className="flex h-full w-full flex-col-reverse overflow-y-auto">
-        <div className="mx-auto flex w-full max-w-full flex-col px-4 md:px-16">
-          {messages.map((msg, i) => {
-            return (
-              <div
-                key={i}
-                ref={messages.length - 1 === i ? chatScrollRef : null}>
-                <Chat
-                  role={msg.role}
-                  message={(msg.content as string).replace(/\[(.*?)\]/g, "")}
-                />
-              </div>
-            );
-          })}
+    <div
+      className="z-background pointer-events-none fixed inset-x-0 top-24 bottom-0 flex flex-col justify-end"
+      /* top-24 leaves vertical space for top UI; we also add a left spacer to avoid covering the sidebar with pointer-active region */
+    >
+      <div className="pointer-events-none flex h-full w-full flex-col-reverse overflow-y-auto">
+        {/* Row to introduce a non-interactive spacer matching sidebar width so sidebar buttons remain clickable */}
+        <div className="pointer-events-none flex w-full flex-row">
+          {/* Approximate sidebar width (buttons + padding). Adjust if layout changes. */}
+          <div
+            className="pointer-events-none w-[72px] shrink-0 sm:w-[80px]"
+            aria-hidden="true"
+          />
+          <div className="pointer-events-auto mx-auto flex w-full max-w-4xl flex-col px-4 md:px-16">
+            {messages.map((msg, i) => {
+              return (
+                <div
+                  key={i}
+                  ref={messages.length - 1 === i ? chatScrollRef : null}>
+                  <Chat
+                    role={msg.role}
+                    message={(msg.content as string).replace(/\[(.*?)\]/g, "")}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

@@ -106,7 +106,10 @@ export const ChatLog = ({ messages }: { messages: Message[] }) => {
   return (
     <>
       {/* Use semantic z-index: base controls sit on floating layer for prominence above base UI. */}
-      <div className="z-floating absolute top-4 left-12">
+      <div
+        className="z-floating absolute top-4 left-[72px]"
+        /* Shifted right to avoid covering sidebar buttons (reserved ~72px gutter) */
+      >
         <IconButton
           iconName="24/ReloadLoop"
           label={t("Restart")}
@@ -129,8 +132,11 @@ export const ChatLog = ({ messages }: { messages: Message[] }) => {
           onClick={() => exportMessagesToTxt(messages)}></IconButton>
       </div>
 
-      <div className="w-col-span-6 fixed h-full max-w-full pb-16">
-        <div className="scroll-hidden max-h-full overflow-y-auto px-16 pt-20 pb-4">
+      <div
+        className="w-col-span-6 z-background pointer-events-none fixed h-full max-w-full pb-16 pl-[72px]"
+        /* Pointer events disabled across full overlay; inner scroller re-enables to avoid blocking sidebar */
+      >
+        <div className="scroll-hidden pointer-events-auto max-h-full overflow-y-auto px-16 pt-20 pb-4">
           {messages.map((msg, i) => {
             return (
               <div
