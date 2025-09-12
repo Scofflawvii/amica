@@ -22,16 +22,39 @@
     "test:ci": "npm run generate:paths && jest --ci --reporters='./github-actions-reporter.js'",
     "test:e2e": "playwright test",
     "test:e2e:ui": "PLAYWRIGHT_HTML_REPORT=1 playwright test --reporter=html",
-  "test:a11y": "playwright test tests/e2e/accessibility*.spec.ts",
-  "verify": "npm run typecheck && npm run lint && npm test --silent && npm run test:a11y",
+    "test:a11y": "playwright test tests/e2e/accessibility*.spec.ts",
+    "verify": "npm run typecheck && npm run lint && npm test --silent && npm run test:a11y",
     "act": "act -j test",
     "tauri": "tauri",
     "generate:paths": "npx node scripts/generate_paths.js",
     "splash": "cp ./public/splashscreen.html out/",
     "postinstall": "patch-package",
     "prepare": "husky",
+    "commitlint": "commitlint --edit $1",
     "check": "npm run typecheck && npm run lint",
     "check:ci": "npm run typecheck && npm run lint && npm test -- --ci"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ],
+    "rules": {
+      "subject-case": [
+        2,
+        "never",
+        [
+          "sentence-case",
+          "start-case",
+          "pascal-case",
+          "upper-case"
+        ]
+      ],
+      "body-max-line-length": [
+        2,
+        "always",
+        120
+      ]
+    }
   },
   "dependencies": {
     "@charcoal-ui/icons": "^4.15.0",
@@ -87,6 +110,8 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
     "@eslint/eslintrc": "3.3.1",
     "@eslint/js": "^9.35.0",
     "@gltf-transform/core": "^4.2.1",

@@ -1,0 +1,4 @@
+#!/bin/sh
+. "/home/scofflawvii/DevProjects/amica/.husky/_/husky.sh"
+
+npx --no-install commitlint --edit 
