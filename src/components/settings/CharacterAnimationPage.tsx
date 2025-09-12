@@ -51,7 +51,7 @@ export function CharacterAnimationPage({
               value={animationUrl}
               className="input-base mt-2 block w-full pr-10 pl-3"
               disabled={animationProcedural}
-              onChange={async (event: React.ChangeEvent<any>) => {
+              onChange={async (event: React.ChangeEvent<HTMLSelectElement>) => {
                 event.preventDefault();
                 const url = event.target.value;
                 setAnimationUrl(url);

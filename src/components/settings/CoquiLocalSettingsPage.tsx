@@ -60,7 +60,7 @@ export function CoquiLocalSettingsPage({
           <FormRow label={t("URL")}>
             <TextInput
               value={coquiLocalUrl}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setCoquiLocalUrl(event.target.value);
                 updateConfig("coquiLocal_url", event.target.value);
                 setSettingsUpdated(true);
@@ -73,7 +73,7 @@ export function CoquiLocalSettingsPage({
             <select
               className="input-base mt-2 block w-full pr-10 pl-3"
               value={coquiLocalVoiceId}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
                 event.preventDefault();
                 setCoquiLocalVoiceId(event.target.value);
                 updateConfig("coquiLocal_voiceid", event.target.value);

@@ -33,7 +33,7 @@ export function BackgroundVideoPage({
           <FormRow label={t("YouTube Video ID")}>
             <TextInput
               value={youtubeVideoID}
-              onChange={(event: React.ChangeEvent<any>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 const id = event.target.value.trim();
                 setYoutubeVideoID(id);
                 updateConfig("youtube_videoid", id);

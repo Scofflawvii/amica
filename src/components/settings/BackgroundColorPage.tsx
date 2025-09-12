@@ -41,7 +41,7 @@ export function BackgroundColorPage({
                 }
                 type="color"
                 value={bgColor}
-                onChange={(event: React.ChangeEvent<any>) => {
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   document.body.style.backgroundImage = `none`;
                   document.body.style.backgroundColor = event.target.value;
                   updateConfig("youtube_videoid", "");
