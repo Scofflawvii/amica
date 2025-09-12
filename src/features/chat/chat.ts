@@ -1,12 +1,17 @@
 import { Message, Role, Screenplay, Talk } from "./messages";
 // Avoid eager importing heavy classes so tests can import Chat without pulling three.js.
-type Viewer = {
-  model?: any;
+// Lightweight structural typing for the viewer's model to avoid importing heavy VRM / three types
+interface SpeakCapableModel {
+  speak?: (audio: ArrayBuffer, screenplay: Screenplay) => Promise<void>;
+  playAnimation?: (animation: unknown, name?: string) => void;
+}
+interface Viewer {
+  model?: SpeakCapableModel; // typically a VRM or proxy wrapper
   resetCameraLerp?: () => void;
   startRecording?: () => void;
   // Accept callback param that may receive Blob or null (runtime may yield null)
   stopRecording?: (cb: (b: Blob | null) => void) => void;
-};
+}
 // Align with concrete Alert class where error(title,message) expects both params
 type Alert = { error: (title: string, message: string) => void };
 type AmicaLife = { receiveMessageFromUser?: (m: string) => void } & Record<
