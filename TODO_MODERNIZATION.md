@@ -14,7 +14,7 @@ Legend:
 
 1. (P0 S) Enable stricter TypeScript flags (`strict`, `noUncheckedIndexedAccess`) — track any `any` cleanups. **DONE** (`strict` + `noUncheckedIndexedAccess` enabled in `tsconfig.json`; `npm run typecheck` passes with 0 errors. Cleaned up FilePond types in `src/pages/share.tsx`; remaining broad `any` mostly in tests and `.d.ts` shims.)
 2. (P0 S) Introduce structured logger wrapper (levels + JSON in prod) & replace ad-hoc `console.*` in new code. **DONE** (added `src/utils/logger.ts` with debug/info/warn/error, pretty in dev and JSON in prod; migrated warn/error across viewer, chat, settings, TTS (piper/kokoro/localXTTS/rvc/coquiLocal), external API modules, pages, and utils; tests/typecheck green).
-3. (P1 S) Add bundle analyzer + size thresholds in CI (warn > baseline + % delta). **DONE** (manifest-based size checker wired to postbuild and CI with shared and total caps; follow-ups: baseline deltas & per-chunk reporting).
+3. (P1 S) Add bundle analyzer + size thresholds in CI (warn > baseline + % delta). **DONE** (manifest-based size checker wired to postbuild and CI with shared/total hard caps; baseline persisted in `bundle-baseline.json` with delta guardrails via `BUNDLE_BASELINE_FILE` + `BUNDLE_MAX_DELTA_KB`; local scripts: `npm run bundle:baseline`, `npm run bundle:check`. Next: per-chunk reporting.)
 4. (P1 M) Add accessibility smoke tests (axe + Playwright) for core views (chat, settings, viewer, overlays). **DONE** (Playwright + axe smoke tests added for main and settings overlays: `tests/e2e/accessibility*.spec.ts`; CI workflow `.github/workflows/accessibility.yml`; npm script `test:a11y`.)
 5. (P1 S) Conventional commits + auto CHANGELOG (semantic-release) + deprecation removal schedule. **DONE** (commitlint + husky in place; semantic-release configured with automated changelog + GitHub release workflow. Note: commit headers limited to 100 chars by commitlint.)
 
@@ -43,7 +43,7 @@ Legend:
 - (P1 S) Lighthouse CI (PWA, performance, a11y) per main flows.
 - (P2 M) Perf budget dashboard auto-published (artifact or PR comment).
 - (P2 M) Bundle splitting audit: verify tree-shaking, mark side-effect-free modules.
-- (P2 S) Bundle size report: add per-chunk reporting to `scripts/check_bundle_size.mjs` and persist baseline file in repo for delta checks. — (not started)
+- (P2 S) Bundle size report: add per-chunk reporting to `scripts/check_bundle_size.mjs` and surface top offenders; baseline file already persisted (`bundle-baseline.json`). — (next)
 - (P3 L) Adaptive token batch flush algorithm (coalesce in busy frame windows).
 
 ## 4. Accessibility & UX Resilience

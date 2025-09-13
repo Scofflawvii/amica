@@ -50,8 +50,20 @@ const value = scope === 'total' ? totalKB : sharedKB;
 const metric = scope === 'total' ? 'totalKB' : 'sharedKB';
 
 const maxKB = Number(process.env.BUNDLE_MAX_KB || 0); // 0 disables
-const baselineKB = Number(process.env.BUNDLE_BASELINE_KB || 0);
+let baselineKB = Number(process.env.BUNDLE_BASELINE_KB || 0);
 const deltaKB = Number(process.env.BUNDLE_MAX_DELTA_KB || 0);
+
+// Optional: read baseline from file when provided and env numeric baseline not set
+const baselineFile = process.env.BUNDLE_BASELINE_FILE || process.env.BUNDLE_BASELINE_PATH;
+if (!baselineKB && baselineFile) {
+  try {
+    const json = JSON.parse(fs.readFileSync(path.join(root, baselineFile), 'utf8'));
+    // Prefer keyed metric, fallback to scope keys
+    baselineKB = Number(json[metric] ?? (scope === 'total' ? json.totalKB : json.sharedKB) ?? 0);
+  } catch (e) {
+    console.warn('[bundle-check] Could not read baseline file:', baselineFile, e?.message || e);
+  }
+}
 
 let ok = true;
 let reasons = [];

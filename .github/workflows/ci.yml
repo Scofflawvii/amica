@@ -37,10 +37,14 @@ jobs:
         env:
           BUNDLE_CHECK_SCOPE: shared
           BUNDLE_MAX_KB: '2400'
+          BUNDLE_BASELINE_FILE: bundle-baseline.json
+          BUNDLE_MAX_DELTA_KB: '60'
         run: node scripts/check_bundle_size.mjs
 
       - name: Bundle size check (total)
         env:
           BUNDLE_CHECK_SCOPE: total
           BUNDLE_MAX_KB: '3400'
+          BUNDLE_BASELINE_FILE: bundle-baseline.json
+          BUNDLE_MAX_DELTA_KB: '80'
         run: node scripts/check_bundle_size.mjs
