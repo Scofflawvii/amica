@@ -43,7 +43,7 @@ Legend:
 - (P1 S) Lighthouse CI (PWA, performance, a11y) per main flows.
 - (P2 M) Perf budget dashboard auto-published (artifact or PR comment).
 - (P2 M) Bundle splitting audit: verify tree-shaking, mark side-effect-free modules.
-- (P2 S) Bundle size report: add per-chunk reporting to `scripts/check_bundle_size.mjs` and surface top offenders; baseline file already persisted (`bundle-baseline.json`). — (next)
+- (P2 S) Bundle size report: add per-chunk reporting and per-page first-load summary; publish to CI summary and PR comment. — **DONE** (added `scripts/bundle_report.mjs`, wired to `verify` and CI; PRs get a sticky comment via `marocchino/sticky-pull-request-comment`.)
 - (P3 L) Adaptive token batch flush algorithm (coalesce in busy frame windows).
 
 ## 4. Accessibility & UX Resilience
