@@ -22,7 +22,7 @@ Legend:
 
 ## 1. TypeScript & Type Safety
 
-- (P0 M) Turn on strict suite: `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `exactOptionalPropertyTypes`.
+- (P0 M) Turn on strict suite: `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `exactOptionalPropertyTypes`. — **DONE** (enabled in tsconfig; codebase adjusted for overrides and exact optional types; typecheck green.)
 - (P1 M) Introduce branded/opaque types (e.g. `ChatSessionId`, `TokenId`).
 - (P1 S) Eliminate remaining broad `any`; codemod `_unused` prefix for intentional ignores. — **WIP** (converted Settings UI event handlers from `ChangeEvent<any>` to specific element types; added numeric parsing for number inputs.)
 - (P2 M) Runtime schema validation at API/model boundaries (zod) with inferred TS types.

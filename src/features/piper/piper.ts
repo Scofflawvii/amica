@@ -9,7 +9,7 @@ export async function piper(message: string) {
 
     const res = await fetch(url.toString());
 
-    const data = (await res.arrayBuffer()) as any;
+    const data: ArrayBuffer = await res.arrayBuffer();
     return { audio: data };
   } catch (error) {
     tlog.error("Error in piper", error);
