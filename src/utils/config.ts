@@ -32,6 +32,8 @@ export const defaults: Readonly<Record<string, string>> = {
   xr_foveation: "0",
   show_fps_overlay: "false",
   use_webgpu: "false",
+  // BVH worker: auto | off | single | parallel
+  bvh_worker_mode: process.env.NEXT_PUBLIC_BVH_WORKER_MODE ?? "auto",
   mtoon_debug_mode: "none",
   mtoon_material_type: "mtoon",
   language: process.env.NEXT_PUBLIC_LANGUAGE ?? "en",

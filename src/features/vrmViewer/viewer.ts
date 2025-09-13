@@ -10,6 +10,8 @@ import {
 } from "three-mesh-bvh";
 // import { GenerateMeshBVHWorker } from "@/workers/bvh/GenerateMeshBVHWorker";
 import { WorkerBase } from "@/workers/bvh/utils/WorkerBase";
+import { GenerateMeshBVHWorker } from "@/workers/bvh/GenerateMeshBVHWorker";
+import { ParallelMeshBVHWorker } from "@/workers/bvh/ParallelMeshBVHWorker";
 // Temp Disable : WebXR
 // import {
 //     BatchedParticleRenderer,
@@ -682,7 +684,36 @@ export class Viewer {
       this.statsMsPanel = noop;
     }
 
-    // this.bvhWorker = new GenerateMeshBVHWorker();
+    // Initialize BVH worker based on capability and config
+    try {
+      const mode = config("bvh_worker_mode"); // auto | off | single | parallel
+      if (mode !== "off") {
+        if (mode === "parallel") {
+          // May throw if SharedArrayBuffer unsupported; will be caught below
+          this.bvhWorker = new (ParallelMeshBVHWorker as unknown as {
+            new (): WorkerBase;
+          })();
+        } else if (mode === "single") {
+          this.bvhWorker = new GenerateMeshBVHWorker();
+        } else {
+          // auto: prefer parallel if available; fallback to single
+          try {
+            this.bvhWorker = new (ParallelMeshBVHWorker as unknown as {
+              new (): WorkerBase;
+            })();
+          } catch {
+            this.bvhWorker = new GenerateMeshBVHWorker();
+          }
+        }
+      } else {
+        this.bvhWorker = null;
+      }
+    } catch (e) {
+      this.bvhWorker = null;
+      if (config("debug_gfx") === "true") {
+        vlog.warn("BVH worker init failed; falling back to main thread", e);
+      }
+    }
     this.raycaster.firstHitOnly = true;
 
     // Temp Disable : WebXR
@@ -948,8 +979,11 @@ export class Viewer {
     // });
 
     // Temp Disable : WebXR
-    // setLoadingProgress("Regenerating BVH");
-    // await this.regenerateBVHForModel();
+    // If model BVH is needed later, re-enable and guard with worker flag:
+    // if (this.bvhWorker && this.modelBVHGenerator) {
+    //   setLoadingProgress("Regenerating BVH");
+    //   await this.regenerateBVHForModel();
+    // }
 
     // Temp Disable : WebXR
     // setLoadingProgress("Complete");
@@ -1007,20 +1041,25 @@ export class Viewer {
     this.room.room.scale.set(scale.x, scale.y, scale.z);
     this.scene!.add(this.room.room);
 
-    // build bvh
+    // build bvh (worker if enabled; else main-thread)
     this.roomTargets = [];
     for (let child of this.room.room.children) {
       if (child instanceof THREE.Mesh) {
-        // this must be cloned because the worker breaks rendering for some reason
         this.roomTargets.push(child);
         const geometry = child.geometry.clone() as THREE.BufferGeometry;
-        const bvh = await this.bvhWorker!.generate(geometry, {
-          maxLeafTris: 1,
-        })!;
-        child.geometry.boundsTree = bvh;
+        let bvh: unknown;
+        if (this.bvhWorker) {
+          bvh = await this.bvhWorker.generate(geometry, { maxLeafTris: 1 });
+        } else {
+          // Main thread fallback
+          geometry.computeBoundsTree({ maxLeafTris: 1 } as unknown as object);
+          bvh = (geometry as unknown as { boundsTree: unknown }).boundsTree;
+        }
+        (child.geometry as unknown as { boundsTree?: unknown }).boundsTree =
+          bvh as unknown;
 
         if (config("debug_gfx") === "true") {
-          const helper = new MeshBVHHelper(child, bvh);
+          const helper = new MeshBVHHelper(child);
           helper.color.set(0xe91e63);
           this.roomBVHHelperGroup.add(helper);
         }

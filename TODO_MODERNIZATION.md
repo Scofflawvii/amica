@@ -95,7 +95,7 @@ Legend:
 
 ## 10. Rendering / 3D / VRM
 
-- (P1 M) Worker offload for BVH / skeleton prep (transferable buffers). — **WIP** (worker is bundled and served as `public/generateMeshBVH.worker.js`; integration in `vrmViewer/viewer.ts` is currently commented out. Next: re-enable behind a feature flag with capability checks and fallback to single-thread when SharedArrayBuffer unavailable.)
+- (P1 M) Worker offload for BVH / skeleton prep (transferable buffers). — **WIP** (feature flag added: `bvh_worker_mode` = `auto|off|single|parallel`; viewer initializes a worker when available, falls back to main-thread bounds tree; room meshes now use worker-backed BVH with debug helpers gated by `debug_gfx`. Next: measure perf (fps/frame time), gate model BVH regeneration behind the same flag, and add a QA toggle in debug pane.)
 - (P2 M) GPU/Device capability diagnostics overlay (fallback heuristics).
 - (P2 M) Frame budgeting scheduler that yields during large token bursts.
 - (P3 L) WASM/Rust acceleration for heavy geometry or voice feature extraction.
