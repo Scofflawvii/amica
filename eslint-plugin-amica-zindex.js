@@ -123,5 +123,102 @@ export default {
         };
       },
     },
+    "no-raw-color": {
+      meta: {
+        type: "suggestion",
+        docs: {
+          description:
+            "Disallow raw hex/rgb/hsl colors in Tailwind arbitrary values and inline style; prefer semantic tokens (e.g., hsl(var(--text))).",
+        },
+        hasSuggestions: false,
+        fixable: null,
+        schema: [],
+        messages: {
+          rawColor:
+            'Raw color "{{raw}}" not allowed. Use semantic token (e.g., hsl(var(--...))) or a predefined utility.',
+        },
+      },
+      create(context) {
+        const RAW_HEX = /#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})/u;
+        const RAW_RGB = /\brgba?\([^)]*\)/u;
+        const RAW_HSL = /\bhsla?\([^)]*\)/u;
+        const ALLOW_VAR = /var\(--[A-Za-z0-9-_]+\)/u;
+        const ALLOW_HSL_VAR = /hsl\(var\(--[A-Za-z0-9-_]+\)\)/u;
+
+        function reportIfRawColor(node, raw) {
+          // Allow semantic tokens via CSS variables
+          if (ALLOW_HSL_VAR.test(raw) || ALLOW_VAR.test(raw)) return;
+          if (RAW_HEX.test(raw) || RAW_RGB.test(raw) || RAW_HSL.test(raw)) {
+            context.report({ node, messageId: "rawColor", data: { raw } });
+          }
+        }
+
+        function checkClassNameLiteral(node, value) {
+          if (typeof value !== "string") return;
+          // Look for Tailwind arbitrary color utilities like text-[...], bg-[...], border-[...], fill-[...], stroke-[...]
+          const ARBITRARY_COLOR = /(text|bg|border|fill|stroke)-\[(.+?)\]/gu;
+          let m;
+          while ((m = ARBITRARY_COLOR.exec(value))) {
+            const inner = m[2];
+            reportIfRawColor(node, inner);
+          }
+        }
+
+        function checkStyleObject(node, expr) {
+          // Only handle simple object literals: style={{ color: "#fff" }}
+          if (!expr || expr.type !== "ObjectExpression") return;
+          const colorProps = new Set([
+            "color",
+            "backgroundColor",
+            "borderColor",
+            "outlineColor",
+            "fill",
+            "stroke",
+          ]);
+          for (const prop of expr.properties) {
+            if (prop.type !== "Property") continue;
+            const key =
+              prop.key.type === "Identifier" ? prop.key.name : prop.key.value;
+            if (!colorProps.has(String(key))) continue;
+            if (
+              prop.value.type === "Literal" &&
+              typeof prop.value.value === "string"
+            ) {
+              reportIfRawColor(prop.value, prop.value.value);
+            }
+          }
+        }
+
+        return {
+          JSXAttribute(node) {
+            // className checks
+            if (node.name && node.name.name === "className" && node.value) {
+              if (node.value.type === "Literal") {
+                checkClassNameLiteral(node.value, node.value.value);
+              } else if (
+                node.value.type === "JSXExpressionContainer" &&
+                node.value.expression.type === "Literal"
+              ) {
+                checkClassNameLiteral(
+                  node.value.expression,
+                  node.value.expression.value,
+                );
+              }
+            }
+
+            // style={{ color: "#fff" }} checks
+            if (node.name && node.name.name === "style" && node.value) {
+              if (
+                node.value.type === "JSXExpressionContainer" &&
+                node.value.expression &&
+                node.value.expression.type === "ObjectExpression"
+              ) {
+                checkStyleObject(node.value.expression, node.value.expression);
+              }
+            }
+          },
+        };
+      },
+    },
   },
 };

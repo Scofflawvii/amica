@@ -7,16 +7,15 @@ export const GitHubLink = () => {
       draggable={false}
       href="https://github.com/semperai/amica"
       rel="noopener noreferrer"
-      target="_blank"
-    >
-      <div className="py-2 px-2 rounded-lg bg-[#1F2328] hover:bg-[#33383E] active:bg-[565A60] inline-flex">
+      target="_blank">
+      <div className="inline-flex rounded-lg bg-[hsl(var(--surface))] px-2 py-2 hover:bg-[hsl(var(--surface-alt))] active:bg-[hsl(var(--surface-alt))]">
         <Image
           alt="https://github.com/semperai/amica"
           height={24}
           width={24}
           src={buildUrl("/github-mark-white.svg")}
         />
-        <div className="mx-2 text-white font-bold">Open Source</div>
+        <div className="mx-2 font-bold text-white">Open Source</div>
       </div>
     </a>
   );

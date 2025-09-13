@@ -12,11 +12,11 @@ Legend:
 
 ## Quick Win Starter Set (Suggested First 5)
 
-1. (P0 S) Enable stricter TypeScript flags (`strict`, `noUncheckedIndexedAccess`) — track any `any` cleanups. **DONE** (`strict` + `noUncheckedIndexedAccess` enabled in `tsconfig.json`; `npm run typecheck` passes with 0 errors. Remaining broad `any` usages tracked under §1 Type Safety cleanups and lint warnings.)
+1. (P0 S) Enable stricter TypeScript flags (`strict`, `noUncheckedIndexedAccess`) — track any `any` cleanups. **DONE** (`strict` + `noUncheckedIndexedAccess` enabled in `tsconfig.json`; `npm run typecheck` passes with 0 errors. Cleaned up FilePond types in `src/pages/share.tsx`; remaining broad `any` mostly in tests and `.d.ts` shims.)
 2. (P0 S) Introduce structured logger wrapper (levels + JSON in prod) & replace ad-hoc `console.*` in new code. **DONE** (added `src/utils/logger.ts` with debug/info/warn/error, pretty in dev and JSON in prod; migrated warn/error across viewer, chat, settings, TTS (piper/kokoro/localXTTS/rvc/coquiLocal), external API modules, pages, and utils; tests/typecheck green).
 3. (P1 S) Add bundle analyzer + size thresholds in CI (warn > baseline + % delta). **DONE** (manifest-based size checker wired to postbuild and CI with shared and total caps; follow-ups: baseline deltas & per-chunk reporting).
 4. (P1 M) Add accessibility smoke tests (axe + Playwright) for core views (chat, settings, viewer, overlays). **DONE** (Playwright + axe smoke tests added for main and settings overlays: `tests/e2e/accessibility*.spec.ts`; CI workflow `.github/workflows/accessibility.yml`; npm script `test:a11y`.)
-5. (P1 S) Conventional commits + auto CHANGELOG (semantic-release) + deprecation removal schedule. **DONE** (commitlint + husky in place; semantic-release configured with automated changelog + GitHub release workflow.)
+5. (P1 S) Conventional commits + auto CHANGELOG (semantic-release) + deprecation removal schedule. **DONE** (commitlint + husky in place; semantic-release configured with automated changelog + GitHub release workflow. Note: commit headers limited to 100 chars by commitlint.)
 
 ---
 
@@ -24,7 +24,7 @@ Legend:
 
 - (P0 M) Turn on strict suite: `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `exactOptionalPropertyTypes`. — **DONE** (enabled in tsconfig; codebase adjusted for overrides and exact optional types; typecheck green.)
 - (P1 M) Introduce branded/opaque types (e.g. `ChatSessionId`, `TokenId`).
-- (P1 S) Eliminate remaining broad `any`; codemod `_unused` prefix for intentional ignores. — **WIP** (converted Settings UI event handlers from `ChangeEvent<any>` to specific element types; added numeric parsing for number inputs. Remaining occurrences concentrated in integration-heavy surfaces like `src/pages/share.tsx` (filepond callbacks), `src/pages/_app.tsx` (console proxy), `src/pages/debug-popout.tsx` (window bridge), and a few 3D utilities (`textureDownscaler.ts`, `transparencyOptimizer.ts`, traversal in `vrmViewer/room.ts`). Tests and `.d.ts` intentionally excluded.)
+- (P1 S) Eliminate remaining broad `any`; codemod `_unused` prefix for intentional ignores. — **WIP** (typed FilePond state/handlers in `src/pages/share.tsx`; narrowed unused args via `_` prefix. Remaining `any` primarily in tests and `.d.ts`, plus minor viewer internals like `room.ts` traversal.)
 - (P2 M) Runtime schema validation at API/model boundaries (zod) with inferred TS types.
 - (P2 M) Add `ts-prune` / `knip` dead symbol check in CI.
 
@@ -33,7 +33,7 @@ Legend:
 - (P0 M) Structured logger abstraction (dev pretty, prod JSON) with child contexts (session, request, model).
 - (P1 M) OpenTelemetry traces: spans for chat streaming, TTS phases, VRM load, vision inference.
 - (P1 S) Error taxonomy & classification (user-facing vs internal) + standardized error codes.
-- (P1 S) Enforce logger usage via ESLint: default `no-console` error with narrow per-file allowlist + autofix hints; codemod lingering `console.debug` in feature modules. — **DONE** (set `no-console: error` with targeted overrides for tests/scripts/logger; migrated console.\* to structured `logger` across chat/session, STT, AmicaLife, registries, UI; added guide `docs/contributing/logging-and-tracing.md`; lint now 0 errors, tests green.)
+- (P1 S) Enforce logger usage via ESLint: default `no-console` error with narrow per-file allowlist + autofix hints; codemod lingering `console.debug` in feature modules. — **DONE** (set `no-console: error` with targeted overrides for tests/scripts/logger; migrated console.\* to structured `logger` across chat/session, STT, AmicaLife, registries, UI; added guide `docs/contributing/logging-and-tracing.md`; lint 0 errors; unit + a11y tests green.)
 - (P2 M) Client perf beacon aggregator → server histograms (p50/p95 token latency, frame pacing, TTS start delay).
 - (P3 L) Session replay (privacy scrub) for difficult streaming race bugs.
 
@@ -87,7 +87,7 @@ Legend:
 ## 9. Theming & Design Tokens
 
 - (P1 M) Single source tokens (Style Dictionary) → emit CSS vars + TS types + doc tables.
-- (P2 S) Lint rule forbidding raw hex/color usage when semantic token available.
+- (P2 S) Lint rule forbidding raw hex/color usage when semantic token available. — **WIP** (added custom rule `amica-z/no-raw-color` as warn; replaced raw colors in `src/components/githubLink.tsx`; promote to error once repo clean.)
 - (P2 M) Visual regression baseline for top 10 token-driven components.
 - (P3 M) Dynamic theme packs / plugin token injection with validation.
 
@@ -126,7 +126,7 @@ Legend:
 - (P1 S) Codemod: replace legacy `Chat.initialize` with `initializeWithObserver` (safe patterns). — **DONE** (migrated remaining tests to `initializeWithObserver`; legacy method retained for BC; docs flag deprecation.)
 - (P1 S) Add contributor guide section for semantic layering + tokens + logging patterns. — **WIP** (logging guide added at `docs/contributing/logging-and-tracing.md`; tokens + semantic layering docs pending.)
 - (P2 M) Storybook (or Ladle) for component + token documentation (dark/light variants).
-- (P2 S) ESLint rule: forbid raw z-index & raw colors (already partial) – add autofixes. — **WIP** (z-index rule active via custom plugin `amica-z/no-raw-z-index`; raw color rule still pending.)
+- (P2 S) ESLint rule: forbid raw z-index & raw colors (already partial) – add autofixes. — **WIP** (z-index rule active via custom plugin `amica-z/no-raw-z-index`; raw color rule added as warn and iterating.)
 - (P3 M) Plugin API versioning & validation (registry schema).
 
 ## 15. Internationalization

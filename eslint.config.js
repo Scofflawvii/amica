@@ -119,8 +119,9 @@ export default [
       "no-useless-escape": "error",
       "no-empty": "error",
       "no-prototype-builtins": "error",
-      // Enforce semantic Tailwind z-index tokens
+      // Enforce semantic Tailwind z-index tokens and forbid raw colors
       "amica-z/no-raw-z-index": "error",
+      "amica-z/no-raw-color": "warn",
     },
     settings: {
       react: {
