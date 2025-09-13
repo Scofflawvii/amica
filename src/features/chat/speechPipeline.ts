@@ -25,7 +25,7 @@ export interface ChatSpeechHost {
   ttsJobs: AsyncQueueLike<TTSJob>;
   speakJobs: AsyncQueueLike<SpeakJob>;
   fetchAudio(talk: Talk): Promise<ArrayBuffer | null>;
-  appendAssistantBuffered(text: string, flushNow?: boolean): void;
+  appendAssistantBufferedPublic(text: string, flushNow?: boolean): void;
   viewer?: {
     model?: { speak?: (a: ArrayBuffer, s: Screenplay) => Promise<void> };
   };
@@ -92,14 +92,14 @@ export class SpeechPipeline {
         if (!speak) continue;
         if (speak.streamIdx !== this.host.currentStreamIdx) continue; // stale
 
-        const lt = (window as any).chatvrm_latency_tracker;
+        const lt = window.chatvrm_latency_tracker;
         if (lt?.active) {
           const ms = Date.now() - lt.start;
           logger.debug("performance_latency", { ms });
           lt.active = false;
         }
 
-        this.host.appendAssistantBuffered(speak.screenplay.text, true);
+        this.host.appendAssistantBufferedPublic(speak.screenplay.text, true);
 
         if (speak.audioBuffer) {
           perfMark("tts:play:start");

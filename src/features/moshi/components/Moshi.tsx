@@ -22,12 +22,15 @@ export function Moshi({
   const { viewer } = useContext(ViewerContext);
   const { audioControls } = useContext(AudioControlsContext);
 
-  const [audioContext] = useState<AudioContext>(
-    () =>
-      new (window.AudioContext || (window as any).webkitAudioContext)({
-        sampleRate: 48000,
-      }),
-  );
+  const [audioContext] = useState<AudioContext>(() => {
+    const AnyWindow = window as unknown as {
+      AudioContext?: typeof AudioContext;
+      webkitAudioContext?: typeof AudioContext;
+    };
+    const Ctor = AnyWindow.AudioContext ?? AnyWindow.webkitAudioContext;
+    if (!Ctor) throw new Error("AudioContext is not supported in this browser");
+    return new Ctor({ sampleRate: 48000 });
+  });
   const decoderRef = useAudioDecoder();
   const { scheduleAudioPlayback, sourceNodeRef } =
     useAudioPlayback(audioContext);

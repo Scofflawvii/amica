@@ -58,7 +58,10 @@ function scaleImage(
   newHeight: number,
 ): Promise<ImageBitmap | HTMLCanvasElement> {
   const canvas = createOffscreenCanvas(newWidth, newHeight);
-  const ctx = canvas.getContext("2d") as OffscreenCanvasRenderingContext2D;
+  const ctx = canvas.getContext("2d") as
+    | OffscreenCanvasRenderingContext2D
+    | CanvasRenderingContext2D
+    | null;
 
   if (!ctx) {
     throw new Error("Failed to create 2D context");
@@ -69,15 +72,21 @@ function scaleImage(
   ctx.imageSmoothingQuality = "high";
 
   // Draw the image scaled down
-  (ctx as any).drawImage(image, 0, 0, newWidth, newHeight);
+  (ctx as CanvasRenderingContext2D).drawImage(
+    image as CanvasImageSource,
+    0,
+    0,
+    newWidth,
+    newHeight,
+  );
 
   // Return as ImageBitmap if supported, otherwise return canvas
   if (typeof createImageBitmap !== "undefined") {
     return createImageBitmap(canvas);
   }
 
-  // return canvas as HTMLCanvasElement;
-  return canvas as any;
+  // Fallback: resolve with the canvas element
+  return Promise.resolve(canvas as HTMLCanvasElement);
 }
 
 // Calculate new dimensions maintaining aspect ratio
@@ -146,9 +155,9 @@ async function processTexture(
 
 // Main function to downscale textures in a GLTF model
 async function downscaleModelTextures(
-  gltf: any,
+  gltf: GLTF,
   maxDimension: number = 1024,
-): Promise<any> {
+): Promise<GLTF> {
   const texturePromises: Promise<void>[] = [];
   const processedTextures = new Set<THREE.Texture>();
 
@@ -157,9 +166,9 @@ async function downscaleModelTextures(
 
     if (node instanceof THREE.Mesh) {
       const mesh = node as THREE.Mesh;
-      const materials = Array.isArray(node.material)
-        ? node.material
-        : [node.material];
+      const materials: THREE.Material[] = Array.isArray(node.material)
+        ? (node.material as THREE.Material[])
+        : [node.material as THREE.Material];
 
       materials.forEach((material: THREE.Material) => {
         if (!material) return;
@@ -189,7 +198,9 @@ async function downscaleModelTextures(
         ];
 
         textureTypes.forEach((type: TextureType) => {
-          const texture = (material as any)[type] as THREE.Texture | undefined;
+          const texture = (material as unknown as Record<string, unknown>)[
+            type
+          ] as THREE.Texture | undefined;
           if (texture && !processedTextures.has(texture)) {
             processedTextures.add(texture);
             texturePromises.push(processTexture(texture, maxDimension));

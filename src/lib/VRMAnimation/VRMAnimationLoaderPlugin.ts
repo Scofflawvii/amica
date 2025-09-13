@@ -43,7 +43,15 @@ export class VRMAnimationLoaderPlugin implements GLTFLoaderPlugin {
   }
 
   public async afterRoot(gltf: GLTF): Promise<void> {
-    const defGltf = gltf.parser.json as any;
+    const defGltf = gltf.parser.json as {
+      extensionsUsed?: string[];
+      extensions?: Record<string, unknown>;
+      animations?: Array<{
+        channels: Array<{
+          target: { node?: number; path?: string };
+        }>;
+      }>;
+    };
     const defExtensionsUsed = defGltf.extensionsUsed;
 
     if (
@@ -76,14 +84,11 @@ export class VRMAnimationLoaderPlugin implements GLTFLoaderPlugin {
 
     const clips = gltf.animations;
     const animations: VRMAnimation[] = clips.map((clip, iAnimation) => {
-      const defAnimation = defGltf.animations![iAnimation];
+      const defAnimation = defGltf.animations?.[iAnimation];
 
-      const animation = this._parseAnimation(
-        clip,
-        defAnimation,
-        nodeMap,
-        worldMatrixMap,
-      );
+      const animation = defAnimation
+        ? this._parseAnimation(clip, defAnimation, nodeMap, worldMatrixMap)
+        : new VRMAnimation();
       animation.restHipsPosition = restHipsPosition;
 
       return animation;
@@ -168,7 +173,9 @@ export class VRMAnimationLoaderPlugin implements GLTFLoaderPlugin {
 
   private _parseAnimation(
     animationClip: THREE.AnimationClip,
-    defAnimation: any,
+    defAnimation: {
+      channels: Array<{ target: { node?: number; path?: string } }>;
+    },
     nodeMap: VRMAnimationLoaderPluginNodeMap,
     worldMatrixMap: VRMAnimationLoaderPluginWorldMatrixMap,
   ): VRMAnimation {
@@ -179,7 +186,7 @@ export class VRMAnimationLoaderPlugin implements GLTFLoaderPlugin {
 
     result.duration = animationClip.duration;
 
-    defChannels.forEach((channel: any, iChannel: number) => {
+    defChannels.forEach((channel, iChannel: number) => {
       const { node, path } = channel.target;
       const origTrack = tracks[iChannel];
 

@@ -19,3 +19,20 @@ declare namespace NodeJS {
     NEXT_PUBLIC_KOBOLDAI_STOP_SEQUENCE?: string;
   }
 }
+
+// Global augmentations for browser runtime
+declare global {
+  // One-time deprecation warning flag for Chat.initialize
+  var __amica_init_warned: boolean | undefined;
+
+  interface Window {
+    // Simple latency tracker used by SpeechPipeline; optional
+    chatvrm_latency_tracker?: { active: boolean; start: number };
+
+    // SpeechT5 worker + audio cache
+    chatvrm_worker_speecht5?: Worker;
+    chatvrm_worker_speecht5_audiocache?: Float32Array | null;
+  }
+}
+
+export {};

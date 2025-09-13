@@ -90,7 +90,7 @@ export function DeveloperPage({
               defaultValue={getLogLevel()}
               className="input-base mt-2 block w-full pr-10 pl-3"
               onChange={(e) => {
-                const lvl = e.target.value as any;
+                const lvl = e.target.value as import("@/utils/logger").Level;
                 setLogLevel(lvl);
                 setSettingsUpdated(true);
               }}>

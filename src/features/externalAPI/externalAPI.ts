@@ -92,7 +92,8 @@ export async function handleConfig(
           localStorageData[key] = value;
         } else {
           // Append missing keys with default values
-          localStorageData[key] = (<any>defaults)[key];
+          const k = key as keyof typeof defaults;
+          localStorageData[key] = defaults[k]!;
         }
       }
 

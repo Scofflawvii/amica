@@ -124,8 +124,9 @@ export async function askVisionLLM(
     const result = await askLLM(config("system_prompt"), content, chat ?? null);
 
     return result;
-  } catch (e: any) {
-    clog.error("getVisionResponse", e.toString());
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    clog.error("getVisionResponse", msg);
     // alert?.error("Failed to get vision response", e.toString());
     return "Failed to get vision response";
   }

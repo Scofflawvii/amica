@@ -2,15 +2,19 @@ import { twitterClientInstance as twitterClient } from "../socialMedia/twitterCl
 import { telegramClientInstance as telegramClient } from "../socialMedia/telegramClient";
 import { sendToClients } from "./apiHelper";
 
+export type SocialMedia = "twitter" | "tg" | "none";
+
 export const handleSocialMediaActions = async (
   message: string,
-  socialMedia: string
-): Promise<any> => {
+  socialMedia: SocialMedia,
+): Promise<string | void> => {
   switch (socialMedia) {
     case "twitter":
-      return await twitterClient.postTweet(message);
+      await twitterClient.postTweet(message);
+      return "Tweet posted";
     case "tg":
-      return await telegramClient.postMessage(message);
+      await telegramClient.postMessage(message);
+      return "Telegram message sent";
     case "none":
       sendToClients({ type: "normal", data: message });
       return "Broadcasted to clients";

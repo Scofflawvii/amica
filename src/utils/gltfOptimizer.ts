@@ -2,12 +2,13 @@ import * as THREE from "three";
 import {
   GLTF,
   GLTFLoader,
+  GLTFLoaderPlugin,
   GLTFParser,
 } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 
-// Type for the extension callback
-type ExtensionCallback = (parser: GLTFParser) => Promise<void> | void;
+// Type for extension callbacks: either return a GLTFLoaderPlugin, or run side-effects only
+type ExtensionCallback = (parser: GLTFParser) => GLTFLoaderPlugin | void;
 
 interface OptimizationOptions {
   // Texture options
@@ -77,8 +78,23 @@ class OptimizedGLTFLoader {
     // Add to our extensions array
     this.extensions.push(callback);
 
-    // Register with the underlying loader
-    this.loader.register(callback as any);
+    // Register with the underlying loader by wrapping callbacks into plugins when needed
+    this.loader.register((parser) => {
+      const maybePlugin = callback(parser);
+      if (
+        maybePlugin &&
+        typeof (maybePlugin as GLTFLoaderPlugin).name === "string"
+      ) {
+        return maybePlugin as GLTFLoaderPlugin;
+      }
+      // Wrap side-effect callback into a no-op plugin stage
+      return {
+        name: "optimized-gltf-callback",
+        afterRoot: async () => {
+          await Promise.resolve(callback(parser));
+        },
+      };
+    });
 
     return this;
   }
@@ -106,13 +122,15 @@ class OptimizedGLTFLoader {
     if (this.options.simplifyMaterials) {
       // Simplify material settings
       if ("fog" in material) {
-        (material as any).fog = false;
+        // Material has 'fog' flag in three types
+        (material as THREE.Material & { fog: boolean }).fog = false;
       }
       if ("dithering" in material) {
         material.dithering = false;
       }
       if ("flatShading" in material) {
-        (material as any).flatShading = true;
+        (material as THREE.Material & { flatShading: boolean }).flatShading =
+          true;
       }
 
       if (material instanceof THREE.MeshStandardMaterial) {
@@ -196,10 +214,13 @@ class OptimizedGLTFLoader {
 
     // Dispose of source data if requested
     if (this.options.disposeSourceData && gltf.parser) {
-      // Clean up parser data
-      if ((gltf.parser as any).json) {
-        delete (gltf.parser as any).json.accessors;
-        delete (gltf.parser as any).json.meshes;
+      // Clean up parser data (access private json via typed shadow)
+      const parserWithJson = gltf.parser as unknown as {
+        json?: { accessors?: unknown; meshes?: unknown };
+      };
+      if (parserWithJson.json) {
+        delete parserWithJson.json.accessors;
+        delete parserWithJson.json.meshes;
       }
     }
   }
@@ -222,7 +243,7 @@ class OptimizedGLTFLoader {
     url: string,
     onLoad?: (gltf: GLTF) => void,
     onProgress?: (event: ProgressEvent<EventTarget>) => void,
-    onError?: (error: ErrorEvent) => void,
+    onError?: (error: unknown) => void,
   ): void {
     this.loader.load(
       url,
@@ -231,11 +252,11 @@ class OptimizedGLTFLoader {
           await this.optimizeScene(gltf);
           if (onLoad) onLoad(gltf);
         } catch (error) {
-          if (onError) onError(error as ErrorEvent);
+          if (onError) onError(error);
         }
       },
       onProgress,
-      onError as any,
+      onError as ((err: unknown) => void) | undefined,
     );
   }
 

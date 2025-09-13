@@ -10,7 +10,10 @@ import { mixamoVRMRigMap } from "./mixamoVRMRigMap";
  * @param {VRM} vrm A target VRM
  * @returns {Promise<THREE.AnimationClip>} The converted AnimationClip
  */
-export function loadMixamoAnimation(url: string, vrm: VRM) {
+export function loadMixamoAnimation(
+  url: string,
+  vrm: VRM,
+): Promise<THREE.AnimationClip> {
   const loader = new FBXLoader(); // A loader which loads FBX
   return loader.loadAsync(url).then((asset) => {
     const clip = THREE.AnimationClip.findByName(asset.animations, "mixamo.com"); // extract the AnimationClip
@@ -37,9 +40,9 @@ export function loadMixamoAnimation(url: string, vrm: VRM) {
       // Convert each tracks for VRM use, and push to `tracks`
       const trackSplitted = track.name.split(".");
       const mixamoRigName: string = trackSplitted[0] ?? "";
-      const vrmBoneName = (mixamoVRMRigMap as any)[mixamoRigName];
+      const vrmBoneName = mixamoVRMRigMap[mixamoRigName];
       const vrmNodeName =
-        vrm.humanoid?.getNormalizedBoneNode(vrmBoneName)?.name;
+        vrmBoneName && vrm.humanoid?.getNormalizedBoneNode(vrmBoneName)?.name;
       const mixamoRigNode = asset.getObjectByName(mixamoRigName);
 
       if (vrmNodeName != null) {

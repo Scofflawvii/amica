@@ -23,7 +23,7 @@ export function LanguagePage() {
               }}>
               {Object.keys(langs).map((lang) => (
                 <option key={lang} value={lang}>
-                  {langs[lang].nativeName}
+                  {langs[lang]?.nativeName ?? lang}
                 </option>
               ))}
             </select>

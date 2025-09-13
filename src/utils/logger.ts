@@ -1,7 +1,7 @@
 // Structured logger with environment-aware formatting and contextual children.
 // Non-breaking: retains info/warn/error/time/timeEnd signatures.
 
-type Level = "debug" | "info" | "warn" | "error";
+export type Level = "debug" | "info" | "warn" | "error";
 
 const levelOrder: Record<Level, number> = {
   debug: 10,
@@ -31,8 +31,9 @@ const nowISO = () => new Date().toISOString();
 
 const isProd = (() => {
   try {
-    // Next.js replaces process.env at build time; default to non-prod if absent
-    return (process as any)?.env?.NODE_ENV === "production";
+    return (
+      typeof process !== "undefined" && process.env?.NODE_ENV === "production"
+    );
   } catch {
     return false;
   }
@@ -55,8 +56,10 @@ function computeInitialLevel(): Level {
     }
     // Env vars (build/runtime)
     const lvl =
-      (process as any)?.env?.NEXT_PUBLIC_LOG_LEVEL ??
-      (process as any)?.env?.LOG_LEVEL;
+      (typeof process !== "undefined"
+        ? process.env?.NEXT_PUBLIC_LOG_LEVEL
+        : undefined) ??
+      (typeof process !== "undefined" ? process.env?.LOG_LEVEL : undefined);
     if (lvl && typeof lvl === "string" && lvl.toLowerCase() in levelOrder) {
       return lvl.toLowerCase() as Level;
     }
@@ -94,10 +97,19 @@ function toErrorLike(
   if (!val) return undefined;
   if (val instanceof Error)
     return { message: val.message, stack: val.stack ?? undefined };
-  if (typeof val === "object" && val && "message" in (val as any)) {
-    const v = val as any;
+  if (
+    typeof val === "object" &&
+    val &&
+    "message" in (val as Record<string, unknown>)
+  ) {
+    const v = val as Record<string, unknown> & { stack?: unknown };
     return {
-      message: typeof v.message === "string" ? v.message : String(v.message),
+      message:
+        typeof v.message === "string"
+          ? v.message
+          : v.message !== undefined
+            ? String(v.message)
+            : undefined,
       stack: typeof v.stack === "string" ? v.stack : undefined,
     };
   }

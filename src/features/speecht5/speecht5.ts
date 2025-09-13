@@ -3,10 +3,19 @@ import { logger } from "@/utils/logger";
 import { updateFileProgress } from "@/utils/progress";
 import { convertNumberToWordsEN } from "@/utils/numberSpelling";
 
-export async function speecht5(message: string, speakerEmbeddingsUrl: string) {
+type SpeechT5WorkerMessage = {
+  status: "ready" | "progress" | "done" | "complete";
+  file?: string;
+  progress?: number;
+  data?: { audio: Float32Array };
+};
+
+export async function speecht5(
+  message: string,
+  speakerEmbeddingsUrl: string,
+): Promise<{ audio: ArrayBuffer }> {
   // empty cache
-  (window as any).chatvrm_worker_speecht5_audiocache =
-    null as Float32Array | null;
+  window.chatvrm_worker_speecht5_audiocache = null;
 
   message = message
     .trim()
@@ -21,26 +30,17 @@ export async function speecht5(message: string, speakerEmbeddingsUrl: string) {
     .join("");
 
   // initialize worker if not already initialized
-  if (
-    !Object.prototype.hasOwnProperty.call(window, "chatvrm_worker_speecht5")
-  ) {
-    (window as any).chatvrm_worker_speecht5 = new Worker(
+  if (!window.chatvrm_worker_speecht5) {
+    window.chatvrm_worker_speecht5 = new Worker(
       new URL("../../workers/speecht5.js", import.meta.url),
       {
         type: "module",
       },
     );
 
-    (window as any).chatvrm_worker_speecht5.addEventListener(
+    window.chatvrm_worker_speecht5.addEventListener(
       "message",
-      (
-        event: MessageEvent<{
-          status: "ready" | "progress" | "done" | "complete";
-          file?: string;
-          progress?: number;
-          data?: { audio: Float32Array };
-        }>,
-      ) => {
+      (event: MessageEvent<SpeechT5WorkerMessage>) => {
         const message = event.data;
         // debug message payload only when needed
         switch (message.status) {
@@ -57,7 +57,7 @@ export async function speecht5(message: string, speakerEmbeddingsUrl: string) {
             break;
           case "complete":
             logger.debug("speecht5 complete");
-            (window as any).chatvrm_worker_speecht5_audiocache =
+            window.chatvrm_worker_speecht5_audiocache =
               message.data?.audio ?? null;
             break;
         }
@@ -66,11 +66,10 @@ export async function speecht5(message: string, speakerEmbeddingsUrl: string) {
   }
 
   // clear cache
-  (window as any).chatvrm_worker_speecht5_audiocache =
-    null as Float32Array | null;
+  window.chatvrm_worker_speecht5_audiocache = null;
 
   // start job
-  (window as any).chatvrm_worker_speecht5.postMessage({
+  window.chatvrm_worker_speecht5!.postMessage({
     text: message,
     speaker_embeddings: speakerEmbeddingsUrl,
   });
@@ -80,7 +79,7 @@ export async function speecht5(message: string, speakerEmbeddingsUrl: string) {
     logger.debug("speecht5 waiting for job to complete");
     const checkJob = async () => {
       while (true) {
-        if ((window as any).chatvrm_worker_speecht5_audiocache !== null) {
+        if (window.chatvrm_worker_speecht5_audiocache !== null) {
           resolve(null);
           break;
         }
@@ -91,12 +90,11 @@ export async function speecht5(message: string, speakerEmbeddingsUrl: string) {
   });
 
   let wav = new WaveFile();
-  wav.fromScratch(
-    1,
-    16000,
-    "32f",
-    (window as any).chatvrm_worker_speecht5_audiocache,
-  );
+  const audio = window.chatvrm_worker_speecht5_audiocache;
+  if (!audio) {
+    throw new Error("SpeechT5 produced no audio data");
+  }
+  wav.fromScratch(1, 16000, "32f", audio);
   const wavBuffer = wav.toBuffer();
   const wavBlob = new Blob([wavBuffer.slice()], { type: "audio/wav" });
   const arrayBuffer = await wavBlob.arrayBuffer();

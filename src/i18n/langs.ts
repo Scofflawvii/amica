@@ -7,22 +7,23 @@ import ka from "./locales/ka/common.json";
 //     return {...arr, [key] : { translation: value} }
 //   }, {});
 
-export const langs: any = {
+type Translation = Record<string, unknown>;
+type LangEntry = { nativeName: string; translation: Translation };
+export const langs: Record<string, LangEntry> = {
   en: {
-    nativeName: 'English',
-    translation: en,
+    nativeName: "English",
+    translation: en as Translation,
   },
   zh: {
-    nativeName: '中文',
-    translation: zh,
+    nativeName: "中文",
+    translation: zh as Translation,
   },
   de: {
-    nativeName: 'Deutsch',
-    translation: de,
+    nativeName: "Deutsch",
+    translation: de as Translation,
   },
   ka: {
-    nativeName: 'ქართული',
-    translation: ka,
+    nativeName: "ქართული",
+    translation: ka as Translation,
   },
-}
-
+};

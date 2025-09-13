@@ -3,11 +3,9 @@ import { Message, Role, Screenplay, Talk } from "./messages";
 // Lightweight structural typing for the viewer's model to avoid importing heavy VRM / three types
 interface SpeakCapableModel {
   speak?: (audio: ArrayBuffer, screenplay: Screenplay) => Promise<void>;
-  playAnimation?: (
-    animation: any /* accept VRMAnimation | THREE.AnimationClip without heavy import */,
-    name: string,
-  ) => Promise<number> | void;
   playEmotion?: (expression: string) => Promise<void> | void;
+  // Optional stopSpeaking hook used on interrupt
+  stopSpeaking?: () => void;
 }
 interface Viewer {
   model?: SpeakCapableModel; // typically a VRM or proxy wrapper
@@ -18,10 +16,7 @@ interface Viewer {
 }
 // Align with concrete Alert class where error(title,message) expects both params
 type Alert = { error: (title: string, message: string) => void };
-type AmicaLife = { receiveMessageFromUser?: (m: string) => void } & Record<
-  string,
-  any
->;
+type AmicaLife = { receiveMessageFromUser?: (m: string) => void };
 import { config, updateConfig } from "@/utils/config";
 import { cleanTalk } from "@/utils/cleanTalk";
 import { wait } from "@/utils/wait";
@@ -47,7 +42,7 @@ import {
   snapshotConfig,
   getOrLoadLLMBackend,
 } from "./registries";
-import { ChatStreamSession } from "./chatSession";
+// import { ChatStreamSession } from "./chatSession"; // unused here
 
 type Speak = {
   audioBuffer: ArrayBuffer | null;
@@ -115,7 +110,6 @@ export class Chat {
     this.messageList = [];
     this.currentStreamIdx = 0;
     this.lastAwake = 0;
-    const noop = () => {};
     // Map legacy setters to observer notifications so existing code keeps working
     this.setChatLog = (log: Message[]) =>
       this.notify((o) => o.onChatLog?.(log));
@@ -149,8 +143,8 @@ export class Chat {
     this.amicaLife = amicaLife;
     this.viewer = viewer;
     this.alert = alert;
-    if (!(globalThis as any).__amica_init_warned) {
-      (globalThis as any).__amica_init_warned = true;
+    if (!globalThis.__amica_init_warned) {
+      globalThis.__amica_init_warned = true;
       // One-time deprecation notice
       logger.warn(
         "Chat.initialize legacy setter signature is deprecated; migrate to initializeWithObserver()",
@@ -168,9 +162,9 @@ export class Chat {
     this.addObserver(legacyObserver);
     if (options?.observer) this.addObserver(options.observer);
     // Initialize background speech pipeline
-    this.speechPipeline = new SpeechPipeline(this as any);
+    this.speechPipeline = new SpeechPipeline(this);
     this.speechPipeline.start();
-    this.streamController = new StreamController(this as any);
+    this.streamController = new StreamController(this);
     this.updateAwake();
     this.initialized = true;
     if (options?.enableSSE !== false) this.initSSE();
@@ -285,6 +279,11 @@ export class Chat {
     requestAnimationFrame(() => this.flushAssistantBuffer());
   }
 
+  // Public bridge for SpeechPipeline to avoid exposing private method
+  public appendAssistantBufferedPublic(text: string, flushNow = false) {
+    this.appendAssistantBuffered(text, flushNow);
+  }
+
   private flushAssistantBuffer() {
     if (this.assistantBuffer === "") {
       this.assistantFlushScheduled = false;
@@ -379,8 +378,8 @@ export class Chat {
     this.speakJobs.clear();
     this.assistantBuffer = "";
     try {
-      (this.viewer as any)?.model?.stopSpeaking?.();
-    } catch (e) {
+      this.viewer?.model?.stopSpeaking?.();
+    } catch {
       /* ignore stopSpeaking errors */
     }
   }
@@ -436,7 +435,14 @@ export class Chat {
             );
             const animation = await loadVRMAnimation(`/animations/${data}`);
             if (!animation) throw new Error("Loading animation failed");
-            this.viewer?.model?.playAnimation?.(animation, data);
+            (
+              this.viewer?.model as unknown as {
+                playAnimation?: (
+                  a: unknown,
+                  n: string,
+                ) => Promise<number> | void;
+              }
+            )?.playAnimation?.(animation, data);
             requestAnimationFrame(() => this.viewer?.resetCameraLerp?.());
             break;
           }

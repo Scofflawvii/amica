@@ -23,7 +23,10 @@ import {
   processNormalChat,
   triggerAmicaActions,
   updateSystemPrompt,
+  type TriggerPayload,
+  type UpdateSystemPromptPayload,
 } from "@/features/externalAPI/processors/chatProcessor";
+import type { TimestampedPrompt } from "@/features/amicaLife/eventHandler";
 
 export const apiLogs: ApiLogEntry[] = [];
 export const sseClients: Array<{ res: NextApiResponse }> = [];
@@ -45,7 +48,11 @@ export default async function handler(
     return sendError(res, "", "API is currently disabled.", 503);
   }
 
-  const { sessionId, inputType, payload, noProcessChat = false } = req.body;
+  const { sessionId, inputType, payload } = req.body as {
+    sessionId?: string;
+    inputType?: string;
+    payload?: unknown;
+  };
   const currentSessionId = generateSessionId(sessionId);
   const timestamp = new Date().toISOString();
 
@@ -65,7 +72,7 @@ export default async function handler(
     res.status(200).json({ sessionId: currentSessionId, outputType, response });
   } catch (error) {
     apiLogs.push({
-      sessionId: sessionId,
+      sessionId: sessionId ?? currentSessionId,
       timestamp,
       inputType,
       outputType: "Error",
@@ -79,7 +86,7 @@ const processRequest = async (inputType: string, payload: unknown) => {
   switch (inputType) {
     case "Normal Chat Message":
       return {
-        response: await processNormalChat(payload as any),
+        response: await processNormalChat(String(payload ?? "")),
         outputType: "Chat",
       };
     case "Memory Request":
@@ -93,12 +100,16 @@ const processRequest = async (inputType: string, payload: unknown) => {
       };
     case "Update System Prompt":
       return {
-        response: await updateSystemPrompt(payload as any),
+        response: await updateSystemPrompt(
+          (payload as UpdateSystemPromptPayload) ?? { prompt: "" },
+        ),
         outputType: "Updated system prompt",
       };
     case "Brain Message":
       return {
-        response: await handleSubconscious(payload as any),
+        response: await handleSubconscious(
+          payload as TimestampedPrompt as TimestampedPrompt,
+        ),
         outputType: "Added subconscious stored prompt",
       };
     case "Chat History":
@@ -108,7 +119,7 @@ const processRequest = async (inputType: string, payload: unknown) => {
       };
     case "Reasoning Server":
       return {
-        response: await triggerAmicaActions(payload as any),
+        response: await triggerAmicaActions((payload as TriggerPayload) ?? {}),
         outputType: "Actions",
       };
     default:

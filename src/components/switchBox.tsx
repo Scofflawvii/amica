@@ -97,7 +97,7 @@ interface VerticalProps {
   value: boolean;
   label: string;
   onChange: (checked: boolean) => void;
-  [key: string]: any; // Additional props
+  [key: string]: unknown; // Additional props
 }
 
 export const VerticalSwitchBox = ({

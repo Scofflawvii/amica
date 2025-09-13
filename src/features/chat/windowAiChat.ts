@@ -1,10 +1,15 @@
 import { Message } from "./messages";
-import { Output } from "window.ai";
+import {
+  Output,
+  ChatMessage as WindowAIMessage,
+  isMessageOutput,
+  isTextOutput,
+} from "window.ai";
 import { config } from "@/utils/config";
 
 export async function getWindowAiChatResponseStream(messages: Message[]) {
   // Window.ai expects plain text messages; flatten multimodal content
-  const flattened = messages.map((m) => ({
+  const flattened: WindowAIMessage[] = messages.map((m) => ({
     role: m.role,
     content:
       typeof m.content === "string"
@@ -16,9 +21,9 @@ export async function getWindowAiChatResponseStream(messages: Message[]) {
   const stream = new ReadableStream({
     async start(controller: ReadableStreamDefaultController) {
       try {
-        const [response]: Output[] = await window.ai.generateText(
+        await window.ai.generateText(
           {
-            messages: flattened as any,
+            messages: flattened,
           },
           {
             maxTokens: 400,
@@ -36,8 +41,10 @@ export async function getWindowAiChatResponseStream(messages: Message[]) {
                 throw new Error(error);
               }
 
-              const piece = (res as any).text || (res as any).message?.content;
-              if (piece) {
+              let piece: string | undefined;
+              if (isTextOutput(res)) piece = res.text;
+              else if (isMessageOutput(res)) piece = res.message.content;
+              if (piece !== undefined) {
                 controller.enqueue(piece);
               }
 

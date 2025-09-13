@@ -570,7 +570,7 @@ export class Viewer {
           el.style.background = "#000";
           el.style.color = "#fff";
         }
-      } catch (_e) {
+      } catch {
         // no-op
         void 0;
       }
@@ -1037,7 +1037,9 @@ export class Viewer {
       for (const item of this.roomBVHHelperGroup.children) {
         if (item instanceof MeshBVHHelper) {
           try {
-            const geometry = (item as any).geometry;
+            const geometry = (
+              item as unknown as { geometry?: THREE.BufferGeometry }
+            ).geometry;
             geometry?.dispose();
             for (const key in geometry?.attributes) {
               geometry?.deleteAttribute(key);
@@ -1261,10 +1263,13 @@ export class Viewer {
 
   public updateHands() {
     const handle = (hand: THREE.Group, jointMeshes: THREE.Mesh[]) => {
-      if ((hand as any).joints) {
+      const h = hand as unknown as {
+        joints?: Record<string, { matrix: THREE.Matrix4 }>;
+      };
+      if (h.joints) {
         let i = 0;
         for (const name of joints) {
-          const joint = (hand as any)?.joints[name];
+          const joint = h.joints[name];
           if (!joint) {
             break; // if one isnt found then they all wont be found
           }
@@ -1434,8 +1439,12 @@ export class Viewer {
     this.updateHands();
 
     // Stats.js legacy export provides update(); call if present
-    if (this.stats && typeof (this.stats as any).update === "function") {
-      (this.stats as any).update();
+    if (
+      this.stats &&
+      typeof (this.stats as unknown as { update?: () => void }).update ===
+        "function"
+    ) {
+      (this.stats as unknown as { update: () => void }).update();
     }
 
     let ptime = performance.now();

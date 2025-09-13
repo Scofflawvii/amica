@@ -1,14 +1,15 @@
 import { ChatStreamSession } from "./chatSession";
 import { Chat } from "./chat"; // Type only
 import { TTSJob } from "./speechPipeline";
-import { Screenplay } from "./messages";
+// ...
+import { ChatObserver } from "./chatObserver";
 
 /**
  * Orchestrates a single streaming chat session lifecycle, isolating Chat from
  * ChatStreamSession creation and post-processing state transitions.
  */
 interface ChatNotifier {
-  notify(fn: (o: any) => void): void; // existing observer notification signature
+  notify(fn: (o: ChatObserver) => void): void; // existing observer notification signature
 }
 
 type EnqueueTTS = { enqueue(v: TTSJob): void };
@@ -34,14 +35,14 @@ export class StreamController {
     if (this.activeSession) {
       const idx = this.activeSession.streamIdx;
       this.activeSession.abort();
-      this.chat.notify?.((o: any) => o.onSessionEnd?.(idx, "aborted"));
+      this.chat.notify?.((o) => o.onSessionEnd?.(idx, "aborted"));
     }
   }
 
   async run(stream: ReadableStream<Uint8Array>) {
     this.chat.currentStreamIdx++;
     const idx = this.chat.currentStreamIdx;
-    this.chat.notify?.((o: any) => o.onSessionStart?.(idx));
+    this.chat.notify?.((o) => o.onSessionStart?.(idx));
     this.chat.transitionPublic("processing");
     this.activeSession = new ChatStreamSession(idx, stream, {
       enqueueScreenplay: (sc) =>
@@ -56,7 +57,7 @@ export class StreamController {
     const result = await this.activeSession.process();
     if (this.chat.getState() === "processing")
       this.chat.transitionPublic("idle");
-    this.chat.notify?.((o: any) => o.onSessionEnd?.(idx, "completed"));
+    this.chat.notify?.((o) => o.onSessionEnd?.(idx, "completed"));
     return result;
   }
 }

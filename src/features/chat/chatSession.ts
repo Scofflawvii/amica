@@ -34,7 +34,7 @@ export class ChatStreamSession {
     this.aborted = true;
     try {
       this.reader.cancel();
-    } catch (e) {
+    } catch {
       /* reader cancel ignored */
     }
   }
@@ -90,12 +90,11 @@ export class ChatStreamSession {
       const msg = e instanceof Error ? e.message : String(e);
       this.cb.appendError(msg);
     } finally {
-      if (!(this as any).reader?.closed)
-        try {
-          this.reader.releaseLock();
-        } catch (e) {
-          /* release lock ignored */
-        }
+      try {
+        this.reader.releaseLock();
+      } catch {
+        /* release lock ignored */
+      }
       console.timeEnd("chat stream processing");
       if (this.cb.isCurrent(this.streamIdx)) this.cb.setProcessingState(false);
       perfMark("chat:stream:done");
