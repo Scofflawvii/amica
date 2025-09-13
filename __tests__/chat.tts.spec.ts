@@ -49,17 +49,11 @@ describe("Chat.fetchAudio edge cases", () => {
       backend,
     });
     const chat = new ChatCtor();
-    chat.initialize(
+    chat.initializeWithObserver(
       {} as any,
       { model: {} } as any,
       alert as any,
-      () => {},
-      () => {},
-      () => {},
-      () => {},
-      () => {},
-      () => {},
-      () => {},
+      undefined,
       { enableSSE: false },
     );
     const res = await chat.fetchAudio({
@@ -81,17 +75,11 @@ describe("Chat.fetchAudio edge cases", () => {
     });
     const { logger } = require("../src/utils/logger");
     const chat = new ChatCtor();
-    chat.initialize(
+    chat.initializeWithObserver(
       {} as any,
       { model: {} } as any,
       alert as any,
-      () => {},
-      () => {},
-      () => {},
-      () => {},
-      () => {},
-      () => {},
-      () => {},
+      undefined,
       { enableSSE: false },
     );
     const res = await chat.fetchAudio({ style: "talk", message: "Hi" } as any);
@@ -113,17 +101,11 @@ describe("Chat.fetchAudio edge cases", () => {
     });
     const { logger } = require("../src/utils/logger");
     const chat = new ChatCtor();
-    chat.initialize(
+    chat.initializeWithObserver(
       {} as any,
       { model: {} } as any,
       alert as any,
-      () => {},
-      () => {},
-      () => {},
-      () => {},
-      () => {},
-      () => {},
-      () => {},
+      undefined,
       { enableSSE: false },
     );
     const res = await chat.fetchAudio({

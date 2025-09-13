@@ -86,19 +86,9 @@ describe("Chat integration (state + TTS + interrupt)", () => {
     viewer = makeViewer();
     alert = makeAlert();
     life = makeLife();
-    chat.initialize(
-      life,
-      viewer,
-      alert,
-      () => {},
-      () => {},
-      () => {},
-      () => {},
-      () => {},
-      () => {},
-      () => {},
-      { enableSSE: false },
-    );
+    chat.initializeWithObserver(life, viewer, alert, undefined, {
+      enableSSE: false,
+    });
   });
 
   test("processing -> speaking -> idle", async () => {

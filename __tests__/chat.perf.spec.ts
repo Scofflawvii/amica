@@ -43,17 +43,11 @@ describe("Chat perf marks", () => {
   let beforeCounts: Record<string, number> = {};
   beforeEach(() => {
     chat = new Chat();
-    chat.initialize(
+    chat.initializeWithObserver(
       {} as any,
       { model: {} } as any,
       { error: () => {} } as any,
-      () => {},
-      () => {},
-      () => {},
-      () => {},
-      () => {},
-      () => {},
-      () => {},
+      undefined,
       { enableSSE: false },
     );
     if (typeof performance.getEntriesByName === "function") {

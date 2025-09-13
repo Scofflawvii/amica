@@ -23,18 +23,12 @@ const makeStream = (parts: string[]) =>
 
 const initChat = (observer?: Record<string, unknown>) => {
   const chat = new Chat();
-  chat.initialize(
+  chat.initializeWithObserver(
     {} as any, // amicaLife
     {} as any, // viewer
     { error: () => {} }, // alert
-    () => {},
-    () => {},
-    () => {},
-    () => {},
-    () => {},
-    () => {},
-    () => {},
-    { enableSSE: false, observer },
+    observer as any,
+    { enableSSE: false },
   );
   return chat;
 };
@@ -43,7 +37,7 @@ describe("ChatObserver extended", () => {
   beforeAll(() => {
     // synchronous flush for buffered assistant text
     // Force sync flush for buffering during tests
-     
+
     (global as any).requestAnimationFrame = (cb: () => void) => {
       cb();
       return 0;
