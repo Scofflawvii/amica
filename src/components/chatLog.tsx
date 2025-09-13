@@ -37,12 +37,14 @@ export const ChatLog = ({ messages }: { messages: Message[] }) => {
       fileReader.onload = (e) => {
         const content = e.target?.result as string;
         const lines = content.split("\n");
-        const parsedChat = lines
-          .map((line) => {
-            const match = line.match(/^(user|assistant)\s*:\s*(.*)$/);
-            return match ? { role: match[1], content: match[2] } : null;
-          })
-          .filter((v): v is Message => Boolean(v));
+        const parsedChat: Message[] = lines.reduce((acc: Message[], line) => {
+          const match = line.match(/^(user|assistant)\s*:\s*(.*)$/);
+          if (!match) return acc;
+          const role = match[1] as Message["role"];
+          const content = match[2] ?? ""; // ensure plain string content
+          acc.push({ role, content });
+          return acc;
+        }, []);
 
         try {
           if (parsedChat.length === 0) {
@@ -55,12 +57,15 @@ export const ChatLog = ({ messages }: { messages: Message[] }) => {
             return;
           }
           bot.setMessageList(parsedChat.slice(0, -1));
-          const content = lastMessage.content ?? ""; // fallback for safety
-          if (lastMessage.role === "user") {
+          const content =
+            (typeof lastMessage.content === "string"
+              ? lastMessage.content
+              : lastMessage.content
+                  .map((p) => (p.type === "text" ? p.text : p.image_url.url))
+                  .join(" ")) || "";
+          if (lastMessage.role === "user")
             bot.receiveMessageFromUser(content, false);
-          } else {
-            bot.bubbleMessage(lastMessage.role, content);
-          }
+          else bot.bubbleMessage(lastMessage.role, content);
         } catch (e) {
           const err = e instanceof Error ? e : new Error(String(e));
           logger.error("chatLog export error", err);
@@ -79,8 +84,8 @@ export const ChatLog = ({ messages }: { messages: Message[] }) => {
       [
         messages
           .map(
-            (msg: { role: string; content: string }) =>
-              `${msg.role} : ${msg.content}`,
+            (msg) =>
+              `${msg.role} : ${typeof msg.content === "string" ? msg.content : msg.content.map((p) => (p.type === "text" ? p.text : p.image_url.url)).join(" ")}`,
           )
           .join("\n\n"),
       ],
@@ -144,7 +149,14 @@ export const ChatLog = ({ messages }: { messages: Message[] }) => {
                 ref={messages.length - 1 === i ? chatScrollRef : null}>
                 <Chat
                   role={msg.role}
-                  message={(msg.content as string).replace(/\[(.*?)\]/g, "")}
+                  message={(typeof msg.content === "string"
+                    ? msg.content
+                    : msg.content
+                        .map((p) =>
+                          p.type === "text" ? p.text : p.image_url.url,
+                        )
+                        .join(" ")
+                  ).replace(/\[(.*?)\]/g, "")}
                   num={i}
                   onClickResumeButton={handleResumeButtonClick}
                 />

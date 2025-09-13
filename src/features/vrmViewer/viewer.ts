@@ -1033,9 +1033,10 @@ export class Viewer {
       vlog.debug("splat loaded");
       if (!this.room?.splat) return;
 
-      this.room.splat.position.set(0, 4, 0);
-      this.room.splat.rotation.set(0, 0, Math.PI);
-      this.scene!.add(this.room.splat);
+      const splat: any = this.room.splat; // DropInViewer lacks three.js Object3D typing; treat as any for now
+      splat.position.set(0, 4, 0);
+      splat.rotation.set(0, 0, Math.PI);
+      this.scene!.add(splat);
     });
   }
 

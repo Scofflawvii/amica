@@ -10,7 +10,7 @@ import {
 import {
   generateSessionId,
   sendError,
-  apiLogEntry,
+  ApiLogEntry,
   ApiResponse,
 } from "@/features/externalAPI/utils/apiHelper";
 import {
@@ -25,7 +25,7 @@ import {
   updateSystemPrompt,
 } from "@/features/externalAPI/processors/chatProcessor";
 
-export const apiLogs: apiLogEntry[] = [];
+export const apiLogs: ApiLogEntry[] = [];
 export const sseClients: Array<{ res: NextApiResponse }> = [];
 
 // Main Amica Handler

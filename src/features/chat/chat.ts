@@ -3,7 +3,11 @@ import { Message, Role, Screenplay, Talk } from "./messages";
 // Lightweight structural typing for the viewer's model to avoid importing heavy VRM / three types
 interface SpeakCapableModel {
   speak?: (audio: ArrayBuffer, screenplay: Screenplay) => Promise<void>;
-  playAnimation?: (animation: unknown, name?: string) => void;
+  playAnimation?: (
+    animation: any /* accept VRMAnimation | THREE.AnimationClip without heavy import */,
+    name: string,
+  ) => Promise<number> | void;
+  playEmotion?: (expression: string) => Promise<void> | void;
 }
 interface Viewer {
   model?: SpeakCapableModel; // typically a VRM or proxy wrapper

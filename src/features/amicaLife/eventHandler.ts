@@ -120,7 +120,7 @@ export async function handleSleepEvent(chat: Chat, amicaLife: AmicaLife) {
   try {
     const viewer = chat.viewer;
     if (viewer) {
-      await viewer.model!.playEmotion("Sleep");
+      await viewer.model?.playEmotion?.("Sleep");
     }
     amicaLife.eventProcessing = false;
     console.timeEnd("processing_event Sleep");
@@ -205,7 +205,7 @@ export async function handleSubconsciousEvent(
     // External API feature
     if (isDev && config("external_api_enabled") === "true") {
       try {
-        storedSubconcious = await handleSubconscious(timestampedPrompt);
+        await handleSubconscious(timestampedPrompt); // side-effect only, stored externally
       } catch (error) {
         alog.error("Error handling external API", error);
       }
