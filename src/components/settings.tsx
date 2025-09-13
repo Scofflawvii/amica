@@ -392,6 +392,7 @@ export const Settings = ({ onClickClose }: { onClickClose: () => void }) => {
   const backButtonRef = useRef<HTMLDivElement>(null);
   const mainMenuRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleChangeVrmFile = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -550,6 +551,40 @@ export const Settings = ({ onClickClose }: { onClickClose: () => void }) => {
     sttWakeWordEnabled,
     sttWakeWord,
   ]);
+
+  useEffect(() => {
+    // Initial focus for accessibility: move focus to the dialog container
+    containerRef.current?.focus();
+  }, []);
+
+  // Focus trap: keep Tab focus within the Settings overlay when open
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const focusable = Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter(
+        (el) => !el.hasAttribute("disabled") && !el.getAttribute("aria-hidden"),
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first?.focus();
+      } else if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last?.focus();
+      }
+    };
+    root.addEventListener("keydown", onKeyDown);
+    return () => root.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   useEffect(() => {
     function click(e: MouseEvent) {
@@ -1138,11 +1173,20 @@ export const Settings = ({ onClickClose }: { onClickClose: () => void }) => {
   }
 
   return (
-    <div className="text z-floating fixed top-0 left-0 max-h-full w-full overflow-y-auto text-left text-xs backdrop-blur">
+    <div
+      ref={containerRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="settings-title"
+      tabIndex={-1}
+      className="text z-floating fixed top-0 left-0 max-h-full w-full overflow-y-auto text-left text-xs backdrop-blur">
       <div className="z-index-50 absolute top-0 left-0 h-full w-full bg-neutral-900/40 dark:bg-neutral-950/60"></div>
       <div
         className="dark:bg-surface-alt border-border/50 bg-surface z-modal fixed top-0 left-0 flex w-full items-center justify-between border-b p-2"
         ref={topMenuRef}>
+        <h2 id="settings-title" className="sr-only">
+          Settings
+        </h2>
         <nav aria-label="Breadcrumb" className="ml-4 inline-block">
           <ol role="list" className="flex items-center space-x-4">
             <li className="flex">

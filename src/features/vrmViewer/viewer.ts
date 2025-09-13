@@ -9,9 +9,7 @@ import {
   StaticGeometryGenerator,
 } from "three-mesh-bvh";
 // import { GenerateMeshBVHWorker } from "@/workers/bvh/GenerateMeshBVHWorker";
-import { WorkerBase } from "@/workers/bvh/utils/WorkerBase";
-import { GenerateMeshBVHWorker } from "@/workers/bvh/GenerateMeshBVHWorker";
-import { ParallelMeshBVHWorker } from "@/workers/bvh/ParallelMeshBVHWorker";
+import type { WorkerBase } from "@/workers/bvh/utils/WorkerBase";
 // Temp Disable : WebXR
 // import {
 //     BatchedParticleRenderer,
@@ -687,26 +685,30 @@ export class Viewer {
     // Initialize BVH worker based on capability and config
     try {
       const mode = config("bvh_worker_mode"); // auto | off | single | parallel
-      if (mode !== "off") {
-        if (mode === "parallel") {
-          // May throw if SharedArrayBuffer unsupported; will be caught below
-          this.bvhWorker = new (ParallelMeshBVHWorker as unknown as {
-            new (): WorkerBase;
-          })();
-        } else if (mode === "single") {
-          this.bvhWorker = new GenerateMeshBVHWorker();
-        } else {
-          // auto: prefer parallel if available; fallback to single
-          try {
-            this.bvhWorker = new (ParallelMeshBVHWorker as unknown as {
-              new (): WorkerBase;
-            })();
-          } catch {
-            this.bvhWorker = new GenerateMeshBVHWorker();
-          }
+      if (mode === "off") {
+        this.bvhWorker = null;
+      } else if (mode === "single") {
+        const { GenerateMeshBVHWorker } = await import(
+          "@/workers/bvh/GenerateMeshBVHWorker"
+        );
+        this.bvhWorker = new GenerateMeshBVHWorker();
+      } else if (mode === "parallel") {
+        // Temporarily fallback to single-threaded worker to avoid bundling parallel worker in dev/test
+        const { GenerateMeshBVHWorker } = await import(
+          "@/workers/bvh/GenerateMeshBVHWorker"
+        );
+        this.bvhWorker = new GenerateMeshBVHWorker();
+        if (config("debug_gfx") === "true") {
+          vlog.info(
+            "Parallel BVH worker disabled in this build; using single-threaded worker",
+          );
         }
       } else {
-        this.bvhWorker = null;
+        // auto: use single-threaded worker to avoid bundling parallel worker in dev/test
+        const { GenerateMeshBVHWorker } = await import(
+          "@/workers/bvh/GenerateMeshBVHWorker"
+        );
+        this.bvhWorker = new GenerateMeshBVHWorker();
       }
     } catch (e) {
       this.bvhWorker = null;

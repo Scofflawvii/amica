@@ -49,7 +49,7 @@ Legend:
 ## 4. Accessibility & UX Resilience
 
 - (P1 S) Automated axe run in CI for critical routes. — **DONE** (see `.github/workflows/accessibility.yml` and `npm run test:a11y`).
-- (P1 S) Focus management & trap for overlays / modals / debug pane.
+- (P1 S) Focus management & trap for overlays / modals / debug pane. — **DONE** (added ARIA dialog semantics + focus trap to DebugPane `src/components/debugPane.tsx` and Settings overlay `src/components/settings.tsx`; ensured initial focus set to the dialog container; Escape closes.)
 - (P1 M) Reduced motion pathway for particle / viewer animations.
 - (P2 M) Keyboard navigation matrix tests (inputs, session controls, debug panel).
 - (P3 M) Pseudo-locale expansion & bidi layout sanity.
