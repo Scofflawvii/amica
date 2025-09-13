@@ -52,8 +52,10 @@ const topFiles = Array.from(sizeMap.entries())
 
 let baseline = null;
 const baselineFile = process.env.BUNDLE_BASELINE_FILE || 'bundle-baseline.json';
-if (fs.existsSync(path.join(root, baselineFile))) {
-  try { baseline = readJson(path.join(root, baselineFile)); } catch {}
+const baselineAbs = path.join(root, baselineFile);
+if (fs.existsSync(baselineAbs)) {
+  const maybe = readJson(baselineAbs);
+  if (maybe) baseline = maybe;
 }
 
 const md = [];
@@ -85,5 +87,9 @@ console.log(output);
 
 // Also write to step summary if available
 if (process.env.GITHUB_STEP_SUMMARY) {
-  try { fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, '\n' + output + '\n'); } catch {}
+  try {
+    fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, '\n' + output + '\n');
+  } catch (e) {
+    console.error('[bundle-report] Failed writing step summary:', e?.message || e);
+  }
 }

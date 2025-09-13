@@ -130,12 +130,14 @@ export default {
           description:
             "Disallow raw hex/rgb/hsl colors in Tailwind arbitrary values and inline style; prefer semantic tokens (e.g., hsl(var(--text))).",
         },
-        hasSuggestions: false,
-        fixable: null,
+        hasSuggestions: true,
+        fixable: "code",
         schema: [],
         messages: {
           rawColor:
             'Raw color "{{raw}}" not allowed. Use semantic token (e.g., hsl(var(--...))) or a predefined utility.',
+          suggestText: "Replace with text token (hsl(var(--text)))",
+          suggestSurface: "Replace with surface token (hsl(var(--surface)))",
         },
       },
       create(context) {
@@ -144,12 +146,41 @@ export default {
         const RAW_HSL = /\bhsla?\([^)]*\)/u;
         const ALLOW_VAR = /var\(--[A-Za-z0-9-_]+\)/u;
         const ALLOW_HSL_VAR = /hsl\(var\(--[A-Za-z0-9-_]+\)\)/u;
+        const COMMON_MAP = new Map([
+          ["#000", "hsl(var(--surface))"],
+          ["#000000", "hsl(var(--surface))"],
+          ["#fff", "hsl(var(--text))"],
+          ["#ffffff", "hsl(var(--text))"],
+        ]);
 
         function reportIfRawColor(node, raw) {
           // Allow semantic tokens via CSS variables
           if (ALLOW_HSL_VAR.test(raw) || ALLOW_VAR.test(raw)) return;
           if (RAW_HEX.test(raw) || RAW_RGB.test(raw) || RAW_HSL.test(raw)) {
-            context.report({ node, messageId: "rawColor", data: { raw } });
+            const lower = raw.toLowerCase();
+            const suggestion = COMMON_MAP.get(lower);
+            context.report({
+              node,
+              messageId: "rawColor",
+              data: { raw },
+              suggest: suggestion
+                ? [
+                    {
+                      messageId: suggestion.includes("text")
+                        ? "suggestText"
+                        : "suggestSurface",
+                      fix(fixer) {
+                        return fixer.replaceText(
+                          node,
+                          node.raw && node.raw.startsWith('"')
+                            ? `"${suggestion}"`
+                            : `'${suggestion}'`,
+                        );
+                      },
+                    },
+                  ]
+                : undefined,
+            });
           }
         }
 

@@ -43,6 +43,13 @@ const sharedFiles = Array.from(sharedSet).filter((f) => f.endsWith('.js'));
 const sharedKB = kb(sumSizes(sharedFiles));
 
 const allFiles = Array.from(new Set(Object.values(pages).flat().concat(buildManifest.polyfillFiles || [], buildManifest.lowPriorityFiles || []))).filter((f) => f.endsWith('.js'));
+
+// Detect development build-manifest (Next.js dev server) and skip hard checks locally
+const isDev = sharedFiles.concat(allFiles).some((f) => f.includes('/development/') || f.endsWith('/webpack.js') || f === 'static/chunks/webpack.js');
+if (isDev) {
+  console.log('[bundle-check] Skipping: development manifest detected. Run `npm run build` for production sizes.');
+  process.exit(0);
+}
 const totalKB = kb(sumSizes(allFiles));
 
 const scope = (process.env.BUNDLE_CHECK_SCOPE || 'shared').toLowerCase();

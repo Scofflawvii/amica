@@ -58,8 +58,7 @@ export default {
           600: "hsl(var(--neutral-600) / <alpha-value>)",
           700: "hsl(var(--neutral-700) / <alpha-value>)",
         },
-        base: "#FBE2CA", // legacy token still used in places
-        "text-primary": "#514062", // legacy (can be migrated to text)
+        // Legacy palette entries removed; use CSS variable tokens above
       },
       fontFamily: {
         M_PLUS_2: ["Montserrat", "M_PLUS_2", "sans-serif"],
