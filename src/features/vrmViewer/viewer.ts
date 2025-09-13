@@ -108,6 +108,12 @@ const amicaBones: VRMHumanBoneName[] = [
   "rightHand",
 ];
 
+// Minimal contract for dynamic scenarios loaded at runtime
+type Scenario = {
+  setup: () => Promise<void>;
+  update?: (dt: number) => void;
+};
+
 /**
  * three.jsを使った3Dビューワー
  *
@@ -218,7 +224,7 @@ export class Viewer {
   private transformAux1: unknown;
   private tempBtVec3_1: unknown;
 
-  private scenario: any;
+  private scenario?: Scenario;
   private scenarioLoading: boolean = false;
   private pausedHeavy: boolean = false;
 
@@ -262,7 +268,7 @@ export class Viewer {
       webgpuPref === "true" ||
       (webgpuPref === "auto" &&
         typeof navigator !== "undefined" &&
-        (navigator as any).gpu);
+        "gpu" in navigator);
     if (wantWebGPU) {
       try {
         const WebGPURenderer = (
@@ -603,18 +609,19 @@ export class Viewer {
       }
 
       const hasPanels =
-        typeof (Stats as unknown as { Panel?: new (...args: any[]) => any })
-          .Panel === "function" &&
+        typeof (
+          Stats as unknown as { Panel?: new (...args: unknown[]) => unknown }
+        ).Panel === "function" &&
         typeof (
           stats as unknown as {
-            addPanel?: (p: any) => {
+            addPanel?: (p: unknown) => {
               update: (v: number, max?: number) => void;
             };
           }
         ).addPanel === "function";
       if (hasPanels) {
         const S = Stats as unknown as {
-          Panel: new (name: string, fg: string, bg: string) => any;
+          Panel: new (name: string, fg: string, bg: string) => unknown;
         };
         const s = stats as unknown as {
           addPanel: (p: InstanceType<typeof S.Panel>) => {
@@ -1043,7 +1050,7 @@ export class Viewer {
       // Dispose BVH trees on room meshes
       for (const m of this.roomTargets) {
         try {
-          const g = m.geometry as any;
+          const g = m.geometry as unknown as { disposeBoundsTree?: () => void };
           if (typeof g.disposeBoundsTree === "function") g.disposeBoundsTree();
         } catch (e) {
           // ignore dispose errors in teardown
@@ -1066,7 +1073,7 @@ export class Viewer {
       vlog.debug("splat loaded");
       if (!this.room?.splat) return;
 
-      const splat: any = this.room.splat; // DropInViewer lacks three.js Object3D typing; treat as any for now
+      const splat = this.room.splat as unknown as THREE.Object3D; // DropInViewer lacks three.js Object3D typing
       splat.position.set(0, 4, 0);
       splat.rotation.set(0, 0, Math.PI);
       this.scene!.add(splat);
@@ -1091,7 +1098,12 @@ export class Viewer {
   }
 
   public onSelect(event: XRInputSourceEvent) {
-    const src = event.inputSource as any;
+    const src = event.inputSource as unknown as {
+      handedness?: string;
+      targetRayMode?: string;
+      hand?: unknown;
+      gripSpace?: unknown;
+    };
     vlog.debug("onSelect", {
       handedness: src?.handedness,
       targetRayMode: src?.targetRayMode,
@@ -1403,7 +1415,7 @@ export class Viewer {
       THREE,
     });
 
-    await this.scenario.setup();
+    await this.scenario?.setup();
     this.scenarioLoading = false;
   }
 
@@ -1490,11 +1502,17 @@ export class Viewer {
     if (!this.pausedHeavy && this.elapsedMsSlow > 1) {
       // updating the texture for this is very slow
       ptime = performance.now();
-      if (this.statsMesh && (this.statsMesh.material as any)?.map) {
-        (this.statsMesh.material as any).map.update();
+      if (this.statsMesh) {
+        const mat = this.statsMesh.material as unknown as {
+          map?: { update: () => void };
+        };
+        mat.map?.update();
       }
-      if (this.guiMesh && (this.guiMesh.material as any)?.map) {
-        (this.guiMesh.material as any).map.update();
+      if (this.guiMesh) {
+        const mat = this.guiMesh.material as unknown as {
+          map?: { update: () => void };
+        };
+        mat.map?.update();
       }
       this.statsMsPanel.update(performance.now() - ptime, 100);
 
@@ -1568,7 +1586,7 @@ export class Viewer {
     // Stop all tracks on the stream to end streaming
     this.videoStream
       .getTracks()
-      .forEach((track: { stop: () => any }) => track.stop());
+      .forEach((track: MediaStreamTrack) => track.stop());
     this.videoStream = null; // Clear the stream reference
 
     vlog.debug("Streaming stopped!");
@@ -1678,7 +1696,7 @@ export class Viewer {
   public dispose() {
     try {
       // Stop animation loop
-      if (this.renderer) this.renderer.setAnimationLoop(null as any);
+      if (this.renderer) this.renderer.setAnimationLoop(null);
       // Remove listeners
       if (this._onResize) window.removeEventListener("resize", this._onResize);
       if (this._onVisibility && typeof document !== "undefined")
