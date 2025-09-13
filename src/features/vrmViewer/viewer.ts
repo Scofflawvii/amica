@@ -231,8 +231,8 @@ export class Viewer {
   private fpsWindowSec = 1.5; // adjust every ~1.5s
   // Minimal FPS overlay
   private fpsEnabled: boolean = false;
-  private fpsCanvas?: HTMLCanvasElement;
-  private fpsCtx?: CanvasRenderingContext2D | null;
+  private fpsCanvas: HTMLCanvasElement | undefined;
+  private fpsCtx: CanvasRenderingContext2D | null | undefined;
   private fpsValue: number = 60;
   // Stored listeners for cleanup
   private _onResize?: () => void;
@@ -1613,7 +1613,7 @@ export class Viewer {
     } else if (!on && this.fpsCanvas) {
       this.fpsCanvas.remove();
       this.fpsCanvas = undefined;
-      this.fpsCtx = undefined;
+      this.fpsCtx = null;
     }
   }
 

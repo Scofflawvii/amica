@@ -38,7 +38,7 @@ export interface Transcriber {
   isBusy: boolean;
   isModelLoading: boolean;
   start: (audioData: AudioBuffer | undefined) => void;
-  output?: TranscriberData;
+  output: TranscriberData | undefined;
 }
 
 export function useTranscriber(): Transcriber {

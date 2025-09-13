@@ -275,7 +275,7 @@ class WebmUint extends WebmBase<string> {
     super(name, type || "Uint");
   }
 
-  updateBySource() {
+  public override updateBySource() {
     // use hex representation of a number instead of number value
     this.data = "";
     for (let i = 0; i < this.source!.length; i++) {
@@ -284,7 +284,7 @@ class WebmUint extends WebmBase<string> {
     }
   }
 
-  updateByData() {
+  public override updateByData() {
     const length = this.data!.length / 2;
     this.source = new Uint8Array(length);
     for (let i = 0; i < length; i++) {
@@ -316,13 +316,13 @@ class WebmFloat extends WebmBase<number> {
       ? Float32Array
       : Float64Array;
   }
-  updateBySource() {
+  public override updateBySource() {
     const byteArray = this.source!.reverse();
     const floatArrayType = this.getFloatArrayType();
     const floatArray = new floatArrayType(byteArray.buffer as ArrayBuffer);
     this.data! = floatArray[0] ?? 0;
   }
-  updateByData() {
+  public override updateByData() {
     const floatArrayType = this.getFloatArrayType();
     const floatArray = new floatArrayType([this.data!]);
     const byteArray = new Uint8Array(floatArray.buffer);
@@ -344,7 +344,7 @@ interface ContainerData {
 
 class WebmContainer extends WebmBase<ContainerData[]> {
   offset: number = 0;
-  data: ContainerData[] = [];
+  override data: ContainerData[] = [];
 
   constructor(name: string, type: string) {
     super(name, type || "Container");
@@ -364,7 +364,7 @@ class WebmContainer extends WebmBase<ContainerData[]> {
     }
     return value;
   }
-  updateBySource() {
+  public override updateBySource() {
     let end: number | undefined = undefined;
     this.data = [];
     for (
@@ -438,7 +438,7 @@ class WebmContainer extends WebmBase<ContainerData[]> {
     return this.offset;
   }
 
-  updateByData() {
+  public override updateByData() {
     // run without accessing this.source to determine total length - need to know it to create Uint8Array
     const length = this.writeSections(true);
     this.source = new Uint8Array(length);

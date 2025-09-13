@@ -6,7 +6,7 @@ Legend:
 
 - Priority: P0 (Immediate / foundational), P1 (High impact), P2 (Medium), P3 (Exploratory / Nice-to-have)
 - Effort: S (≤1d), M (2–4d), L (≥1 week / multi-sprint)
-- Status: (blank = not started) / WIP / DONE / DEFERRED
+- Status: (blank = not started) / **WIP** / **DONE** / **DEFERRED**
 
 ---
 
@@ -24,7 +24,7 @@ Legend:
 
 - (P0 M) Turn on strict suite: `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `exactOptionalPropertyTypes`.
 - (P1 M) Introduce branded/opaque types (e.g. `ChatSessionId`, `TokenId`).
-- (P1 S) Eliminate remaining broad `any`; codemod `_unused` prefix for intentional ignores. — WIP (converted Settings UI event handlers from `ChangeEvent<any>` to specific element types; added numeric parsing for number inputs.)
+- (P1 S) Eliminate remaining broad `any`; codemod `_unused` prefix for intentional ignores. — **WIP** (converted Settings UI event handlers from `ChangeEvent<any>` to specific element types; added numeric parsing for number inputs.)
 - (P2 M) Runtime schema validation at API/model boundaries (zod) with inferred TS types.
 - (P2 M) Add `ts-prune` / `knip` dead symbol check in CI.
 
@@ -46,7 +46,7 @@ Legend:
 
 ## 4. Accessibility & UX Resilience
 
-- (P1 S) Automated axe run in CI for critical routes. — DONE (see `.github/workflows/accessibility.yml` and `npm run test:a11y`).
+- (P1 S) Automated axe run in CI for critical routes. — **DONE** (see `.github/workflows/accessibility.yml` and `npm run test:a11y`).
 - (P1 S) Focus management & trap for overlays / modals / debug pane.
 - (P1 M) Reduced motion pathway for particle / viewer animations.
 - (P2 M) Keyboard navigation matrix tests (inputs, session controls, debug panel).
@@ -114,14 +114,14 @@ Legend:
 ## 13. Build & Tooling
 
 - (P1 S) Bundle analyzer snapshot per PR (stored artifact + delta comment).
-- (P1 S) `tsc --noEmit` + ESLint + tests unified via a single `verify` script. — DONE (`npm run verify`).
+- (P1 S) `tsc --noEmit` + ESLint + tests unified via a single `verify` script. — **DONE** (`npm run verify`).
 - (P2 M) Turborepo / task pipeline for incremental caching (tests & build layers).
 - (P2 S) Add `knip` / `depcheck` to catch unused deps & exports.
 - (P3 M) Evaluate Biome or Rome/oxc for faster lint/format path.
 
 ## 14. Developer Experience & Maintainability
 
-- (P1 S) Codemod: replace legacy `Chat.initialize` with `initializeWithObserver` (safe patterns). — DONE (migrated remaining tests to `initializeWithObserver`; legacy method retained for BC; docs flag deprecation.)
+- (P1 S) Codemod: replace legacy `Chat.initialize` with `initializeWithObserver` (safe patterns). — **DONE** (migrated remaining tests to `initializeWithObserver`; legacy method retained for BC; docs flag deprecation.)
 - (P1 S) Add contributor guide section for semantic layering + tokens + logging patterns.
 - (P2 M) Storybook (or Ladle) for component + token documentation (dark/light variants).
 - (P2 S) ESLint rule: forbid raw z-index & raw colors (already partial) – add autofixes.

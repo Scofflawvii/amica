@@ -7,11 +7,11 @@ import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { VRMLookAtSmoother } from "./VRMLookAtSmoother";
 
 export class VRMLookAtSmootherLoaderPlugin extends VRMLookAtLoaderPlugin {
-  public get name(): string {
+  public override get name(): string {
     return "VRMLookAtSmootherLoaderPlugin";
   }
 
-  public async afterRoot(gltf: GLTF): Promise<void> {
+  public override async afterRoot(gltf: GLTF): Promise<void> {
     await super.afterRoot(gltf);
 
     const humanoid = gltf.userData.vrmHumanoid as VRMHumanoid | null;

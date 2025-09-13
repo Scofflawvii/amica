@@ -12,13 +12,15 @@ export default defineConfig({
     video: "retain-on-failure",
   },
   // Launch the Next.js dev server automatically for local + CI runs if one isn't already running.
-  webServer: process.env.PLAYWRIGHT_BASE_URL
-    ? undefined
+  ...(process.env.PLAYWRIGHT_BASE_URL
+    ? {}
     : {
-        command: "npm run dev",
-        port: 3000,
-        reuseExistingServer: false, // force fresh server so latest code (a11y fixes) is picked up
-        timeout: 120_000,
-      },
+        webServer: {
+          command: "npm run dev",
+          port: 3000,
+          reuseExistingServer: false, // force fresh server so latest code (a11y fixes) is picked up
+          timeout: 120_000,
+        },
+      }),
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 });

@@ -192,6 +192,10 @@ export class Chat {
     if (this.initialized) return; // idempotent safeguard
     const noop = () => {};
     // Reuse original initialize supplying no-op legacy setters so internal logic works.
+    const initOpts: { enableSSE?: boolean; observer?: ChatObserver } = {};
+    if (typeof options?.enableSSE === "boolean")
+      initOpts.enableSSE = options.enableSSE;
+    if (observer) initOpts.observer = observer;
     this.initialize(
       amicaLife,
       viewer,
@@ -203,7 +207,7 @@ export class Chat {
       noop,
       noop,
       noop,
-      { enableSSE: options?.enableSSE, observer },
+      initOpts,
     );
   }
 

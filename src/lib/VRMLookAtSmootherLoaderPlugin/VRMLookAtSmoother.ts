@@ -60,7 +60,7 @@ export class VRMLookAtSmoother extends VRMLookAt {
     this.enableSaccade = true;
   }
 
-  public update(delta: number): void {
+  public override update(delta: number): void {
     if (this.target && this.autoUpdate) {
       // アニメーションの視線
       // `_yaw` と `_pitch` のアップデート
@@ -99,22 +99,22 @@ export class VRMLookAtSmoother extends VRMLookAt {
           1.0 -
           THREE.MathUtils.smoothstep(
             Math.sqrt(
-              yawAnimation * yawAnimation + pitchAnimation * pitchAnimation
+              yawAnimation * yawAnimation + pitchAnimation * pitchAnimation,
             ),
             30.0,
-            90.0
+            90.0,
           );
 
         // yawFrame / pitchFrame に結果を代入
         yawFrame = THREE.MathUtils.lerp(
           yawAnimation,
           0.6 * this._yawDamped,
-          userRatio
+          userRatio,
         );
         pitchFrame = THREE.MathUtils.lerp(
           pitchAnimation,
           0.6 * this._pitchDamped,
-          userRatio
+          userRatio,
         );
 
         // 頭も回す
@@ -122,7 +122,7 @@ export class VRMLookAtSmoother extends VRMLookAt {
           -this._pitchDamped * THREE.MathUtils.DEG2RAD,
           this._yawDamped * THREE.MathUtils.DEG2RAD,
           0.0,
-          VRMLookAt.EULER_ORDER
+          VRMLookAt.EULER_ORDER,
         );
         _quatA.setFromEuler(_eulerA);
 

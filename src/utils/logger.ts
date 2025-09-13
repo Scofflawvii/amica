@@ -90,13 +90,14 @@ function shouldLog(level: Level): boolean {
 
 function toErrorLike(
   val: unknown,
-): { message?: string; stack?: string } | undefined {
+): { message?: string | undefined; stack?: string | undefined } | undefined {
   if (!val) return undefined;
-  if (val instanceof Error) return { message: val.message, stack: val.stack };
+  if (val instanceof Error)
+    return { message: val.message, stack: val.stack ?? undefined };
   if (typeof val === "object" && val && "message" in (val as any)) {
     const v = val as any;
     return {
-      message: String(v.message),
+      message: typeof v.message === "string" ? v.message : String(v.message),
       stack: typeof v.stack === "string" ? v.stack : undefined,
     };
   }
