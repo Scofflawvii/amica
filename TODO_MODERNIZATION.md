@@ -15,7 +15,7 @@ Legend:
 1. (P0 S) Enable stricter TypeScript flags (`strict`, `noUncheckedIndexedAccess`) — track any `any` cleanups. **DONE** (`strict` + `noUncheckedIndexedAccess` enabled in `tsconfig.json`; `npm run typecheck` passes with 0 errors. Remaining broad `any` usages tracked under §1 Type Safety cleanups and lint warnings.)
 2. (P0 S) Introduce structured logger wrapper (levels + JSON in prod) & replace ad-hoc `console.*` in new code. **DONE** (added `src/utils/logger.ts` with debug/info/warn/error, pretty in dev and JSON in prod; migrated warn/error across viewer, chat, settings, TTS (piper/kokoro/localXTTS/rvc/coquiLocal), external API modules, pages, and utils; tests/typecheck green).
 3. (P1 S) Add bundle analyzer + size thresholds in CI (warn > baseline + % delta). **DONE** (manifest-based size checker wired to postbuild and CI with shared and total caps; follow-ups: baseline deltas & per-chunk reporting).
-4. (P1 M) Add accessibility smoke tests (axe + Playwright) for core views (chat, settings, viewer, overlays).
+4. (P1 M) Add accessibility smoke tests (axe + Playwright) for core views (chat, settings, viewer, overlays). **DONE** (Playwright + axe smoke tests added for main and settings overlays: `tests/e2e/accessibility*.spec.ts`; CI workflow `.github/workflows/accessibility.yml`; npm script `test:a11y`.)
 5. (P1 S) Conventional commits + auto CHANGELOG (semantic-release) + deprecation removal schedule. **DONE** (commitlint + husky in place; semantic-release configured with automated changelog + GitHub release workflow.)
 
 ---
@@ -24,7 +24,7 @@ Legend:
 
 - (P0 M) Turn on strict suite: `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `exactOptionalPropertyTypes`.
 - (P1 M) Introduce branded/opaque types (e.g. `ChatSessionId`, `TokenId`).
-- (P1 S) Eliminate remaining broad `any`; codemod `_unused` prefix for intentional ignores.
+- (P1 S) Eliminate remaining broad `any`; codemod `_unused` prefix for intentional ignores. — WIP (converted Settings UI event handlers from `ChangeEvent<any>` to specific element types; added numeric parsing for number inputs.)
 - (P2 M) Runtime schema validation at API/model boundaries (zod) with inferred TS types.
 - (P2 M) Add `ts-prune` / `knip` dead symbol check in CI.
 
@@ -46,7 +46,7 @@ Legend:
 
 ## 4. Accessibility & UX Resilience
 
-- (P1 S) Automated axe run in CI for critical routes.
+- (P1 S) Automated axe run in CI for critical routes. — DONE (see `.github/workflows/accessibility.yml` and `npm run test:a11y`).
 - (P1 S) Focus management & trap for overlays / modals / debug pane.
 - (P1 M) Reduced motion pathway for particle / viewer animations.
 - (P2 M) Keyboard navigation matrix tests (inputs, session controls, debug panel).
@@ -114,14 +114,14 @@ Legend:
 ## 13. Build & Tooling
 
 - (P1 S) Bundle analyzer snapshot per PR (stored artifact + delta comment).
-- (P1 S) `tsc --noEmit` + ESLint + tests unified via a single `verify` script.
+- (P1 S) `tsc --noEmit` + ESLint + tests unified via a single `verify` script. — DONE (`npm run verify`).
 - (P2 M) Turborepo / task pipeline for incremental caching (tests & build layers).
 - (P2 S) Add `knip` / `depcheck` to catch unused deps & exports.
 - (P3 M) Evaluate Biome or Rome/oxc for faster lint/format path.
 
 ## 14. Developer Experience & Maintainability
 
-- (P1 S) Codemod: replace legacy `Chat.initialize` with `initializeWithObserver` (safe patterns).
+- (P1 S) Codemod: replace legacy `Chat.initialize` with `initializeWithObserver` (safe patterns). — WIP (new `initializeWithObserver` added and adopted in `pages/index.tsx`; broader codemod pending.)
 - (P1 S) Add contributor guide section for semantic layering + tokens + logging patterns.
 - (P2 M) Storybook (or Ladle) for component + token documentation (dark/light variants).
 - (P2 S) ESLint rule: forbid raw z-index & raw colors (already partial) – add autofixes.
