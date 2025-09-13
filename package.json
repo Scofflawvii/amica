@@ -10,6 +10,7 @@
   "bundle:baseline": "node scripts/write_bundle_baseline.mjs",
   "bundle:check": "BUNDLE_BASELINE_FILE=bundle-baseline.json BUNDLE_MAX_DELTA_KB=50 node scripts/check_bundle_size.mjs",
   "bundle:report": "node scripts/bundle_report.mjs",
+  "codemod:tailwind-legacy": "node codemods/tailwind-remove-legacy-keys.mjs",
     "analyze": "ANALYZE=true npm run build",
     "build:workers": "npm run build:worker:generateMeshBVH",
     "build:worker:generateMeshBVH": "esbuild src/workers/bvh/generateMeshBVH.worker.js --bundle --minify --sourcemap --outfile=public/generateMeshBVH.worker.js",

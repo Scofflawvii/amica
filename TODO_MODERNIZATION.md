@@ -87,7 +87,9 @@ Legend:
 ## 9. Theming & Design Tokens
 
 - (P1 M) Single source tokens (Style Dictionary) → emit CSS vars + TS types + doc tables.
-- (P2 S) Lint rule forbidding raw hex/color usage when semantic token available. — **WIP** (added custom rule `amica-z/no-raw-color` as warn; replaced raw colors in `src/components/githubLink.tsx`; promote to error once repo clean.)
+- (P2 S) Lint rule forbidding raw hex/color usage when semantic token available. — **DONE** (custom rule `amica-z/no-raw-color` is enforced as error; added suggestions for #000/#fff → semantic tokens.)
+- (P1 S) Remove legacy hex keys from Tailwind config and update docs — **DONE** (dropped `base` and `text-primary` from `tailwind.config.ts`; guidance added to `docs/contributing/design-tokens-and-theming.md`).
+- (P2 S) Codemod helper to sweep legacy classes (`text-primary`, `bg-base`, etc.) — **DONE** (`codemods/tailwind-remove-legacy-keys.mjs`, script: `npm run codemod:tailwind-legacy`).
 - (P2 M) Visual regression baseline for top 10 token-driven components.
 - (P3 M) Dynamic theme packs / plugin token injection with validation.
 
