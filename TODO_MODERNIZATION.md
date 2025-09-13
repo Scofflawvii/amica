@@ -121,7 +121,7 @@ Legend:
 
 ## 14. Developer Experience & Maintainability
 
-- (P1 S) Codemod: replace legacy `Chat.initialize` with `initializeWithObserver` (safe patterns). — WIP (new `initializeWithObserver` added and adopted in `pages/index.tsx`; broader codemod pending.)
+- (P1 S) Codemod: replace legacy `Chat.initialize` with `initializeWithObserver` (safe patterns). — DONE (migrated remaining tests to `initializeWithObserver`; legacy method retained for BC; docs flag deprecation.)
 - (P1 S) Add contributor guide section for semantic layering + tokens + logging patterns.
 - (P2 M) Storybook (or Ladle) for component + token documentation (dark/light variants).
 - (P2 S) ESLint rule: forbid raw z-index & raw colors (already partial) – add autofixes.
