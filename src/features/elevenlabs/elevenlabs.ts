@@ -4,7 +4,7 @@ import { config } from "@/utils/config";
 export async function elevenlabs(
   message: string,
   voiceId: string,
-  style: TalkStyle,
+  _style: TalkStyle,
 ) {
   const apiKey = config("elevenlabs_apikey");
   if (!apiKey) {

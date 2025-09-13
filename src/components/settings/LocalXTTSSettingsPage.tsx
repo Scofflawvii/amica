@@ -68,7 +68,7 @@ export function LocalXTTSSettingsPage({
       } else {
         setServerStatus("error");
       }
-    } catch (err) {
+    } catch {
       setServerStatus("error");
       setError("Failed to connect to AllTalk server");
     } finally {

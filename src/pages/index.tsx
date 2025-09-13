@@ -1,6 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { clsx } from "clsx";
-import Head from "next/head";
 import { M_PLUS_2, Montserrat } from "next/font/google";
 import {
   ChatBubbleLeftIcon,

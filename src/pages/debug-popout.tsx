@@ -12,10 +12,20 @@ export default function DebugPopoutPage() {
     if (typeof window === "undefined") return;
     if (!window.opener) return;
     try {
-      const anyOpener = window.opener as any;
-      if (Array.isArray((anyOpener as any).error_handler_logs)) {
+      const anyOpener = window.opener as unknown as {
+        error_handler_logs?: Array<{
+          ts: number;
+          type: "debug" | "info" | "log" | "warn" | "error";
+          arguments: unknown[];
+        }>;
+      };
+      if (Array.isArray(anyOpener.error_handler_logs)) {
         // Point local buffer to opener's array so updates flow through
-        (window as any).error_handler_logs = anyOpener.error_handler_logs;
+        (
+          window as unknown as {
+            error_handler_logs?: typeof anyOpener.error_handler_logs;
+          }
+        ).error_handler_logs = anyOpener.error_handler_logs;
       }
     } catch {
       /* cross-origin or other issue; ignore */

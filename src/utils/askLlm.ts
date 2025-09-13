@@ -100,7 +100,7 @@ export async function askVisionLLM(
   try {
     const visionBackend = config("vision_backend");
 
-    console.debug("vision_backend", visionBackend);
+    clog.debug("vision_backend", { backend: visionBackend });
 
     const messages: Message[] = [
       { role: "system", content: config("vision_system_prompt") },

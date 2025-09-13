@@ -81,7 +81,7 @@ async function handleVRMAnimationEvent(viewer: Viewer, amicaLife: AmicaLife) {
       // Set timeout for the duration of the animation
       setTimeout(() => {
         amicaLife.eventProcessing = false;
-        console.timeEnd("processing_event VRMA");
+        alog.timeEnd("processing_event VRMA");
       }, duration * 1000);
     }
   } catch (error) {
@@ -102,7 +102,7 @@ async function handleTextEvent(chat: Chat, amicaLife: AmicaLife) {
   try {
     await chat.receiveMessageFromUser?.(String(randomTextPrompt), true);
     amicaLife.eventProcessing = false;
-    console.timeEnd(`processing_event IdleTextPrompts`);
+    alog.timeEnd(`processing_event IdleTextPrompts`);
   } catch (error) {
     alog.error(
       "Error occurred while sending a message through chat instance",
@@ -123,7 +123,7 @@ export async function handleSleepEvent(chat: Chat, amicaLife: AmicaLife) {
       await viewer.model?.playEmotion?.("Sleep");
     }
     amicaLife.eventProcessing = false;
-    console.timeEnd("processing_event Sleep");
+    alog.timeEnd("processing_event Sleep");
   } catch (error) {
     alog.error("Error playing emotion sleep", error);
   }
@@ -228,7 +228,7 @@ export async function handleSubconsciousEvent(
     amicaLife.setSubconciousLogs!(storedSubconcious);
 
     amicaLife.eventProcessing = false;
-    console.timeEnd(`processing_event Subconcious`);
+    alog.timeEnd(`processing_event Subconcious`);
   } catch (error) {
     alog.error("Error handling subconscious event", error);
   }
@@ -244,7 +244,7 @@ export async function handleNewsEvent(chat: Chat, amicaLife: AmicaLife) {
     }
     await chat.receiveMessageFromUser?.(news, true);
     amicaLife.eventProcessing = false;
-    console.timeEnd("processing_event News");
+    alog.timeEnd("processing_event News");
   } catch (error) {
     alog.error(
       "Error occurred while sending a message through chat instance",

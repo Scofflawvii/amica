@@ -1,6 +1,5 @@
 import { Message } from "./messages";
 import { logger } from "@/utils/logger";
-import { buildPrompt } from "@/utils/buildPrompt";
 import { config } from "@/utils/config";
 
 export async function getOllamaChatResponseStream(messages: Message[]) {

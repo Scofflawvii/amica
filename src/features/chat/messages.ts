@@ -10,15 +10,13 @@ export type Message = {
   content: string | MultiModalContent;
 };
 
-const talkStyles = [
-  "talk",
-  "happy",
-  "sad",
-  "angry",
-  "fear",
-  "surprised",
-] as const;
-export type TalkStyle = (typeof talkStyles)[number];
+export type TalkStyle =
+  | "talk"
+  | "happy"
+  | "sad"
+  | "angry"
+  | "fear"
+  | "surprised";
 
 export type Talk = {
   style: TalkStyle;

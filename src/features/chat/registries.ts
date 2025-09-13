@@ -1,6 +1,8 @@
 import { Talk, Message } from "./messages";
 import { config } from "@/utils/config";
 import { perfMark } from "@/utils/perf";
+import { logger } from "@/utils/logger";
+const rlog = logger.with({ subsystem: "chat", module: "registries" });
 
 export type TTSHandlerContext = {
   rvcTransform: (audio: ArrayBuffer) => Promise<ArrayBuffer>;
@@ -36,7 +38,7 @@ export function getLLMBackend(name: string) {
 async function ensureLLMLoaded(name: string) {
   if (!llmDynamicFlags[name]) return;
   const label = `llm:load:${name}`;
-  console.time?.(label);
+  rlog.time(label);
   perfMark(`${label}:start`);
   try {
     // (Placeholder) dynamic loading example; currently all eager
@@ -47,7 +49,7 @@ async function ensureLLMLoaded(name: string) {
   } finally {
     delete llmDynamicFlags[name];
     perfMark(`${label}:done`);
-    console.timeEnd?.(label);
+    rlog.timeEnd(label);
   }
 }
 
@@ -78,7 +80,7 @@ export function snapshotConfig(keys: string[]): Record<string, string> {
 async function ensureTTSLoaded(name: string) {
   if (!ttsDynamicFlags[name]) return; // not lazy or already loaded
   const label = `tts:load:${name}`;
-  console.time?.(label);
+  rlog.time(label);
   perfMark(`${label}:start`);
   try {
     switch (name) {
@@ -112,7 +114,7 @@ async function ensureTTSLoaded(name: string) {
   } finally {
     delete ttsDynamicFlags[name];
     perfMark(`${label}:done`);
-    console.timeEnd?.(label);
+    rlog.timeEnd(label);
   }
 }
 

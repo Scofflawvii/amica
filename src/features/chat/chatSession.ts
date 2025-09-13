@@ -1,6 +1,8 @@
 import { Screenplay } from "./messages";
 import { processResponse } from "@/utils/processResponse";
 import { perfMark } from "@/utils/perf";
+import { logger } from "@/utils/logger";
+const slog = logger.with({ subsystem: "chat", module: "session" });
 
 export interface ChatSessionCallbacks {
   enqueueScreenplay(screenplay: Screenplay): void;
@@ -41,15 +43,15 @@ export class ChatStreamSession {
 
   async process() {
     this.cb.setProcessingState(true);
-    console.time("chat stream processing");
-    console.time("performance_time_to_first_token");
-    console.time("performance_time_to_first_sentence");
+    slog.time("chat stream processing");
+    slog.time("performance_time_to_first_token");
+    slog.time("performance_time_to_first_sentence");
     try {
       while (!this.aborted) {
         if (!this.cb.isCurrent(this.streamIdx)) break;
         const { done, value } = await this.reader.read();
         if (!this.firstToken) {
-          console.timeEnd("performance_time_to_first_token");
+          slog.timeEnd("performance_time_to_first_token");
           this.firstToken = true;
           perfMark("chat:stream:firstToken");
         }
@@ -71,7 +73,7 @@ export class ChatStreamSession {
             if (!this.isThinking) this.cb.enqueueScreenplay(first);
             this.cb.thought(this.isThinking, first.text);
             if (!this.firstSentence) {
-              console.timeEnd("performance_time_to_first_sentence");
+              slog.timeEnd("performance_time_to_first_sentence");
               this.firstSentence = true;
               perfMark("chat:stream:firstSentence");
             }
@@ -95,7 +97,7 @@ export class ChatStreamSession {
       } catch {
         /* release lock ignored */
       }
-      console.timeEnd("chat stream processing");
+      slog.timeEnd("chat stream processing");
       if (this.cb.isCurrent(this.streamIdx)) this.cb.setProcessingState(false);
       perfMark("chat:stream:done");
     }

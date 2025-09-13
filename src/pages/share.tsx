@@ -9,6 +9,11 @@ import { useTranslation } from "react-i18next";
 import { config, updateConfig } from "@/utils/config";
 import { isTauri } from "@/utils/isTauri";
 import { FilePond, registerPlugin } from "react-filepond";
+import type {
+  FilePondFile,
+  ActualFileObject,
+  FilePondInitialFile,
+} from "filepond";
 import { ViewerContext } from "@/features/vrmViewer/viewerContext";
 import VrmDemo from "@/components/vrmDemo";
 import { loadVRMAnimation } from "@/lib/VRMAnimation/loadVRMAnimation";
@@ -32,9 +37,10 @@ async function hashFile(file: File): Promise<string> {
   return hashValue;
 }
 
-async function updateVrmAvatar(viewer: any, url: string) {
+import type { Viewer } from "@/features/vrmViewer/viewer";
+async function updateVrmAvatar(viewer: Viewer, url: string) {
   try {
-    await viewer.loadVrm(url, (progress: string) => {
+    await viewer.loadVrm(url, (_progress: string) => {
       // TODO handle loading progress
     });
   } catch (e) {
@@ -42,8 +48,8 @@ async function updateVrmAvatar(viewer: any, url: string) {
   }
 }
 
-function vrmDetector(source: File, type: string): Promise<string> {
-  return new Promise((resolve, reject) => {
+function vrmDetector(source: File, _type: string): Promise<string> {
+  return new Promise((resolve, _reject) => {
     slog.debug("vrmDetector source", source);
     (async () => {
       const ab = await source.arrayBuffer();
@@ -73,10 +79,11 @@ export default function Share() {
   const [animationUrl, setAnimationUrl] = useState("");
   const [voiceUrl, setVoiceUrl] = useState("");
 
-  const [bgFiles, setBgFiles] = useState([]);
-  const [vrmFiles, setVrmFiles] = useState([]);
-  const [animationFiles, setAnimationFiles] = useState([]);
-  const [voiceFiles, setVoiceFiles] = useState([]);
+  type PondFiles = (string | Blob | ActualFileObject | FilePondInitialFile)[];
+  const [bgFiles, setBgFiles] = useState<PondFiles>([]);
+  const [vrmFiles, setVrmFiles] = useState<PondFiles>([]);
+  const [_animationFiles, _setAnimationFiles] = useState<PondFiles>([]);
+  const [voiceFiles, setVoiceFiles] = useState<PondFiles>([]);
 
   const [vrmLoaded, setVrmLoaded] = useState(false);
   const [vrmLoadedFromIndexedDb, setVrmLoadedFromIndexedDb] = useState(false);
@@ -299,14 +306,14 @@ export default function Share() {
                 files={bgFiles}
                 // this is done to remove type error
                 // filepond is not typed properly
-                onupdatefiles={(files: any) => {
-                  setBgFiles(files);
+                onupdatefiles={(files: unknown) => {
+                  setBgFiles(files as PondFiles);
                 }}
                 server={`${process.env.NEXT_PUBLIC_AMICA_API_URL}/api/upload?type=bgimg`}
                 name="file"
                 labelIdle=".png & .jpg files only<br />click or drag & drop"
                 acceptedFileTypes={["image/png", "image/jpeg"]}
-                onremovefile={(err, file) => {
+                onremovefile={(err, _file) => {
                   if (err) {
                     slog.error("canvas export error", err);
                     return;
@@ -314,7 +321,7 @@ export default function Share() {
 
                   setBgUrl("");
                 }}
-                onprocessfile={(err, file) => {
+                onprocessfile={(err, _file: FilePondFile) => {
                   if (err) {
                     slog.error("video export error", err);
                     return;
@@ -327,7 +334,7 @@ export default function Share() {
                     );
                   }
 
-                  handleFile(file.file as File);
+                  handleFile(_file.file as File);
                 }}
                 disabled={!!sqid}
               />
@@ -407,19 +414,19 @@ export default function Share() {
                 files={vrmFiles}
                 // this is done to remove type error
                 // filepond is not typed properly
-                onupdatefiles={(files: any) => {
-                  setVrmFiles(files);
+                onupdatefiles={(files: unknown) => {
+                  setVrmFiles(files as PondFiles);
                 }}
                 server={`${process.env.NEXT_PUBLIC_AMICA_API_URL}/api/upload?type=vrm`}
                 name="file"
                 labelIdle=".vrm files only<br />click or drag & drop"
                 acceptedFileTypes={["model/gltf-binary"]}
                 fileValidateTypeDetectType={vrmDetector}
-                onaddfilestart={(file) => {
+                onaddfilestart={(_file) => {
                   setVrmUrl("");
                   setVrmLoaded(false);
                 }}
-                onremovefile={(err, file) => {
+                onremovefile={(err, _file) => {
                   if (err) {
                     slog.error("vrm removefile error", err);
                     return;
@@ -428,7 +435,7 @@ export default function Share() {
                   setVrmUrl("");
                   setVrmLoaded(false);
                 }}
-                onprocessfile={(err, file) => {
+                onprocessfile={(err, _file: FilePondFile) => {
                   if (err) {
                     slog.error("vrm processfile error", err);
                     return;
@@ -446,7 +453,7 @@ export default function Share() {
                     setVrmLoaded(false);
                   }
 
-                  handleFile(file.file as File);
+                  handleFile(_file.file as File);
                 }}
                 disabled={!!sqid}
               />
@@ -555,14 +562,14 @@ export default function Share() {
                 files={voiceFiles}
                 // this is done to remove type error
                 // filepond is not typed properly
-                onupdatefiles={(files: any) => {
-                  setVoiceFiles(files);
+                onupdatefiles={(files: unknown) => {
+                  setVoiceFiles(files as PondFiles);
                 }}
                 server={`${process.env.NEXT_PUBLIC_AMICA_API_URL}/api/upload?type=voice`}
                 name="file"
                 labelIdle=".wav & .mp3 files only<br />click or drag & drop"
                 acceptedFileTypes={["audio/wav", "audio/mpeg"]}
-                onremovefile={(err, file) => {
+                onremovefile={(err, _file) => {
                   if (err) {
                     slog.error("screenshot error", err);
                     return;
@@ -570,7 +577,7 @@ export default function Share() {
 
                   setVoiceUrl("");
                 }}
-                onprocessfile={(err, file) => {
+                onprocessfile={(err, file: FilePondFile) => {
                   if (err) {
                     slog.error("record error", err);
                     return;

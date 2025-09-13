@@ -2,7 +2,7 @@ import { VRM } from "@pixiv/three-vrm";
 
 const pi = Math.PI;
 const sin = Math.sin;
-const cos = Math.cos;
+// const cos = Math.cos;
 
 export class ProceduralAnimation {
   private vrm: VRM;

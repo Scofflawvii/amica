@@ -3,7 +3,7 @@ import { logger } from "@/utils/logger";
 import { useWorker } from "./useWorker";
 import { updateFileProgress } from "@/utils/progress";
 
-interface ProgressItem {
+export interface ProgressItem {
   file: string;
   loaded: number;
   progress: number;

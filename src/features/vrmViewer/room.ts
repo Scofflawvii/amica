@@ -3,6 +3,8 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OptimizedGLTFLoader } from "@/utils/gltfOptimizer";
 import { config } from "@/utils/config";
 import * as GaussianSplats3D from "@mkkellogg/gaussian-splats-3d";
+// import { logger } from "@/utils/logger";
+// const vlog = logger.with({ subsystem: "viewer", module: "room" });
 
 export class Room {
   public room?: THREE.Group;
@@ -47,18 +49,18 @@ export class Room {
           {
             const analyzer = new GLTFAnalyzer();
             const stats = analyzer.analyzeModel(gltf);
-            console.log('Model Statistics:', stats);
+            vlog.info('Model Statistics', { stats });
             const suggestions = analyzer.suggestOptimizations(stats);
-            console.log('Optimization Suggestions:', suggestions);
+            vlog.info('Optimization Suggestions', { suggestions });
           }
           {
           // Or for more control:
             const optimizer = new TransparencyOptimizer();
             const stats = optimizer.analyzeTransparency(gltf);
-            console.log('Transparency analysis:', stats);
+            vlog.info('Transparency analysis', { stats });
             // Check for issues
             const issues = optimizer.logTransparencyIssues();
-            console.log('Transparency issues:', issues);
+            vlog.warn('Transparency issues', { issues });
 
             // Apply optimizations
             optimizer.optimizeTransparency(gltf, {

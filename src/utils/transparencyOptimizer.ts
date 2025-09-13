@@ -82,7 +82,8 @@ class TransparencyOptimizer {
       alphaValue,
       textureAlpha,
       blendMode,
-      renderOrder: (material as any).renderOrder || 0,
+      renderOrder:
+        (material as unknown as { renderOrder?: number }).renderOrder || 0,
     });
   }
 

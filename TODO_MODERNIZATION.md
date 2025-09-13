@@ -24,7 +24,7 @@ Legend:
 
 - (P0 M) Turn on strict suite: `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `exactOptionalPropertyTypes`. — **DONE** (enabled in tsconfig; codebase adjusted for overrides and exact optional types; typecheck green.)
 - (P1 M) Introduce branded/opaque types (e.g. `ChatSessionId`, `TokenId`).
-- (P1 S) Eliminate remaining broad `any`; codemod `_unused` prefix for intentional ignores. — **WIP** (converted Settings UI event handlers from `ChangeEvent<any>` to specific element types; added numeric parsing for number inputs.)
+- (P1 S) Eliminate remaining broad `any`; codemod `_unused` prefix for intentional ignores. — **WIP** (converted Settings UI event handlers from `ChangeEvent<any>` to specific element types; added numeric parsing for number inputs. Remaining occurrences concentrated in integration-heavy surfaces like `src/pages/share.tsx` (filepond callbacks), `src/pages/_app.tsx` (console proxy), `src/pages/debug-popout.tsx` (window bridge), and a few 3D utilities (`textureDownscaler.ts`, `transparencyOptimizer.ts`, traversal in `vrmViewer/room.ts`). Tests and `.d.ts` intentionally excluded.)
 - (P2 M) Runtime schema validation at API/model boundaries (zod) with inferred TS types.
 - (P2 M) Add `ts-prune` / `knip` dead symbol check in CI.
 
@@ -33,6 +33,7 @@ Legend:
 - (P0 M) Structured logger abstraction (dev pretty, prod JSON) with child contexts (session, request, model).
 - (P1 M) OpenTelemetry traces: spans for chat streaming, TTS phases, VRM load, vision inference.
 - (P1 S) Error taxonomy & classification (user-facing vs internal) + standardized error codes.
+- (P1 S) Enforce logger usage via ESLint: default `no-console` error with narrow per-file allowlist + autofix hints; codemod lingering `console.debug` in feature modules. — **DONE** (set `no-console: error` with targeted overrides for tests/scripts/logger; migrated console.\* to structured `logger` across chat/session, STT, AmicaLife, registries, UI; added guide `docs/contributing/logging-and-tracing.md`; lint now 0 errors, tests green.)
 - (P2 M) Client perf beacon aggregator → server histograms (p50/p95 token latency, frame pacing, TTS start delay).
 - (P3 L) Session replay (privacy scrub) for difficult streaming race bugs.
 
@@ -42,6 +43,7 @@ Legend:
 - (P1 S) Lighthouse CI (PWA, performance, a11y) per main flows.
 - (P2 M) Perf budget dashboard auto-published (artifact or PR comment).
 - (P2 M) Bundle splitting audit: verify tree-shaking, mark side-effect-free modules.
+- (P2 S) Bundle size report: add per-chunk reporting to `scripts/check_bundle_size.mjs` and persist baseline file in repo for delta checks. — (not started)
 - (P3 L) Adaptive token batch flush algorithm (coalesce in busy frame windows).
 
 ## 4. Accessibility & UX Resilience
@@ -91,7 +93,7 @@ Legend:
 
 ## 10. Rendering / 3D / VRM
 
-- (P1 M) Worker offload for BVH / skeleton prep (transferable buffers).
+- (P1 M) Worker offload for BVH / skeleton prep (transferable buffers). — **WIP** (worker is bundled and served as `public/generateMeshBVH.worker.js`; integration in `vrmViewer/viewer.ts` is currently commented out. Next: re-enable behind a feature flag with capability checks and fallback to single-thread when SharedArrayBuffer unavailable.)
 - (P2 M) GPU/Device capability diagnostics overlay (fallback heuristics).
 - (P2 M) Frame budgeting scheduler that yields during large token bursts.
 - (P3 L) WASM/Rust acceleration for heavy geometry or voice feature extraction.
@@ -122,9 +124,9 @@ Legend:
 ## 14. Developer Experience & Maintainability
 
 - (P1 S) Codemod: replace legacy `Chat.initialize` with `initializeWithObserver` (safe patterns). — **DONE** (migrated remaining tests to `initializeWithObserver`; legacy method retained for BC; docs flag deprecation.)
-- (P1 S) Add contributor guide section for semantic layering + tokens + logging patterns.
+- (P1 S) Add contributor guide section for semantic layering + tokens + logging patterns. — **WIP** (logging guide added at `docs/contributing/logging-and-tracing.md`; tokens + semantic layering docs pending.)
 - (P2 M) Storybook (or Ladle) for component + token documentation (dark/light variants).
-- (P2 S) ESLint rule: forbid raw z-index & raw colors (already partial) – add autofixes.
+- (P2 S) ESLint rule: forbid raw z-index & raw colors (already partial) – add autofixes. — **WIP** (z-index rule active via custom plugin `amica-z/no-raw-z-index`; raw color rule still pending.)
 - (P3 M) Plugin API versioning & validation (registry schema).
 
 ## 15. Internationalization

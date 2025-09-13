@@ -56,7 +56,7 @@ export function DebugPane({ onClickClose, mode = "embedded" }: DebugPaneProps) {
   const [showPerf, setShowPerf] = useState(true);
   const [leftOffset, setLeftOffset] = useState(0);
   // Tick state to force re-render so new logs are shown
-  const [tick, setTick] = useState(0);
+  const [_tick, setTick] = useState(0);
   const isPopout = mode === "popout";
 
   const scrollRef = useRef<HTMLDivElement>(null);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { logger } from "@/utils/logger";
 const mlog = logger.with({ subsystem: "tts", module: "moshi" });
 import { ChatContext } from "@/features/chat/chatContext";
@@ -16,7 +16,7 @@ export function Moshi({
   setAssistantText: (message: string) => void;
 }) {
   const [pendingSentence, setPendingSentence] = useState<string>("");
-  const [completedSentences, setCompletedSentences] = useState<string[]>([]);
+  const [_completedSentences, setCompletedSentences] = useState<string[]>([]);
 
   const { chat: bot } = useContext(ChatContext);
   const { viewer } = useContext(ViewerContext);

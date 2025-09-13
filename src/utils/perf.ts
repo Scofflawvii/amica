@@ -4,7 +4,7 @@ export const perfMark = (name: string) => {
   if (typeof performance !== "undefined" && performance.mark) {
     try {
       performance.mark(name);
-    } catch (e) {
+    } catch {
       // ignore mark errors (e.g., duplicate names) intentionally
     }
   }
@@ -14,7 +14,7 @@ export const perfMeasure = (name: string, start: string, end: string) => {
   if (typeof performance !== "undefined" && performance.measure) {
     try {
       performance.measure(name, start, end);
-    } catch (e) {
+    } catch {
       // ignore measure errors
     }
   }
@@ -24,31 +24,6 @@ export const logPerfSummaryOnce = (() => {
   let logged = false;
   return () => {
     if (logged || typeof performance === "undefined") return;
-    const marks = [
-      "vrm:setup:start",
-      "vrm:setup:afterViewerSetup",
-      "vrm:loadVrm:start",
-      "vrm:loadVrm:done",
-      "chat:init:start",
-      "chat:init:done",
-      "amicaLife:init:start",
-      "amicaLife:init:done",
-      // chat stream lifecycle
-      "chat:stream:start",
-      "chat:stream:firstToken",
-      "chat:stream:firstSentence",
-      "chat:stream:done",
-      // stt lifecycle
-      "stt:vad:start",
-      "stt:vad:end",
-      "stt:transcribe:start",
-      "stt:transcribe:done",
-      // tts playback
-      "tts:play:start",
-      "tts:play:done",
-    ];
-    const have = marks.filter((m) => performance.getEntriesByName(m).length);
-
     logged = true;
     const measures: Record<string, number> = {};
     const measureIf = (label: string, a: string, b: string) => {

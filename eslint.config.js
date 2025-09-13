@@ -113,8 +113,8 @@ export default [
 
       // General rules
       "no-unused-vars": "warn",
-      // Quiet console usage across the project to avoid noisy production builds
-      "no-console": "off",
+      // Enforce logger usage; allow specific files below
+      "no-console": "error",
       "no-undef": "error",
       "no-useless-escape": "error",
       "no-empty": "error",
@@ -129,6 +129,17 @@ export default [
     },
   },
   {
+    // Allow console usage in repo scripts and tooling where structured logger isn't used
+    files: [
+      "scripts/**/*.mjs",
+      "github-actions-reporter.js",
+      "src/utils/logger.ts",
+    ],
+    rules: {
+      "no-console": "off",
+    },
+  },
+  {
     // Relax rules in test files to keep signal high
     files: [
       "**/__tests__/**/*.{js,jsx,ts,tsx}",
@@ -136,6 +147,7 @@ export default [
     ],
     rules: {
       "no-unused-vars": "off",
+      "no-console": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/ban-ts-comment": "off",
@@ -214,6 +226,7 @@ export default [
     ],
     rules: {
       "no-unused-vars": "off",
+      "no-console": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/ban-ts-comment": "off",

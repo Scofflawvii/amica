@@ -73,3 +73,4 @@
 - [Developing Amica](./contributing/developing-amica.md)
 - [Adding Translations](./contributing/adding-translations.md)
 - [Design Tokens & Theming](./contributing/design-tokens-and-theming.md)
+- [Structured Logging & Tracing](./contributing/logging-and-tracing.md)

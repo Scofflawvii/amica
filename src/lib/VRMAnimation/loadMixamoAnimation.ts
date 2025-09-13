@@ -27,13 +27,9 @@ export function loadMixamoAnimation(
     const restRotationInverse = new THREE.Quaternion();
     const parentRestWorldRotation = new THREE.Quaternion();
     const _quatA = new THREE.Quaternion();
-    const _vec3 = new THREE.Vector3();
 
     // Adjust with reference to hips height.
     // TODO check for null
-    const vrmHipsY = 0; // vrm.humanoid?.getNormalizedBoneNode('hips')!.getWorldPosition(_vec3).y;
-    const vrmRootY = 0; // vrm.scene.getWorldPosition(_vec3).y;
-    const vrmHipsHeight = 0; // Math.abs(vrmHipsY - vrmRootY);
     const hipsPositionScale = 0; // vrmHipsHeight / motionHipsHeight;
 
     clip.tracks.forEach((track) => {

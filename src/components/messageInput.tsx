@@ -21,6 +21,7 @@ import { AmicaLifeContext } from "@/features/amicaLife/amicaLifeContext";
 import { AudioControlsContext } from "@/features/moshi/components/audioControlsContext";
 import { perfMark } from "@/utils/perf";
 import { logger } from "@/utils/logger";
+const mlog = logger.with({ subsystem: "ui", module: "messageInput" });
 
 export default function MessageInput({
   userMessage,
@@ -53,13 +54,13 @@ export default function MessageInput({
     onSpeechStart: () => {
       logger.debug("vad on_speech_start");
       perfMark("stt:vad:start");
-      console.time("performance_speech");
+      mlog.time("performance_speech");
     },
     onSpeechEnd: (audio: Float32Array) => {
       logger.debug("vad on_speech_end");
       perfMark("stt:vad:end");
-      console.timeEnd("performance_speech");
-      console.time("performance_transcribe");
+      mlog.timeEnd("performance_speech");
+      mlog.time("performance_transcribe");
       (
         window as unknown as {
           chatvrm_latency_tracker?: { start: number; active: boolean };
@@ -195,7 +196,7 @@ export default function MessageInput({
     } else {
       setUserMessage(text);
     }
-    console.timeEnd("performance_transcribe");
+    mlog.timeEnd("performance_transcribe");
     perfMark("stt:transcribe:done");
   }
 

@@ -165,7 +165,6 @@ async function downscaleModelTextures(
     if (!(node as THREE.Mesh).isMesh) return;
 
     if (node instanceof THREE.Mesh) {
-      const mesh = node as THREE.Mesh;
       const materials: THREE.Material[] = Array.isArray(node.material)
         ? (node.material as THREE.Material[])
         : [node.material as THREE.Material];
@@ -198,9 +197,8 @@ async function downscaleModelTextures(
         ];
 
         textureTypes.forEach((type: TextureType) => {
-          const texture = (material as unknown as Record<string, unknown>)[
-            type
-          ] as THREE.Texture | undefined;
+          const matRecord = material as unknown as Record<string, unknown>;
+          const texture = matRecord[type] as THREE.Texture | undefined;
           if (texture && !processedTextures.has(texture)) {
             processedTextures.add(texture);
             texturePromises.push(processTexture(texture, maxDimension));
@@ -226,22 +224,21 @@ function logTextureInfo(gltf: GLTF): void {
       : [mesh.material];
 
     materials.forEach((material: THREE.Material, index: number) => {
-      // Grouping is only visible in dev tools; keep in dev logs only
-      console.group?.(`Material ${index} on mesh "${node.name}"`);
-      Object.entries(material).forEach(([key, value]) => {
-        if (value instanceof THREE.Texture && value.image) {
-          logger
-            .with({ subsystem: "gfx", module: "textureDownscaler" })
-            .debug("texture size", {
-              materialIndex: index,
-              mesh: node.name,
-              key,
-              width: (value.image as any).width,
-              height: (value.image as any).height,
-            });
-        }
-      });
-      console.groupEnd?.();
+      Object.entries(material as unknown as Record<string, unknown>).forEach(
+        ([key, value]) => {
+          if (value instanceof THREE.Texture && value.image) {
+            logger
+              .with({ subsystem: "gfx", module: "textureDownscaler" })
+              .debug("texture size", {
+                materialIndex: index,
+                mesh: node.name,
+                key,
+                width: (value.image as { width?: number })?.width,
+                height: (value.image as { height?: number })?.height,
+              });
+          }
+        },
+      );
     });
   });
 }

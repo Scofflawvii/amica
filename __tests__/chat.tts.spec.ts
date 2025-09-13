@@ -1,26 +1,30 @@
 import { describe, test, expect, jest, beforeEach } from "@jest/globals";
 
-jest.mock("../src/utils/logger", () => ({
-  logger: {
+jest.mock("../src/utils/logger", () => {
+  const base = {
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
     time: jest.fn(),
     timeEnd: jest.fn(),
-  },
-}));
+  } as any;
+  base.with = jest.fn(() => base);
+  return { logger: base };
+});
 
 function buildChatWith(mocks: { snapshot: any; backend?: any }) {
   jest.resetModules();
-  jest.doMock("../src/utils/logger", () => ({
-    logger: {
+  jest.doMock("../src/utils/logger", () => {
+    const base = {
       info: jest.fn(),
       warn: jest.fn(),
       error: jest.fn(),
       time: jest.fn(),
       timeEnd: jest.fn(),
-    },
-  }));
+    } as any;
+    base.with = jest.fn(() => base);
+    return { logger: base };
+  });
   jest.doMock("../src/utils/config", () => ({
     config: (k: string) => (({ system_prompt: "SYS" }) as any)[k] || "",
   }));

@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import { TimestampedPrompt } from "@/features/amicaLife/eventHandler";
-import { useTranslation } from "react-i18next";
 import { IconBrain } from "@tabler/icons-react";
 
 export const SubconciousText = ({
@@ -36,7 +35,6 @@ export const SubconciousText = ({
 };
 
 function Chat({ timeStamp, prompt }: { timeStamp: string; prompt: string }) {
-  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (

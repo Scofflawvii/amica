@@ -387,9 +387,9 @@ export class Chat {
   public async receiveMessageFromUser(message: string, amicaLife: boolean) {
     perfMark("chat:user:send:start");
     if (!message) return;
-    console.time("performance_interrupting");
+    logger.time("performance_interrupting");
     await this.interrupt();
-    console.timeEnd("performance_interrupting");
+    logger.timeEnd("performance_interrupting");
     await wait(0);
     if (!amicaLife) {
       const { handleUserInput } = await import("../externalAPI/externalAPI");

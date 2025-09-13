@@ -102,14 +102,11 @@ export class AmicaLife {
   // Function to remove a specific event from the mainEvents queue
   public removeEvent(eventName: string) {
     const newQueue = new Queue<AmicaLifeEvents>();
-    let found = false;
 
     while (!this.mainEvents.isEmpty()) {
       const event = this.mainEvents.dequeue();
       if (event && event.events !== eventName) {
         newQueue.enqueue(event);
-      } else {
-        found = true;
       }
     }
 
@@ -222,7 +219,7 @@ export class AmicaLife {
         // Main event handling
         const idleEvent = this.mainEvents.dequeue();
         if (idleEvent) {
-          console.time(`processing_event ${idleEvent.events}`);
+          slog.time(`processing_event ${idleEvent.events}`);
           this.eventProcessing = true;
           await handleIdleEvent(idleEvent, this, this.chat!, this.viewer!);
           !(idleEvent.events === "Subconcious" || idleEvent.events === "Sleep")
@@ -317,10 +314,7 @@ export class AmicaLife {
 
   // Update time before idle increase by 1.25 times
   public updatedIdleTime() {
-    const idleTimeSec = Math.min(
-      parseInt(config("time_before_idle_sec")) * 1.25,
-      240,
-    );
+    Math.min(parseInt(config("time_before_idle_sec")) * 1.25, 240);
     // updateConfig("time_before_idle_sec", idleTimeSec.toString());
     // removed for staging
     //console.log(`Updated time before idle to ${idleTimeSec} seconds`);

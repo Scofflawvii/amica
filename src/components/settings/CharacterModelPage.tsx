@@ -10,7 +10,6 @@ export function CharacterModelPage({
   viewer,
   vrmHash,
   vrmUrl,
-  vrmSaveType,
   vrmList,
   setVrmHash,
   setVrmUrl,
@@ -21,7 +20,6 @@ export function CharacterModelPage({
   viewer: Viewer;
   vrmHash: string;
   vrmUrl: string;
-  vrmSaveType: string;
   vrmList: VrmData[];
   setVrmHash: (hash: string) => void;
   setVrmUrl: (url: string) => void;
