@@ -20,6 +20,9 @@ export const defaults: Readonly<Record<string, string>> = {
   wake_word: "Hello",
   time_before_idle_sec: "20",
   debug_gfx: "false",
+  // Use optimized GLTF loader (can reduce memory and load time, may simplify materials)
+  use_optimized_gltf_loader:
+    process.env.NEXT_PUBLIC_USE_OPTIMIZED_GLTF_LOADER ?? "false",
   adaptive_pixel_ratio: "true",
   min_pixel_ratio: "0.75",
   max_pixel_ratio: "1.0",

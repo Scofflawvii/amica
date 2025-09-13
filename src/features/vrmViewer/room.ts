@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OptimizedGLTFLoader } from "@/utils/gltfOptimizer";
+import { config } from "@/utils/config";
 import * as GaussianSplats3D from "@mkkellogg/gaussian-splats-3d";
 
 export class Room {
@@ -11,7 +12,7 @@ export class Room {
     url: string,
     setLoadingProgress: (progress: string) => void,
   ): Promise<void> {
-    const useOptimized = false; // flip to true to use optimized loader
+    const useOptimized = config("use_optimized_gltf_loader") === "true";
     const loader = useOptimized
       ? new OptimizedGLTFLoader({
           skipTextures: true,

@@ -8,13 +8,13 @@ import {
 } from "@pixiv/three-vrm";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OptimizedGLTFLoader } from "@/utils/gltfOptimizer";
+import { config } from "@/utils/config";
 import { VRMAnimation } from "@/lib/VRMAnimation/VRMAnimation";
 import { VRMLookAtSmootherLoaderPlugin } from "@/lib/VRMLookAtSmootherLoaderPlugin/VRMLookAtSmootherLoaderPlugin";
 import { LipSync } from "@/features/lipSync/lipSync";
 import { EmoteController } from "@/features/emoteController/emoteController";
 import { ProceduralAnimation } from "@/features/proceduralAnimation/proceduralAnimation";
 import { Screenplay } from "@/features/chat/messages";
-import { config } from "@/utils/config";
 import { logger } from "@/utils/logger";
 
 const vlog = logger.with({ subsystem: "viewer", module: "model" });
@@ -44,7 +44,7 @@ export class Model {
     url: string,
     _setLoadingProgress: (progress: string) => void,
   ): Promise<void> {
-    const useOptimized = false; // flip to true to use optimized loader
+    const useOptimized = config("use_optimized_gltf_loader") === "true";
     const loader = useOptimized
       ? new OptimizedGLTFLoader({
           skipTextures: true,
