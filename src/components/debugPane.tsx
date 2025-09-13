@@ -3,7 +3,7 @@ import { Switch } from "@headlessui/react";
 import { IconButton } from "@/components/iconButton";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 import { clsx } from "clsx";
-import { config } from "@/utils/config";
+import { config, updateConfig } from "@/utils/config";
 import PerfMetrics from "@/components/perfMetrics";
 
 const TOTAL_ITEMS_TO_SHOW = 100;
@@ -54,6 +54,14 @@ export function DebugPane({ onClickClose, mode = "embedded" }: DebugPaneProps) {
   const [typeWarnEnabled, setTypeWarnEnabled] = useState(true);
   const [typeErrorEnabled, setTypeErrorEnabled] = useState(true);
   const [showPerf, setShowPerf] = useState(true);
+  const [bvhMode, setBvhMode] = useState<string>(() => {
+    try {
+      return config("bvh_worker_mode");
+    } catch {
+      return "auto";
+    }
+  });
+  const [bvhSaved, setBvhSaved] = useState(false);
   const [leftOffset, setLeftOffset] = useState(0);
   // Tick state to force re-render so new logs are shown
   const [_tick, setTick] = useState(0);
@@ -252,6 +260,46 @@ export function DebugPane({ onClickClose, mode = "embedded" }: DebugPaneProps) {
             <span className="bg-primary/15 text ring-primary/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
               perf
               <SwitchToggle enabled={showPerf} set={setShowPerf} />
+            </span>
+            {/* BVH worker mode selector (QA) */}
+            <span className="ring-border/40 mx-1 inline-flex items-center gap-1 rounded-md bg-[hsl(var(--surface))] px-2 py-1 text-xs font-medium ring-1 ring-inset">
+              <label htmlFor="bvh-mode" className="text-muted mr-1">
+                BVH:
+              </label>
+              <select
+                id="bvh-mode"
+                value={bvhMode}
+                onChange={async (e) => {
+                  const v = e.target.value;
+                  setBvhMode(v);
+                  try {
+                    await updateConfig("bvh_worker_mode", v);
+                    setBvhSaved(true);
+                    setTimeout(() => setBvhSaved(false), 2000);
+                  } catch {
+                    // ignore error; UI will just not show saved state
+                  }
+                }}
+                className="text-text border-border/40 rounded-sm border bg-[hsl(var(--surface))] px-1 py-0.5 outline-none hover:bg-[hsl(var(--surface-alt))]">
+                <option value="auto">auto</option>
+                <option value="off">off</option>
+                <option value="single">single</option>
+                <option value="parallel">parallel</option>
+              </select>
+              <button
+                type="button"
+                onClick={() => {
+                  try {
+                    window.location.reload();
+                  } catch {
+                    /* noop */
+                  }
+                }}
+                className="border-border/40 ml-1 rounded-sm border px-1 py-0.5 text-xs hover:bg-[hsl(var(--surface-alt))] active:scale-[.98]"
+                title="Reload page to apply">
+                Apply
+              </button>
+              {bvhSaved && <span className="text-muted ml-1">saved</span>}
             </span>
           </span>
         </div>
