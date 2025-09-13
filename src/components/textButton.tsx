@@ -22,9 +22,9 @@ const variantClasses: Record<Variant, string> = {
     "bg-success hover:bg-success-hover active:bg-success-press disabled:bg-success-disabled text-white",
   danger:
     "bg-danger hover:bg-danger-hover active:bg-danger-press disabled:bg-danger-disabled text-white",
-  ghost: "bg-transparent hover:bg-primary/10 active:bg-primary/20 text-primary",
+  ghost: "bg-transparent hover:bg-primary/10 active:bg-primary/20 text",
   outline:
-    "border border-primary text-primary hover:bg-primary hover:text-white active:bg-primary-press active:text-white disabled:opacity-50",
+    "border border-primary text hover:bg-primary hover:text-white active:bg-primary-press active:text-white disabled:opacity-50",
 };
 
 export const TextButton = ({

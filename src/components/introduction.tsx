@@ -52,7 +52,7 @@ export const Introduction = ({ open }: { open: boolean }) => {
               <a
                 href="https://docs.heyamica.com"
                 target="_blank"
-                className="text-primary font-semibold underline">
+                className="text font-semibold underline">
                 {t("Read the full documentation here.")}
               </a>
             </p>

@@ -31,7 +31,7 @@ export default function Import() {
   const [vrmLoaded, setVrmLoaded] = useState(false);
 
   useEffect(() => {
-    document.body.style.backgroundColor = "#ffffff";
+    document.body.style.backgroundColor = "hsl(var(--surface))";
   }, []);
 
   useEffect(() => {

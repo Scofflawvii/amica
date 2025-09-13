@@ -249,7 +249,7 @@ export function DebugPane({ onClickClose, mode = "embedded" }: DebugPaneProps) {
                 set={setTypeErrorEnabled}
               />
             </span>
-            <span className="bg-primary/15 text-primary ring-primary/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
+            <span className="bg-primary/15 text ring-primary/30 mx-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
               perf
               <SwitchToggle enabled={showPerf} set={setShowPerf} />
             </span>

@@ -567,8 +567,8 @@ export class Viewer {
         const el = (gui as unknown as { domElement?: HTMLElement })
           .domElement as HTMLElement | undefined;
         if (el) {
-          el.style.background = "#000";
-          el.style.color = "#fff";
+          el.style.background = "hsl(var(--surface))";
+          el.style.color = "hsl(var(--text))";
         }
       } catch {
         // no-op
@@ -599,8 +599,8 @@ export class Viewer {
         statsDom.style.top = "0px";
         statsDom.style.left = window.innerWidth - 80 + "px";
         // Opaque background for debug overlay
-        statsDom.style.background = "#000";
-        statsDom.style.color = "#fff";
+        statsDom.style.background = "hsl(var(--surface))";
+        statsDom.style.color = "hsl(var(--text))";
         document.body.appendChild(statsDom);
       } else {
         vlog.warn(

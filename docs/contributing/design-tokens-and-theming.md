@@ -46,7 +46,7 @@ colors: {
 
 Use these instead of raw brand utilities (`bg-fuchsia-500`, `text-gray-900`, etc.).
 
-Note: legacy Tailwind color keys like `base` or `text-primary` were removed from `tailwind.config.ts`. Replace usages with semantic tokens: `bg-surface`, `text`, `text-muted`, or `primary` variants.
+Note: legacy Tailwind color keys like `base` or `text` were removed from `tailwind.config.ts`. Replace usages with semantic tokens: `bg-surface`, `text`, `text-muted`, or `primary` variants.
 
 ### 3. Component & Utility Primitives
 

@@ -133,6 +133,7 @@ export default [
     // Allow console usage in repo scripts and tooling where structured logger isn't used
     files: [
       "scripts/**/*.mjs",
+      "codemods/**/*.mjs",
       "github-actions-reporter.js",
       "src/utils/logger.ts",
     ],

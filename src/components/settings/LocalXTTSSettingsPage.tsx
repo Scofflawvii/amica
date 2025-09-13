@@ -326,7 +326,7 @@ export function LocalXTTSSettingsPage({
                             {selected && (
                               <span
                                 className={clsx(
-                                  active ? "text-white" : "text-primary",
+                                  active ? "text-white" : "text",
                                   "absolute inset-y-0 right-0 flex items-center pr-4",
                                 )}>
                                 <CheckIcon
@@ -395,7 +395,7 @@ export function LocalXTTSSettingsPage({
                             {selected && (
                               <span
                                 className={clsx(
-                                  active ? "text-white" : "text-primary",
+                                  active ? "text-white" : "text",
                                   "absolute inset-y-0 right-0 flex items-center pr-4",
                                 )}>
                                 <CheckIcon
@@ -463,7 +463,7 @@ export function LocalXTTSSettingsPage({
                             {selected && (
                               <span
                                 className={clsx(
-                                  active ? "text-white" : "text-primary",
+                                  active ? "text-white" : "text",
                                   "absolute inset-y-0 right-0 flex items-center pr-4",
                                 )}>
                                 <CheckIcon
@@ -560,7 +560,7 @@ export function LocalXTTSSettingsPage({
                             {selected && (
                               <span
                                 className={clsx(
-                                  active ? "text-white" : "text-primary",
+                                  active ? "text-white" : "text",
                                   "absolute inset-y-0 right-0 flex items-center pr-4",
                                 )}>
                                 <CheckIcon
@@ -628,7 +628,7 @@ export function LocalXTTSSettingsPage({
               href="https://github.com/erew123/alltalk_tts/wiki"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:text-primary-hover">
+              className="text hover:text-hover">
               {t("View AllTalk Documentation")} →
             </a>
           </div>
