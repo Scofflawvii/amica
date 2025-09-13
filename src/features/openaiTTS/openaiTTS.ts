@@ -27,8 +27,7 @@ export async function openaiTTS(message: string) {
       });
       throw new Error("OpenAI TTS API Error");
     }
-    const data = (await res.arrayBuffer()) as any;
-
+    const data: ArrayBuffer = await res.arrayBuffer();
     return { audio: data };
   } catch (e) {
     logger.error("openaiTTS: error", e);

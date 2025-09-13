@@ -1,9 +1,13 @@
 import { handleNews } from "../plugins/news";
 import { logger } from "@/utils/logger";
 
-export async function expandPrompt(prompt: string, values: any) {
+export async function expandPrompt(
+  prompt: string,
+  values: Record<string, string>,
+) {
   for (const key in values) {
-    prompt = prompt.replace(`{${key}}`, values[key]);
+    const replacement = values[key] ?? "";
+    prompt = prompt.replace(`{${key}}`, replacement);
   }
   return prompt;
 }

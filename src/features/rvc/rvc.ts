@@ -45,7 +45,7 @@ export async function rvc(
       body: formData,
     });
 
-    const data = (await res.arrayBuffer()) as any;
+    const data = await res.arrayBuffer();
     return { audio: data };
   } catch (error) {
     tlog.error("Error in rvc", error);

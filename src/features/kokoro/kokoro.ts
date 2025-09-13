@@ -19,8 +19,7 @@ export async function kokoro(message: string) {
       tlog.error("kokoro tts non-ok response", { status: res.status });
       throw new Error("Kokoro TTS API Error");
     }
-    const data = (await res.arrayBuffer()) as any;
-
+    const data: ArrayBuffer = await res.arrayBuffer();
     return { audio: data };
   } catch (e) {
     tlog.error("kokoro tts error", e);

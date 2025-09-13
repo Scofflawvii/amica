@@ -5,17 +5,20 @@ const TIME_DOMAIN_DATA_LENGTH = 2048;
 export class LipSync {
   public readonly audio: AudioContext;
   public readonly analyser: AnalyserNode;
-  public readonly timeDomainData: Float32Array;
+  public readonly timeDomainData: Float32Array<ArrayBuffer>;
 
   public constructor(audio: AudioContext) {
     this.audio = audio;
 
     this.analyser = audio.createAnalyser();
-    this.timeDomainData = new Float32Array(TIME_DOMAIN_DATA_LENGTH);
+    // Use ArrayBuffer-backed typed array to satisfy stricter DOM lib typings
+    this.timeDomainData = new Float32Array<ArrayBuffer>(
+      new ArrayBuffer(TIME_DOMAIN_DATA_LENGTH * Float32Array.BYTES_PER_ELEMENT),
+    );
   }
 
   public update(): LipSyncAnalyzeResult {
-    this.analyser.getFloatTimeDomainData(this.timeDomainData as any);
+    this.analyser.getFloatTimeDomainData(this.timeDomainData);
 
     let volume = 0.0;
     for (let i = 0; i < TIME_DOMAIN_DATA_LENGTH; i++) {

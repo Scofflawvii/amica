@@ -267,7 +267,14 @@ export class Viewer {
       try {
         const WebGPURenderer = (
           await import("three/src/renderers/webgpu/WebGPURenderer.js")
-        ).default as any;
+        ).default as unknown as {
+          new (opts: {
+            canvas: HTMLCanvasElement;
+            alpha: boolean;
+            antialias: boolean;
+            powerPreference: string;
+          }): THREE.WebGLRenderer;
+        };
         renderer = new WebGPURenderer({
           canvas,
           alpha: true,
@@ -295,12 +302,18 @@ export class Viewer {
 
     renderer.setClearColor(0x000000, 0);
     // Modern defaults: color space, tone mapping, physically correct lighting
-    if ((renderer as any).outputColorSpace !== undefined) {
-      (renderer as any).outputColorSpace = THREE.SRGBColorSpace;
+    if (
+      (renderer as unknown as { outputColorSpace?: unknown })
+        .outputColorSpace !== undefined
+    ) {
+      (renderer as unknown as { outputColorSpace: unknown }).outputColorSpace =
+        THREE.SRGBColorSpace;
     }
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.0;
-    (renderer as any).physicallyCorrectLights = true;
+    (
+      renderer as unknown as { physicallyCorrectLights?: boolean }
+    ).physicallyCorrectLights = true;
     renderer.shadowMap.enabled = false;
 
     // Adaptive pixel ratio setup
@@ -328,10 +341,18 @@ export class Viewer {
       !Number.isNaN(xrScale) ? xrScale : 2.0,
     ); // reduce pixelation with minimal performance hit on quest 3
     // Set XR foveation only on WebGL renderers that support it
-    if (!(renderer as any).isWebGPURenderer) {
+    if (
+      !(renderer as unknown as { isWebGPURenderer?: boolean }).isWebGPURenderer
+    ) {
       const foveation = parseFloat(config("xr_foveation"));
-      if (typeof (renderer.xr as any).setFoveation === "function") {
-        renderer.xr.setFoveation(!Number.isNaN(foveation) ? foveation : 0);
+      if (
+        typeof (
+          renderer.xr as unknown as { setFoveation?: (v: number) => void }
+        ).setFoveation === "function"
+      ) {
+        (
+          renderer.xr as unknown as { setFoveation: (v: number) => void }
+        ).setFoveation(!Number.isNaN(foveation) ? foveation : 0);
       }
     }
 
@@ -537,7 +558,8 @@ export class Viewer {
       this.guiMesh = guiMesh;
       // Ensure GUI panel is opaque for readability
       try {
-        const el = (gui as any).domElement as HTMLElement | undefined;
+        const el = (gui as unknown as { domElement?: HTMLElement })
+          .domElement as HTMLElement | undefined;
         if (el) {
           el.style.background = "#000";
           el.style.color = "#fff";
@@ -561,7 +583,9 @@ export class Viewer {
 
       // Support both stats.js APIs: `.dom` (modern) and `.domElement` (legacy)
       const statsDom: HTMLElement | null =
-        (stats as any).dom || (stats as any).domElement || null;
+        (stats as unknown as { dom?: HTMLElement }).dom ||
+        (stats as unknown as { domElement?: HTMLElement }).domElement ||
+        null;
       if (typeof document !== "undefined" && statsDom) {
         statsDom.style.width = "80px";
         statsDom.style.height = "48px";
@@ -579,36 +603,45 @@ export class Viewer {
       }
 
       const hasPanels =
-        typeof (Stats as any).Panel === "function" &&
-        typeof (stats as any).addPanel === "function";
+        typeof (Stats as unknown as { Panel?: new (...args: any[]) => any })
+          .Panel === "function" &&
+        typeof (
+          stats as unknown as {
+            addPanel?: (p: any) => {
+              update: (v: number, max?: number) => void;
+            };
+          }
+        ).addPanel === "function";
       if (hasPanels) {
-        this.updateMsPanel = (stats as any).addPanel(
-          new (Stats as any).Panel("update_ms", "#fff", "#221"),
+        const S = Stats as unknown as {
+          Panel: new (name: string, fg: string, bg: string) => any;
+        };
+        const s = stats as unknown as {
+          addPanel: (p: InstanceType<typeof S.Panel>) => {
+            update: (v: number, max?: number) => void;
+          };
+        };
+        this.updateMsPanel = s.addPanel(
+          new S.Panel("update_ms", "#fff", "#221"),
         );
-        this.renderMsPanel = (stats as any).addPanel(
-          new (Stats as any).Panel("render_ms", "#ff8", "#221"),
+        this.renderMsPanel = s.addPanel(
+          new S.Panel("render_ms", "#ff8", "#221"),
         );
-        this.scenarioMsPanel = (stats as any).addPanel(
-          new (Stats as any).Panel("scenario_ms", "#f8f", "#221"),
+        this.scenarioMsPanel = s.addPanel(
+          new S.Panel("scenario_ms", "#f8f", "#221"),
         );
-        this.physicsMsPanel = (stats as any).addPanel(
-          new (Stats as any).Panel("physics_ms", "#88f", "#212"),
+        this.physicsMsPanel = s.addPanel(
+          new S.Panel("physics_ms", "#88f", "#212"),
         );
-        this.modelMsPanel = (stats as any).addPanel(
-          new (Stats as any).Panel("model_ms", "#f8f", "#212"),
+        this.modelMsPanel = s.addPanel(new S.Panel("model_ms", "#f8f", "#212"));
+        this.bvhMsPanel = s.addPanel(new S.Panel("bvh_ms", "#8ff", "#122"));
+        this.raycastMsPanel = s.addPanel(
+          new S.Panel("raycast_ms", "#f8f", "#212"),
         );
-        this.bvhMsPanel = (stats as any).addPanel(
-          new (Stats as any).Panel("bvh_ms", "#8ff", "#122"),
-        );
-        this.raycastMsPanel = (stats as any).addPanel(
-          new (Stats as any).Panel("raycast_ms", "#f8f", "#212"),
-        );
-        this.statsMsPanel = (stats as any).addPanel(
-          new (Stats as any).Panel("stats_ms", "#8f8", "#212"),
-        );
+        this.statsMsPanel = s.addPanel(new S.Panel("stats_ms", "#8f8", "#212"));
       } else {
         // Fallback: provide no-op panels, legacy stats.js doesn't support custom panels
-        const noop = { update: (_v: any, _max?: number) => {} };
+        const noop = { update: (_v: number, _max?: number) => {} };
         this.updateMsPanel = noop;
         this.renderMsPanel = noop;
         this.scenarioMsPanel = noop;
@@ -631,7 +664,7 @@ export class Viewer {
       }
     } else {
       // Ensure panels are no-ops when UI disabled
-      const noop = { update: (_v: any, _max?: number) => {} };
+      const noop = { update: (_v: number, _max?: number) => {} };
       this.updateMsPanel = noop;
       this.renderMsPanel = noop;
       this.scenarioMsPanel = noop;

@@ -5,7 +5,8 @@ import { convertNumberToWordsEN } from "@/utils/numberSpelling";
 
 export async function speecht5(message: string, speakerEmbeddingsUrl: string) {
   // empty cache
-  (<any>window).chatvrm_worker_speecht5_audiocache = null;
+  (window as any).chatvrm_worker_speecht5_audiocache =
+    null as Float32Array | null;
 
   message = message
     .trim()
@@ -23,16 +24,23 @@ export async function speecht5(message: string, speakerEmbeddingsUrl: string) {
   if (
     !Object.prototype.hasOwnProperty.call(window, "chatvrm_worker_speecht5")
   ) {
-    (<any>window).chatvrm_worker_speecht5 = new Worker(
+    (window as any).chatvrm_worker_speecht5 = new Worker(
       new URL("../../workers/speecht5.js", import.meta.url),
       {
         type: "module",
       },
     );
 
-    (<any>window).chatvrm_worker_speecht5.addEventListener(
+    (window as any).chatvrm_worker_speecht5.addEventListener(
       "message",
-      (event: any) => {
+      (
+        event: MessageEvent<{
+          status: "ready" | "progress" | "done" | "complete";
+          file?: string;
+          progress?: number;
+          data?: { audio: Float32Array };
+        }>,
+      ) => {
         const message = event.data;
         // debug message payload only when needed
         switch (message.status) {
@@ -40,16 +48,17 @@ export async function speecht5(message: string, speakerEmbeddingsUrl: string) {
             logger.debug("speecht5 worker ready");
             break;
           case "progress":
-            updateFileProgress(message.file, message.progress);
+            if (message.file)
+              updateFileProgress(message.file, message.progress ?? 0);
             break;
           case "done":
             logger.debug("speecht5 done", { file: message.file });
-            updateFileProgress(message.file, 100);
+            if (message.file) updateFileProgress(message.file, 100);
             break;
           case "complete":
             logger.debug("speecht5 complete");
-            (<any>window).chatvrm_worker_speecht5_audiocache =
-              message.data.audio;
+            (window as any).chatvrm_worker_speecht5_audiocache =
+              message.data?.audio ?? null;
             break;
         }
       },
@@ -57,10 +66,11 @@ export async function speecht5(message: string, speakerEmbeddingsUrl: string) {
   }
 
   // clear cache
-  (<any>window).chatvrm_worker_speecht5_audiocache = null;
+  (window as any).chatvrm_worker_speecht5_audiocache =
+    null as Float32Array | null;
 
   // start job
-  (<any>window).chatvrm_worker_speecht5.postMessage({
+  (window as any).chatvrm_worker_speecht5.postMessage({
     text: message,
     speaker_embeddings: speakerEmbeddingsUrl,
   });
@@ -70,7 +80,7 @@ export async function speecht5(message: string, speakerEmbeddingsUrl: string) {
     logger.debug("speecht5 waiting for job to complete");
     const checkJob = async () => {
       while (true) {
-        if ((<any>window).chatvrm_worker_speecht5_audiocache !== null) {
+        if ((window as any).chatvrm_worker_speecht5_audiocache !== null) {
           resolve(null);
           break;
         }
@@ -85,7 +95,7 @@ export async function speecht5(message: string, speakerEmbeddingsUrl: string) {
     1,
     16000,
     "32f",
-    (<any>window).chatvrm_worker_speecht5_audiocache,
+    (window as any).chatvrm_worker_speecht5_audiocache,
   );
   const wavBuffer = wav.toBuffer();
   const wavBlob = new Blob([wavBuffer.slice()], { type: "audio/wav" });
