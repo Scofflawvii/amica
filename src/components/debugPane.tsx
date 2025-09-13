@@ -68,6 +68,7 @@ export function DebugPane({ onClickClose, mode = "embedded" }: DebugPaneProps) {
   const isPopout = mode === "popout";
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useKeyboardShortcut("Escape", onClickClose);
 
@@ -76,6 +77,8 @@ export function DebugPane({ onClickClose, mode = "embedded" }: DebugPaneProps) {
       behavior: "auto",
       block: "center",
     });
+    // Initial focus to container for screen readers / keyboard users
+    containerRef.current?.focus();
   }, []);
 
   // Periodically refresh (lightweight) so new logs show up without user interaction
@@ -112,6 +115,35 @@ export function DebugPane({ onClickClose, mode = "embedded" }: DebugPaneProps) {
       window.clearInterval(id);
     };
   }, [isPopout]);
+
+  // Focus trap within the pane
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root) return;
+    const keyHandler = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const focusable = Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter(
+        (el) => !el.hasAttribute("disabled") && !el.getAttribute("aria-hidden"),
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0] as HTMLElement | undefined;
+      const last = focusable[focusable.length - 1] as HTMLElement | undefined;
+      const active = document.activeElement as HTMLElement | null;
+      if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first?.focus();
+      } else if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last?.focus();
+      }
+    };
+    root.addEventListener("keydown", keyHandler);
+    return () => root.removeEventListener("keydown", keyHandler);
+  }, []);
 
   // Shape of a captured console log item (mirrors error handler injection logic)
   interface LogItem {
@@ -172,6 +204,11 @@ export function DebugPane({ onClickClose, mode = "embedded" }: DebugPaneProps) {
     <>
       {/* Floating / Popout debug panel */}
       <div
+        ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="debug-pane-title"
+        tabIndex={-1}
         className={clsx(
           "z-max border-border/30 flex flex-col overflow-hidden rounded-lg border bg-[hsl(var(--surface))] text-left text-xs shadow-2xl",
           isPopout
@@ -180,6 +217,9 @@ export function DebugPane({ onClickClose, mode = "embedded" }: DebugPaneProps) {
         )}
         style={isPopout ? undefined : { left: leftOffset + 8 }}>
         <div className="border-border/50 flex-shrink-0 border-b bg-[hsl(var(--surface-alt))] p-2">
+          <h2 id="debug-pane-title" className="sr-only">
+            Debug panel
+          </h2>
           <IconButton
             iconName="24/Close"
             isProcessing={false}

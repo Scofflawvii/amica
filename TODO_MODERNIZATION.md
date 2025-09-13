@@ -39,7 +39,7 @@ Legend:
 
 ## 3. Performance & Bundle Budgets
 
-- (P1 S) CI gate: fail if > X kB gz/ Brotli delta vs baseline (config file + allowlist).
+- (P1 S) CI gate: fail if > X kB gz/ Brotli delta vs baseline (config file + allowlist). — **DONE** (manifest-based checker with baseline + delta limits; caps enforced in CI and local verify; see `scripts/check_bundle_size.mjs` and `bundle-baseline.json`).
 - (P1 S) Lighthouse CI (PWA, performance, a11y) per main flows.
 - (P2 M) Perf budget dashboard auto-published (artifact or PR comment).
 - (P2 M) Bundle splitting audit: verify tree-shaking, mark side-effect-free modules.
@@ -96,6 +96,8 @@ Legend:
 ## 10. Rendering / 3D / VRM
 
 - (P1 M) Worker offload for BVH / skeleton prep (transferable buffers). — **WIP** (feature flag added: `bvh_worker_mode` = `auto|off|single|parallel`; viewer initializes a worker when available, falls back to main-thread bounds tree; room meshes now use worker-backed BVH with debug helpers gated by `debug_gfx`. Next: measure perf (fps/frame time), gate model BVH regeneration behind the same flag, and add a QA toggle in debug pane.)
+  - (P3 S) Add perf panel readout for BVH build/raycast timings to compare modes. — TODO
+  - (P3 S) Gate model BVH regeneration behind flag; expose DebugPane toggle. — TODO
 - (P2 M) GPU/Device capability diagnostics overlay (fallback heuristics).
 - (P2 M) Frame budgeting scheduler that yields during large token bursts.
 - (P3 L) WASM/Rust acceleration for heavy geometry or voice feature extraction.
