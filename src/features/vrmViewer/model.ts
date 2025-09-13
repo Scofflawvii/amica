@@ -7,6 +7,7 @@ import {
   VRMUtils,
 } from "@pixiv/three-vrm";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { OptimizedGLTFLoader } from "@/utils/gltfOptimizer";
 import { VRMAnimation } from "@/lib/VRMAnimation/VRMAnimation";
 import { VRMLookAtSmootherLoaderPlugin } from "@/lib/VRMLookAtSmootherLoaderPlugin/VRMLookAtSmootherLoaderPlugin";
 import { LipSync } from "@/features/lipSync/lipSync";
@@ -43,44 +44,32 @@ export class Model {
     url: string,
     _setLoadingProgress: (progress: string) => void,
   ): Promise<void> {
-    const loader = new GLTFLoader();
-    /*
-    const loader = new OptimizedGLTFLoader({
-      // Texture optimizations
-      skipTextures: true,          // Skip loading textures completely
-      maxTextureSize: 512,         // Maximum texture size
-      generateMipmaps: false,      // Disable mipmaps
-      
-      // Geometry optimizations
-      skipDraco: true,            // Skip Draco decoder setup
-      preserveIndices: false,     // Remove index buffers
-      
-      // Animation/Material optimizations
-      skipAnimations: true,       // Skip loading animations
-      simplifyMaterials: true,    // Use simplified materials
-      disableNormalMaps: true,    // Disable normal maps
-      
-      // Performance optimizations
-      disposeSourceData: true,    // Clear source data after load
-      
-      // Optional callbacks for fine-tuning
-      onMesh: (mesh) => {
-        // Custom mesh optimizations
-        mesh.castShadow = false;
-        mesh.receiveShadow = false;
-      },
-      onMaterial: (material) => {
-        // Custom material optimizations
-        if (material instanceof THREE.MeshStandardMaterial) {
-          material.envMapIntensity = 0;
-        }
-      },
-      onTexture: (texture) => {
-        // Custom texture optimizations
-        texture.colorSpace = THREE.LinearSRGBColorSpace;
-      },
-    });
-    */
+    const useOptimized = false; // flip to true to use optimized loader
+    const loader = useOptimized
+      ? new OptimizedGLTFLoader({
+          skipTextures: true,
+          maxTextureSize: 512,
+          generateMipmaps: false,
+          skipDraco: true,
+          preserveIndices: false,
+          skipAnimations: true,
+          simplifyMaterials: true,
+          disableNormalMaps: true,
+          disposeSourceData: true,
+          onMesh: (mesh) => {
+            mesh.castShadow = false;
+            mesh.receiveShadow = false;
+          },
+          onMaterial: (material) => {
+            if (material instanceof THREE.MeshStandardMaterial) {
+              material.envMapIntensity = 0;
+            }
+          },
+          onTexture: (texture) => {
+            texture.colorSpace = THREE.LinearSRGBColorSpace;
+          },
+        })
+      : new GLTFLoader();
 
     // used for debug rendering
     const helperRoot = new THREE.Group();
